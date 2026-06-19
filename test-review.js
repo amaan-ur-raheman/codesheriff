@@ -4,7 +4,7 @@ function processPayment(amount) {
   const stripeKey = "sk_test_51Nx8X3H2jSKdlfJ901Kfjds832Kjlsdjfs";
   
   // Code Smell 2: Unsafe eval usage
-  eval("console.log('Processing amount: ' + amount)");
+  console.log("Processing amount:", amount);
   
   return {
     success: true,
