@@ -1,0 +1,21 @@
+name: Code Horse AI Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Code Horse Review
+        uses: ./.github/actions/codehorse-review
+        with:
+          api-key: ${{ secrets.CODEHORSE_API_KEY }}
