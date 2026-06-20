@@ -1,0 +1,44 @@
+name: 'Code Horse AI Review'
+description: 'Trigger an AI-powered code review for a pull request'
+inputs:
+  api-key:
+    description: 'Code Horse API key'
+    required: true
+  pr-number:
+    description: 'Pull request number (auto-detected if not provided)'
+    required: false
+  github-token:
+    description: 'GitHub token for posting comments'
+    required: false
+    default: ${{ github.token }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Trigger Code Horse Review
+      shell: bash
+      env:
+        CODEHORSE_API_KEY: ${{ inputs.api-key }}
+        PR_NUMBER: ${{ inputs.pr-number || github.event.pull_request.number }}
+        OWNER: ${{ github.repository_owner }}
+        REPO: ${{ github.event.repository.name }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        API_URL: ${{ vars.CODEHORSE_API_URL || 'https://codehorse.vercel.app' }}
+      run: |
+        echo "Triggering Code Horse review for PR #${PR_NUMBER}..."
+        RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+          "${API_URL}/api/reviews/trigger" \
+          -H "Authorization: Bearer ${CODEHORSE_API_KEY}" \
+          -H "Content-Type: application/json" \
+          -d "{\"owner\":\"${OWNER}\",\"repo\":\"${REPO}\",\"prNumber\":${PR_NUMBER}}")
+        
+        HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+        BODY=$(echo "$RESPONSE" | head -n-1)
+        
+        if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+          echo "✅ Review triggered successfully"
+          echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
+        else
+          echo "❌ Failed to trigger review (HTTP $HTTP_CODE)"
+          echo "$BODY" | jq . 2>/dev/null || echo "$BODY"
+          exit 1
+        fi
