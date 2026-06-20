@@ -1,10 +1,6 @@
 "use server";
 
 import prisma from "@/lib/db";
-import {
-	sendUsageLimitWarning,
-	sendSubscriptionChangedNotification,
-} from "@/modules/notifications/actions";
 
 export type SubscriptionTier = "FREE" | "PRO";
 export type SubscriptionStatus = "ACTIVE" | "CANCELLED" | "EXPIRED";
@@ -164,6 +160,7 @@ export async function incrementRepositoryCount(userId: string): Promise<void> {
 
 	if (limit && newCount >= Math.ceil(limit * 0.8)) {
 		try {
+			const { sendUsageLimitWarning } = await import("@/modules/notifications/actions");
 			await sendUsageLimitWarning(userId, "repositories", newCount, limit);
 		} catch {
 			// Notification failure should not block the operation
@@ -215,6 +212,7 @@ export async function incrementReviewCount(
 
 	if (limit && newCount >= Math.ceil(limit * 0.8)) {
 		try {
+			const { sendUsageLimitWarning } = await import("@/modules/notifications/actions");
 			await sendUsageLimitWarning(userId, "reviews", newCount, limit);
 		} catch {
 			// Notification failure should not block the operation
@@ -293,6 +291,7 @@ export async function updateUserTier(
 
 	if (previous?.subscriptionTier !== tier || status === "CANCELLED") {
 		try {
+			const { sendSubscriptionChangedNotification } = await import("@/modules/notifications/actions");
 			await sendSubscriptionChangedNotification(userId, tier, status);
 		} catch {
 			// Notification failure should not block the tier update

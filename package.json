@@ -14,5 +14,5 @@
     "typecheck": "tsc --noEmit --project packages/web/tsconfig.json && tsc --noEmit --project packages/cli/tsconfig.json",
     "test": "bun --filter code-horse test"
   },
-  "devDependencies": {},
+  "devDependencies": {}
 }
