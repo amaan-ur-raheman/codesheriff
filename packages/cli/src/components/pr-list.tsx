@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Text } from "ink";
+import { Box, Text, useInput } from "ink";
 // @ts-ignore
 import SelectInput from "ink-select-input";
 import { usePullRequests } from "../hooks/use-api.js";
@@ -12,6 +12,11 @@ interface PRListProps {
 }
 
 export const PRList = ({ repo, onSelect, onBack }: PRListProps) => {
+	useInput((input, key) => {
+		if (key.escape || input.toLowerCase() === "b") {
+			onBack();
+		}
+	});
 	const { prs, loading, error } = usePullRequests(repo.owner, repo.name);
 
 	if (loading) {

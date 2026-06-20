@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Text } from "ink";
+import { Box, Text, useInput } from "ink";
 import chalk from "chalk";
 
 interface LandingProps {
@@ -10,6 +10,16 @@ interface LandingProps {
 }
 
 export const Landing = ({ username, onStart, onLogout, onExit }: LandingProps) => {
+	useInput((input, key) => {
+		if (key.return) {
+			onStart();
+		} else if (input.toLowerCase() === "l") {
+			onLogout();
+		} else if (input.toLowerCase() === "q") {
+			onExit();
+		}
+	});
+
 	return (
 		<Box flexDirection="column" padding={2} borderStyle="round" borderColor="cyan">
 			<Box flexDirection="column" alignItems="center" marginBottom={1}>

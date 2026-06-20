@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { execSync } from "child_process";
 
 export interface FixResult {
 	success: boolean;
@@ -19,7 +20,13 @@ export async function applyFixLocally(
 	endLine: number
 ): Promise<FixResult> {
 	try {
-		const absolutePath = path.resolve(process.cwd(), filePath);
+		let repoRoot = process.cwd();
+		try {
+			repoRoot = execSync("git rev-parse --show-toplevel", { encoding: "utf-8" }).trim();
+		} catch {
+			// fallback to process.cwd()
+		}
+		const absolutePath = path.resolve(repoRoot, filePath);
 
 		// Verify file exists
 		try {
@@ -33,10 +40,12 @@ export async function applyFixLocally(
 
 		const fileContent = await fs.readFile(absolutePath, "utf-8");
 
+		const trimNewlines = (str: string) => str.replace(/^(?:\r?\n)+|(?:\r?\n)+$/g, "");
+
 		// Normalize line endings to avoid CRLF mismatch crashes
 		const normalizedContent = fileContent.replace(/\r\n/g, "\n");
-		const normalizedOriginal = originalCode.replace(/\r\n/g, "\n").trim();
-		const normalizedSuggested = suggestedCode.replace(/\r\n/g, "\n");
+		const normalizedOriginal = trimNewlines(originalCode.replace(/\r\n/g, "\n"));
+		const normalizedSuggested = trimNewlines(suggestedCode.replace(/\r\n/g, "\n"));
 
 		// Attempt 1: Exact string replacement
 		if (normalizedOriginal && normalizedContent.includes(normalizedOriginal)) {
@@ -55,7 +64,7 @@ export async function applyFixLocally(
 			const endIdx = Math.min(endLine - 1, lines.length - 1);
 
 			// Splice in the suggestion
-			lines.splice(startIdx, endIdx - startIdx + 1, normalizedSuggested.trim());
+			lines.splice(startIdx, endIdx - startIdx + 1, normalizedSuggested);
 			const updatedContent = lines.join("\n");
 
 			await fs.writeFile(absolutePath, updatedContent, "utf-8");

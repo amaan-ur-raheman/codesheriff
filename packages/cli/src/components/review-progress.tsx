@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Box, Text } from "ink";
+import { Box, Text, useInput } from "ink";
 import { useReview } from "../hooks/use-review.js";
 import { Repository, PullRequest, Review } from "../types.js";
 
@@ -11,6 +11,11 @@ interface ReviewProgressProps {
 }
 
 export const ReviewProgress = ({ repo, pr, onComplete, onBack }: ReviewProgressProps) => {
+	useInput((input, key) => {
+		if (key.escape || input.toLowerCase() === "b") {
+			onBack();
+		}
+	});
 	const { review, status, error, startReview } = useReview(repo.owner, repo.name, pr.number);
 
 	useEffect(() => {

@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Text } from "ink";
+import { Box, Text, useInput } from "ink";
 // @ts-ignore
 import SelectInput from "ink-select-input";
 import { useRepositories } from "../hooks/use-api.js";
@@ -11,6 +11,11 @@ interface RepoListProps {
 }
 
 export const RepoList = ({ onSelect, onBack }: RepoListProps) => {
+	useInput((input, key) => {
+		if (key.escape || input.toLowerCase() === "b") {
+			onBack();
+		}
+	});
 	const { repos, loading, error } = useRepositories();
 
 	if (loading) {
