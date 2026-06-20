@@ -83,6 +83,7 @@ export async function reviewPullRequest(
 
 		return { success: true, message: "Review Queued" };
 	} catch (error) {
+		console.error("Error in reviewPullRequest:", error);
 		try {
 			const repository = await prisma.repository.findFirst({
 				where: {
@@ -110,6 +111,7 @@ export async function reviewPullRequest(
 		} catch (dbError) {
 			console.error("Failed to save error to database:", dbError);
 		}
+		return { success: false, error: error instanceof Error ? error.message : String(error) };
 	}
 }
 

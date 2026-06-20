@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-import { Handle, Position } from "@xyflow/react";
+import { useEffect, useMemo } from "react";
+import { Handle, Position, useNodesState, useEdgesState } from "@xyflow/react";
 import { Canvas } from "@/components/ai-elements/canvas";
 import { Badge } from "@/components/ui/badge";
 import { parseSuggestionsFromReview } from "@/modules/ai/lib/suggestions";
@@ -85,13 +85,18 @@ interface ReviewFlowCanvasProps {
 export default function ReviewFlowCanvas({ review }: ReviewFlowCanvasProps) {
 	const parsed = useMemo(() => parseSuggestionsFromReview(review.review ?? ""), [review.review]);
 
-	const { nodes, edges } = useMemo(() => {
+	const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
+	const [edges, setEdges, onEdgesChange] = useEdgesState<any>([]);
+
+	useEffect(() => {
+		if (!parsed.suggestions.length) {
+			setNodes([]);
+			setEdges([]);
+			return;
+		}
+
 		const localNodes: any[] = [];
 		const localEdges: any[] = [];
-
-		if (!parsed.suggestions.length) {
-			return { nodes: [], edges: [] };
-		}
 
 		// 1. Add central PR node
 		localNodes.push({
@@ -103,7 +108,7 @@ export default function ReviewFlowCanvas({ review }: ReviewFlowCanvasProps) {
 
 		// Group suggestions by file
 		const filesMap = new Map<string, any[]>();
-		parsed.suggestions.forEach((s) => {
+		parsed.suggestions.forEach((s: any) => {
 			if (!filesMap.has(s.filePath)) {
 				filesMap.set(s.filePath, []);
 			}
@@ -167,8 +172,9 @@ export default function ReviewFlowCanvas({ review }: ReviewFlowCanvasProps) {
 			});
 		});
 
-		return { nodes: localNodes, edges: localEdges };
-	}, [parsed, review]);
+		setNodes(localNodes);
+		setEdges(localEdges);
+	}, [parsed, review.prTitle, review.prNumber, setNodes, setEdges]);
 
 	if (nodes.length === 0) {
 		return (
@@ -180,7 +186,13 @@ export default function ReviewFlowCanvas({ review }: ReviewFlowCanvasProps) {
 
 	return (
 		<div className="h-[450px] w-full border rounded-lg overflow-hidden bg-muted/5 relative">
-			<Canvas nodes={nodes} edges={edges} nodeTypes={nodeTypes} />
+			<Canvas
+				nodes={nodes}
+				edges={edges}
+				nodeTypes={nodeTypes}
+				onNodesChange={onNodesChange}
+				onEdgesChange={onEdgesChange}
+			/>
 		</div>
 	);
 }

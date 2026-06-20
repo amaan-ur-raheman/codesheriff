@@ -455,14 +455,6 @@ export async function getCompareDiff(
 	return diff as unknown as string;
 }
 
-/**
- * Posts inline review comments with code suggestions to a GitHub pull request.
- * @param token - GitHub access token
- * @param owner - Repository owner username
- * @param repo - Repository name
- * @param prNumber - Pull request number
- * @param comments - Array of comments with path, line number, and markdown body
- */
 export async function postInlineReviewComments(
 	token: string,
 	owner: string,
@@ -472,6 +464,9 @@ export async function postInlineReviewComments(
 		path: string;
 		line: number;
 		body: string;
+		side?: "LEFT" | "RIGHT";
+		start_line?: number;
+		start_side?: "LEFT" | "RIGHT";
 	}[]
 ) {
 	const octokit = new Octokit({ auth: token });

@@ -32,6 +32,7 @@ import {
 	type CodeSuggestion,
 	type ReviewSuggestions,
 } from "@/modules/ai/lib/suggestions";
+import { Message, MessageContent } from "@/components/ai-elements/message";
 
 const SEVERITY_CONFIG: Record<
 	CodeSuggestion["severity"],
@@ -162,32 +163,36 @@ function SuggestionCard({ suggestion }: { suggestion: CodeSuggestion }) {
 				</button>
 			</CollapsibleTrigger>
 			<CollapsibleContent>
-				<div className="px-3 pb-3 pt-1 ml-7 space-y-3">
-					{suggestion.description && (
-						<p className="text-sm text-muted-foreground">
-							{suggestion.description}
-						</p>
-					)}
-					{suggestion.category && (
-						<Badge variant="secondary" className="text-[10px]">
-							{suggestion.category}
-						</Badge>
-					)}
-					<CodeDiff
-						original={suggestion.originalCode}
-						suggested={suggestion.suggestedCode}
-					/>
-					{suggestion.verified === false && suggestion.verificationLog && (
-						<div className="rounded-md border border-red-500/20 bg-red-500/5 p-3 overflow-x-auto mt-2">
-							<div className="text-[10px] uppercase tracking-wider text-red-500/70 mb-1.5 font-sans font-medium">
-								Verification Logs (Test Failures)
-							</div>
-							<pre className="whitespace-pre-wrap text-xs text-red-600 dark:text-red-400 font-mono">
-								{suggestion.verificationLog}
-							</pre>
+				<Message from="assistant" className="max-w-full ml-7 mt-2">
+					<MessageContent className="w-full">
+						<div className="space-y-3">
+							{suggestion.description && (
+								<p className="text-sm text-muted-foreground">
+									{suggestion.description}
+								</p>
+							)}
+							{suggestion.category && (
+								<Badge variant="secondary" className="text-[10px]">
+									{suggestion.category}
+								</Badge>
+							)}
+							<CodeDiff
+								original={suggestion.originalCode}
+								suggested={suggestion.suggestedCode}
+							/>
+							{suggestion.verified === false && suggestion.verificationLog && (
+								<div className="rounded-md border border-red-500/20 bg-red-500/5 p-3 overflow-x-auto mt-2">
+									<div className="text-[10px] uppercase tracking-wider text-red-500/70 mb-1.5 font-sans font-medium">
+										Verification Logs (Test Failures)
+									</div>
+									<pre className="whitespace-pre-wrap text-xs text-red-600 dark:text-red-400 font-mono">
+										{suggestion.verificationLog}
+									</pre>
+								</div>
+							)}
 						</div>
-					)}
-				</div>
+					</MessageContent>
+				</Message>
 			</CollapsibleContent>
 		</Collapsible>
 	);

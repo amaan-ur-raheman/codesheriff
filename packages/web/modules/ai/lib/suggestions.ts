@@ -48,6 +48,10 @@ function generateId(): string {
 	return Math.random().toString(36).substring(2, 10);
 }
 
+export function trimNewlines(str: string): string {
+	return str.replace(/^(?:\r?\n)+|(?:\r?\n)+$/g, "");
+}
+
 /**
  * Attempt to extract structured suggestion blocks from review markdown
  * when no JSON block is present.
@@ -113,8 +117,8 @@ function parseStructuredBlocks(
 				"suggestion",
 			title,
 			description: descMatch?.[1]?.trim() ?? "",
-			originalCode: originalCode.trim(),
-			suggestedCode: suggestedCode.trim(),
+			originalCode: trimNewlines(originalCode),
+			suggestedCode: trimNewlines(suggestedCode),
 			category: categoryMatch?.[1]?.trim() ?? "general",
 		});
 	}
