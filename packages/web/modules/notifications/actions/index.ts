@@ -9,6 +9,7 @@ import {
 	reviewFailedEmail,
 	usageLimitWarningEmail,
 	subscriptionChangedEmail,
+	commentReplyEmail,
 } from "../lib/email-templates";
 
 async function getSession() {
@@ -59,15 +60,38 @@ export async function markAllAsRead() {
 	});
 }
 
+interface NotificationData {
+	reviewId?: string;
+	prNumber?: number;
+	prUrl?: string;
+	usageType?: string;
+	current?: number;
+	limit?: number;
+	newTier?: string;
+	status?: string;
+}
+
 async function createNotification(
 	userId: string,
 	type: string,
 	title: string,
 	message: string,
-	data?: any
+	data?: NotificationData
 ) {
+	const existing = await prisma.notification.findFirst({
+		where: {
+			userId,
+			type,
+			...(data?.reviewId
+				? { data: { path: ["reviewId"], equals: data.reviewId } }
+				: {}),
+		},
+	});
+
+	if (existing) return existing;
+
 	return prisma.notification.create({
-		data: { userId, type, title, message, data },
+		data: { userId, type, title, message, data: data as any },
 	});
 }
 
@@ -90,16 +114,20 @@ export async function sendReviewCompletedNotification(reviewId: string) {
 		{ reviewId, prNumber: review.prNumber, prUrl: review.prUrl }
 	);
 
-	await sendEmail({
-		to: user.email,
-		subject: `Review complete: #${review.prNumber} ${review.prTitle}`,
-		html: reviewCompletedEmail(
-			review.prTitle,
-			review.prNumber,
-			review.repository.fullName,
-			reviewUrl
-		),
-	});
+	try {
+		await sendEmail({
+			to: user.email,
+			subject: `Review complete: #${review.prNumber} ${review.prTitle}`,
+			html: reviewCompletedEmail(
+				review.prTitle,
+				review.prNumber,
+				review.repository.fullName,
+				reviewUrl
+			),
+		});
+	} catch (emailError) {
+		console.error("Failed to send review completed email:", emailError);
+	}
 }
 
 export async function sendReviewFailedNotification(
@@ -123,16 +151,20 @@ export async function sendReviewFailedNotification(
 		{ reviewId, prNumber: review.prNumber, prUrl: review.prUrl }
 	);
 
-	await sendEmail({
-		to: user.email,
-		subject: `Review failed: #${review.prNumber} ${review.prTitle}`,
-		html: reviewFailedEmail(
-			review.prTitle,
-			review.prNumber,
-			review.repository.fullName,
-			error
-		),
-	});
+	try {
+		await sendEmail({
+			to: user.email,
+			subject: `Review failed: #${review.prNumber} ${review.prTitle}`,
+			html: reviewFailedEmail(
+				review.prTitle,
+				review.prNumber,
+				review.repository.fullName,
+				error
+			),
+		});
+	} catch (emailError) {
+		console.error("Failed to send review failed email:", emailError);
+	}
 }
 
 export async function sendUsageLimitWarning(
@@ -154,11 +186,15 @@ export async function sendUsageLimitWarning(
 		{ usageType, current, limit }
 	);
 
-	await sendEmail({
-		to: user.email,
-		subject: `Usage warning: ${percent}% of monthly ${usageType} used`,
-		html: usageLimitWarningEmail(usageType, current, limit),
-	});
+	try {
+		await sendEmail({
+			to: user.email,
+			subject: `Usage warning: ${percent}% of monthly ${usageType} used`,
+			html: usageLimitWarningEmail(usageType, current, limit),
+		});
+	} catch (emailError) {
+		console.error("Failed to send usage limit warning email:", emailError);
+	}
 }
 
 export async function sendSubscriptionChangedNotification(
@@ -177,9 +213,52 @@ export async function sendSubscriptionChangedNotification(
 		{ newTier, status }
 	);
 
-	await sendEmail({
-		to: user.email,
-		subject: `Subscription updated: ${newTier} (${status})`,
-		html: subscriptionChangedEmail(newTier, status),
+	try {
+		await sendEmail({
+			to: user.email,
+			subject: `Subscription updated: ${newTier} (${status})`,
+			html: subscriptionChangedEmail(newTier, status),
+		});
+	} catch (emailError) {
+		console.error("Failed to send subscription changed email:", emailError);
+	}
+}
+
+export async function sendCommentReplyNotification(
+	reviewId: string,
+	replyContent: string
+) {
+	const review = await prisma.review.findUnique({
+		where: { id: reviewId },
+		include: { repository: { include: { user: true } } },
 	});
+
+	if (!review || !review.repository?.user?.email) return;
+
+	const user = review.repository.user;
+	const snippet = replyContent.slice(0, 300) + (replyContent.length > 300 ? "..." : "");
+
+	await createNotification(
+		user.id,
+		"comment_reply",
+		"Code Horse Replied",
+		`Code Horse replied to your comment on #${review.prNumber} ${review.prTitle}.`,
+		{ reviewId, prNumber: review.prNumber, prUrl: review.prUrl }
+	);
+
+	try {
+		await sendEmail({
+			to: user.email,
+			subject: `Code Horse replied: #${review.prNumber} ${review.prTitle}`,
+			html: commentReplyEmail(
+				review.prTitle,
+				review.prNumber,
+				review.repository.fullName,
+				snippet,
+				review.prUrl
+			),
+		});
+	} catch (emailError) {
+		console.error("Failed to send comment reply email:", emailError);
+	}
 }
