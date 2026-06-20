@@ -25,6 +25,7 @@ import prisma from "@/lib/db";
 import {
 	sendReviewCompletedNotification,
 	sendReviewFailedNotification,
+	sendCommentReplyNotification,
 } from "@/modules/notifications/actions";
 import { sendSlackWebhook, sendDiscordWebhook } from "@/lib/webhooks";
 
@@ -246,37 +247,42 @@ Format the rest of your response in markdown.`;
 
 				// Post inline file suggestions if they exist
 				if (verifiedSuggestions && verifiedSuggestions.suggestions && verifiedSuggestions.suggestions.length > 0) {
-					const inlineComments = verifiedSuggestions.suggestions.map((s: any) => {
-						const severityText = s.severity === "error" 
-							? "⚠️ Potential issue | 🔴 Critical" 
-							: s.severity === "warning" 
-								? "⚠️ Potential issue | 🟡 Major" 
-								: "ℹ️ Suggestion";
-						
-						const title = s.title ? `### ${severityText}\n**${s.title}**\n\n` : `### ${severityText}\n\n`;
-						const description = s.description ? `${s.description}\n\n` : "";
-						
-						let suggestionBlock = "";
-						if (s.suggestedCode !== undefined) {
-							suggestionBlock = `#### 💡 Suggested Fix\n\`\`\`suggestion\n${s.suggestedCode}\n\`\`\``;
-						}
+					try {
+						const inlineComments = verifiedSuggestions.suggestions.map((s: any) => {
+							const severityText = s.severity === "error" 
+								? "⚠️ Potential issue | 🔴 Critical" 
+								: s.severity === "warning" 
+									? "⚠️ Potential issue | 🟡 Major" 
+									: "ℹ️ Suggestion";
+							
+							const title = s.title ? `### ${severityText}\n**${s.title}**\n\n` : `### ${severityText}\n\n`;
+							const description = s.description ? `${s.description}\n\n` : "";
+							
+							let suggestionBlock = "";
+							if (s.suggestedCode !== undefined) {
+								suggestionBlock = `#### 💡 Suggested Fix\n\`\`\`suggestion\n${s.suggestedCode}\n\`\`\``;
+							}
 
-						const commentObj: any = {
-							path: s.filePath,
-							line: s.endLine || s.startLine,
-							body: `${title}${description}${suggestionBlock}`,
-						};
+							const commentObj: any = {
+								path: s.filePath,
+								line: s.endLine || s.startLine,
+								side: "RIGHT",
+								body: `${title}${description}${suggestionBlock}`,
+							};
 
-						// Support multi-line suggestions
-						if (s.startLine && s.endLine && s.startLine < s.endLine) {
-							commentObj.start_line = s.startLine;
-							commentObj.start_side = "RIGHT";
-						}
+							// Support multi-line suggestions
+							if (s.startLine && s.endLine && s.startLine < s.endLine) {
+								commentObj.start_line = s.startLine;
+								commentObj.start_side = "RIGHT";
+							}
 
-						return commentObj;
-					});
+							return commentObj;
+						});
 
-					await postInlineReviewComments(token as string, owner, repo, prNumber, inlineComments);
+						await postInlineReviewComments(token as string, owner, repo, prNumber, inlineComments);
+					} catch (inlineError) {
+						console.error("Failed to post inline review comments:", inlineError);
+					}
 				}
 			});
 
@@ -488,6 +494,29 @@ Please provide a helpful, clear, and constructive answer. If they are asking you
 					commentId,
 					isReviewComment
 				);
+			});
+
+			await step.run("send-reply-notification", async () => {
+				const repository = await prisma.repository.findFirst({
+					where: { owner, name: repo },
+				});
+
+				if (repository) {
+					const review = await prisma.review.findFirst({
+						where: {
+							repositoryId: repository.id,
+							prNumber,
+						},
+						orderBy: { createdAt: "desc" },
+					});
+
+					if (review) {
+						await sendCommentReplyNotification(
+							review.id,
+							replyContent as string
+						);
+					}
+				}
 			});
 
 			return { success: true };

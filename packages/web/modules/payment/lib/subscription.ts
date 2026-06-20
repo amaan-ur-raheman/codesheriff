@@ -1,6 +1,10 @@
 "use server";
 
 import prisma from "@/lib/db";
+import {
+	sendUsageLimitWarning,
+	sendSubscriptionChangedNotification,
+} from "@/modules/notifications/actions";
 
 export type SubscriptionTier = "FREE" | "PRO";
 export type SubscriptionStatus = "ACTIVE" | "CANCELLED" | "EXPIRED";
@@ -138,7 +142,7 @@ export async function canCreateReview(
  * @param userId - User ID.
  */
 export async function incrementRepositoryCount(userId: string): Promise<void> {
-	await prisma.userUsage.upsert({
+	const usage = await prisma.userUsage.upsert({
 		where: { userId },
 		create: {
 			userId,
@@ -151,6 +155,20 @@ export async function incrementRepositoryCount(userId: string): Promise<void> {
 			},
 		},
 	});
+
+	const tier = await getUserTier(userId);
+	if (tier === "PRO") return;
+
+	const limit = TIER_LIMITS.FREE.repositories;
+	const newCount = usage.repositoryCount + 1;
+
+	if (limit && newCount >= Math.ceil(limit * 0.8)) {
+		try {
+			await sendUsageLimitWarning(userId, "repositories", newCount, limit);
+		} catch {
+			// Notification failure should not block the operation
+		}
+	}
 }
 
 /**
@@ -180,7 +198,8 @@ export async function incrementReviewCount(
 	const usage = await getUserUsage(userId);
 	const reviewCounts = usage.reviewCounts as Record<string, number>;
 
-	reviewCounts[repositoryId] = (reviewCounts[repositoryId] || 0) + 1;
+	const newCount = (reviewCounts[repositoryId] || 0) + 1;
+	reviewCounts[repositoryId] = newCount;
 
 	await prisma.userUsage.update({
 		where: { userId },
@@ -188,6 +207,19 @@ export async function incrementReviewCount(
 			reviewCounts,
 		},
 	});
+
+	const tier = await getUserTier(userId);
+	if (tier === "PRO") return;
+
+	const limit = TIER_LIMITS.FREE.reviewsPerRepo;
+
+	if (limit && newCount >= Math.ceil(limit * 0.8)) {
+		try {
+			await sendUsageLimitWarning(userId, "reviews", newCount, limit);
+		} catch {
+			// Notification failure should not block the operation
+		}
+	}
 }
 
 /**
@@ -246,6 +278,11 @@ export async function updateUserTier(
 	status: SubscriptionStatus,
 	polarSubscriptionId?: string
 ): Promise<void> {
+	const previous = await prisma.user.findUnique({
+		where: { id: userId },
+		select: { subscriptionTier: true },
+	});
+
 	await prisma.user.update({
 		where: { id: userId },
 		data: {
@@ -253,6 +290,14 @@ export async function updateUserTier(
 			subscriptionStatus: status,
 		},
 	});
+
+	if (previous?.subscriptionTier !== tier || status === "CANCELLED") {
+		try {
+			await sendSubscriptionChangedNotification(userId, tier, status);
+		} catch {
+			// Notification failure should not block the tier update
+		}
+	}
 }
 
 /**

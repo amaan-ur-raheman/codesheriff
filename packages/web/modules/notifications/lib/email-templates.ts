@@ -57,7 +57,7 @@ function wrap(title: string, body: string) {
     ${body}
     <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 24px 0;">
     <p style="color: #888; font-size: 12px; margin: 0;">
-      Code Horse — AI-powered code reviews. <a href="https://codehorse.app" style="color: #888;">Unsubscribe</a>
+      Code Horse — AI-powered code reviews. <a href="https://codehorse.app/dashboard/settings" style="color: #888;">Manage email preferences</a>
     </p>
   </div>
 </body>
@@ -161,6 +161,31 @@ export function subscriptionChangedEmail(newTier: string, status: string) {
         ? "<p>Your subscription has been cancelled. You'll retain Pro access until the end of your billing period.</p>"
         : "<p>Your plan has been updated.</p>"}
     <a href="https://codehorse.app/dashboard/subscriptions" style="${buttonStyles}">Manage Subscription</a>
+    `
+  );
+}
+
+export function commentReplyEmail(
+  prTitle: string,
+  prNumber: number,
+  repoName: string,
+  replySnippet: string,
+  prUrl: string
+) {
+  return wrap(
+    "Code Horse Replied",
+    `
+    <p>Code Horse replied to a comment on your pull request.</p>
+    <div style="background: #f9f9f9; padding: 16px; border-radius: 8px; margin: 16px 0;">
+      <p style="margin: 0; font-size: 12px; color: #888; text-transform: uppercase; font-weight: 600;">Pull Request</p>
+      <p style="margin: 4px 0 0; font-weight: 600;">#${prNumber} ${prTitle}</p>
+      <p style="margin: 8px 0 0; font-size: 12px; color: #888;">${repoName}</p>
+    </div>
+    <div style="background: #f0f9ff; border: 1px solid #bae6fd; padding: 16px; border-radius: 8px; margin: 16px 0;">
+      <p style="margin: 0; font-size: 12px; color: #0369a1; text-transform: uppercase; font-weight: 600;">Reply Preview</p>
+      <p style="margin: 8px 0 0; font-size: 14px; color: #334155;">${replySnippet}</p>
+    </div>
+    <a href="${prUrl}" style="${buttonStyles}">View on GitHub</a>
     `
   );
 }
