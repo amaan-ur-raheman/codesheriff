@@ -1,18 +1,23 @@
 {
-  "name": "code-horse-monorepo",
-  "version": "1.0.0",
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "web:dev": "bun --filter code-horse dev",
-    "web:build": "bun --filter code-horse build",
-    "web:start": "bun --filter code-horse start",
-    "cli:build": "bun --filter codehorse-cli build",
-    "cli:start": "bun --filter codehorse-cli start",
-    "lint": "bun --filter code-horse lint",
-    "typecheck": "tsc --noEmit --project packages/web/tsconfig.json && tsc --noEmit --project packages/cli/tsconfig.json",
-    "test": "bun --filter code-horse test"
-  },
-  "devDependencies": {}
+    "name": "code-sheriff-monorepo",
+    "version": "1.0.0",
+    "devDependencies": {
+        "mprocs": "^0.9.6"
+    },
+    "scripts": {
+        "web:dev": "bun --filter code-sheriff dev",
+        "web:dev:all": "mprocs",
+        "inngest:dev": "inngest dev",
+        "ngrok:dev": "ngrok http 3000",
+        "web:build": "bun --filter code-sheriff build",
+        "web:start": "bun --filter code-sheriff start",
+        "cli:build": "bun --filter codesheriff-cli build",
+        "cli:start": "bun --filter codesheriff-cli start",
+        "lint": "bun --filter code-sheriff lint",
+        "typecheck": "tsc --noEmit --project packages/web/tsconfig.json && tsc --noEmit --project packages/cli/tsconfig.json",
+        "test": "bun --filter code-sheriff test"
+    },
+    "workspaces": [
+        "packages/*"
+    ]
 }
