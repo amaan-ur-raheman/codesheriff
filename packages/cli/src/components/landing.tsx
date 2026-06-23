@@ -47,7 +47,7 @@ export const Landing = ({ username, onStart, onLogout, onExit }: LandingProps) =
 						</Text>
 					</Box>
 				) : (
-					<Text color="yellow">Not logged in. Use 'codehorse login' first, or start to log in.</Text>
+					<Text color="yellow">Not logged in. Use 'codesheriff login' first, or start to log in.</Text>
 				)}
 			</Box>
 

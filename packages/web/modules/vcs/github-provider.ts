@@ -70,7 +70,7 @@ export class GitHubProvider implements VCSProvider {
       owner,
       repo,
       issue_number: prNumber,
-      body: `## 🤖 AI Code Review\n\n${comment}\n\n---\n*Powered By CodeHorse*`,
+      body: `## 🤖 AI Code Review\n\n${comment}\n\n---\n*Powered By CodeSheriff*`,
     });
   }
 

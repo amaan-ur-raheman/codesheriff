@@ -4,7 +4,7 @@ async function main() {
   console.log("Invoking reviewPullRequest directly...");
   const result = await reviewPullRequest(
     "amaan-ur-raheman",
-    "codehorse",
+    "codesheriff",
     27
   );
   console.log("Execution Result:", result);

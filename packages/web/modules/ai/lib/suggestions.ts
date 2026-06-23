@@ -18,6 +18,7 @@ export interface CodeSuggestion {
 	category: string;
 	verified?: boolean;
 	verificationLog?: string;
+	applied?: boolean;
 }
 
 export interface ReviewSuggestions {

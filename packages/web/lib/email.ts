@@ -17,7 +17,7 @@ export async function sendEmail({
   }
 
   return resend.emails.send({
-    from: "Code Horse <notifications@codehorse.app>",
+    from: "Code Sheriff <notifications@codesheriff.app>",
     to,
     subject,
     html,

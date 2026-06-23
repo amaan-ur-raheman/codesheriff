@@ -2,6 +2,7 @@
 
 import { Bell } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from "../actions";
 
 export function NotificationBell() {
+	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [open, setOpen] = useState(false);
 
@@ -104,6 +106,15 @@ export function NotificationBell() {
 									onClick={() => {
 										if (!n.read) {
 											markReadMutation.mutate(n.id);
+										}
+										setOpen(false);
+										const data = n.data as Record<string, string> | null;
+										if (data?.reviewId) {
+											router.push(`/dashboard/reviews/${data.reviewId}`);
+										} else if (data?.prUrl) {
+											router.push(data.prUrl);
+										} else if (n.type === "subscription_changed") {
+											router.push("/dashboard/subscriptions");
 										}
 									}}
 								>

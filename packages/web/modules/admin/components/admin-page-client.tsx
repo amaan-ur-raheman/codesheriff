@@ -157,7 +157,7 @@ function AdminDashboard() {
 								<Line
 									type="monotone"
 									dataKey="reviews"
-									stroke="hsl(var(--primary))"
+									stroke="var(--primary)"
 									strokeWidth={2}
 									dot={false}
 								/>

@@ -28,6 +28,7 @@ export async function getActiveReviews() {
 		select: {
 			id: true,
 			prTitle: true,
+			prNumber: true,
 			status: true,
 			repository: { select: { fullName: true } },
 		},

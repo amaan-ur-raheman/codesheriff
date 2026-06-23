@@ -1,7 +1,7 @@
 /**
  * Authentication configuration using Better Auth.
  *
- * This file sets up the authentication system for Code Horse, including:
+ * This file sets up the authentication system for Code Sheriff, including:
  * - PostgreSQL adapter (via Prisma) for storing user data.
  * - GitHub OAuth provider for user login.
  * - Integration with Polar.sh for subscription management.
@@ -45,7 +45,7 @@ export const auth = betterAuth({
 	},
 	trustedOrigins: [
 		"http://localhost:3000",
-		"https://codehorse.vercel.app",
+		"https://codesheriff.vercel.app",
 		"https://kamden-epeiric-caiden.ngrok-free.dev",
 	],
 	plugins: [

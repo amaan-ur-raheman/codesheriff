@@ -131,11 +131,11 @@ export async function POST(request: NextRequest) {
 			}
 
 			// Create a new API Key for the authenticated user
-			const keyToken = "ch_" + crypto.randomBytes(24).toString("hex");
+			const keyToken = "cs_" + crypto.randomBytes(24).toString("hex");
 			await prisma.apiKey.create({
 				data: {
 					userId: session.user.id,
-					name: `Code Horse CLI (${new Date().toLocaleDateString()})`,
+					name: `Code Sheriff CLI (${new Date().toLocaleDateString()})`,
 					key: keyToken,
 				},
 			});
