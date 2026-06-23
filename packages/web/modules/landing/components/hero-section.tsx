@@ -8,8 +8,8 @@ export function HeroSection() {
 	return (
 		<section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
 			<div className="absolute inset-0">
-				<div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/8 rounded-full blur-[128px]" />
-				<div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+				<div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/5 rounded-full blur-[128px]" />
+				<div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 			</div>
 
 			<div className="relative max-w-7xl mx-auto px-6 py-24 grid lg:grid-cols-2 gap-16 items-center">
@@ -37,7 +37,7 @@ export function HeroSection() {
 					<div className="flex flex-wrap gap-4">
 						<Button
 							size="lg"
-							className="bg-primary text-primary-foreground hover:bg-primary/90 px-8"
+							className="px-8"
 							asChild
 						>
 							<a href="/login">
@@ -48,7 +48,6 @@ export function HeroSection() {
 						<Button
 							size="lg"
 							variant="outline"
-							className="border-white/10 hover:border-white/20 hover:bg-white/5"
 						>
 							<Play className="mr-2 w-4 h-4" />
 							See it in action
@@ -68,7 +67,7 @@ export function HeroSection() {
 							</div>
 							<span>2,400+ developers</span>
 						</div>
-						<div className="w-px h-4 bg-white/10" />
+						<div className="w-px h-4 bg-border" />
 						<span>No credit card required</span>
 					</div>
 				</motion.div>
@@ -79,13 +78,13 @@ export function HeroSection() {
 					transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
 					className="relative"
 				>
-					<div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-primary/5 to-primary/20 rounded-2xl blur-xl opacity-50" />
-					<div className="relative rounded-2xl border border-white/10 bg-card/50 backdrop-blur-sm overflow-hidden shadow-2xl">
-						<div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+					<div className="absolute -inset-4 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 rounded-2xl blur-xl opacity-50" />
+					<div className="relative rounded-2xl border border-border bg-card overflow-hidden shadow-xl">
+						<div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
 							<div className="flex gap-1.5">
-								<div className="w-3 h-3 rounded-full bg-white/10" />
-								<div className="w-3 h-3 rounded-full bg-white/10" />
-								<div className="w-3 h-3 rounded-full bg-white/10" />
+								<div className="w-3 h-3 rounded-full bg-muted-foreground/20" />
+								<div className="w-3 h-3 rounded-full bg-muted-foreground/20" />
+								<div className="w-3 h-3 rounded-full bg-muted-foreground/20" />
 							</div>
 							<span className="text-xs text-muted-foreground ml-2 font-mono">
 								pull-request #347
@@ -96,35 +95,35 @@ export function HeroSection() {
 						</div>
 
 						<div className="p-5 font-mono text-sm space-y-3">
-							<div className="flex items-center gap-3 text-muted-foreground">
-								<span className="text-white/30 w-5">+</span>
-								<span className="text-green-400/90">
+							<div className="flex items-center gap-3">
+								<span className="text-muted-foreground/30 w-5">+</span>
+								<span className="text-green-600 dark:text-green-400">
 									const validateInput = (data: UserInput) =&gt; &#123;
 								</span>
 							</div>
-							<div className="flex items-center gap-3 text-muted-foreground">
-								<span className="text-white/30 w-5">+</span>
-								<span className="text-green-400/90">
+							<div className="flex items-center gap-3">
+								<span className="text-muted-foreground/30 w-5">+</span>
+								<span className="text-green-600 dark:text-green-400">
 									{"  "}if (!data.email) &#123;
 								</span>
 							</div>
-							<div className="flex items-center gap-3 text-muted-foreground">
-								<span className="text-white/30 w-5">+</span>
-								<span className="text-green-400/90">
+							<div className="flex items-center gap-3">
+								<span className="text-muted-foreground/30 w-5">+</span>
+								<span className="text-green-600 dark:text-green-400">
 									{"    "}throw new ValidationError(&quot;Email required&quot;);
 								</span>
 							</div>
-							<div className="flex items-center gap-3 text-muted-foreground">
-								<span className="text-white/30 w-5">+</span>
-								<span className="text-green-400/90">{"  "}&#125;</span>
+							<div className="flex items-center gap-3">
+								<span className="text-muted-foreground/30 w-5">+</span>
+								<span className="text-green-600 dark:text-green-400">{"  "}&#125;</span>
 							</div>
-							<div className="flex items-center gap-3 text-muted-foreground">
-								<span className="text-white/30 w-5">+</span>
-								<span className="text-green-400/90">{"  "}return sanitize(data);</span>
+							<div className="flex items-center gap-3">
+								<span className="text-muted-foreground/30 w-5">+</span>
+								<span className="text-green-600 dark:text-green-400">{"  "}return sanitize(data);</span>
 							</div>
-							<div className="flex items-center gap-3 text-muted-foreground">
-								<span className="text-white/30 w-5">+</span>
-								<span className="text-green-400/90">&#125;</span>
+							<div className="flex items-center gap-3">
+								<span className="text-muted-foreground/30 w-5">+</span>
+								<span className="text-green-600 dark:text-green-400">&#125;</span>
 							</div>
 						</div>
 
@@ -139,10 +138,10 @@ export function HeroSection() {
 							</div>
 							<p className="text-xs text-muted-foreground leading-relaxed">
 								Consider adding{" "}
-								<code className="px-1 py-0.5 rounded bg-white/5 text-primary text-[11px]">
+								<code className="px-1 py-0.5 rounded bg-muted text-primary text-[11px]">
 									isEmail()
 								</code>{" "}
-								validation from <code className="px-1 py-0.5 rounded bg-white/5 text-primary text-[11px]">zod</code>{" "}
+								validation from <code className="px-1 py-0.5 rounded bg-muted text-primary text-[11px]">zod</code>{" "}
 								to prevent invalid email formats from reaching the
 								database layer.
 							</p>

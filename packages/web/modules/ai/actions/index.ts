@@ -6,6 +6,8 @@ import {
 	canCreateReview,
 	incrementReviewCount,
 } from "@/modules/payment/lib/subscription";
+import { Octokit } from "octokit";
+import { updatePRCommitStatus, createPRCheckRun } from "@/modules/github/lib/github";
 
 /**
  * Initiates an AI-powered code review for a pull request
@@ -67,6 +69,39 @@ export async function reviewPullRequest(
 
 		const token = githubAccount.accessToken;
 
+		// Resolve head SHA
+		let headSha = after;
+		if (!headSha || headSha === "0000000000000000000000000000000000000000") {
+			try {
+				const octokit = new Octokit({ auth: token });
+				const { data: pr } = await octokit.rest.pulls.get({
+					owner,
+					repo,
+					pull_number: prNumber,
+				});
+				headSha = pr.head.sha;
+			} catch (prError) {
+				console.error("Failed to fetch PR details for head SHA:", prError);
+			}
+		}
+
+		let checkRunId: number | null = null;
+		if (headSha) {
+			// Instantly set commit status to pending (pulsing yellow/orange dot)
+			await updatePRCommitStatus(
+				token,
+				owner,
+				repo,
+				headSha,
+				"pending",
+				"Review in progress",
+				`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard/reviews`
+			);
+
+			// Instantly create Check Run in_progress (animating loading spinner)
+			checkRunId = await createPRCheckRun(token, owner, repo, headSha);
+		}
+
 		await inngest.send({
 			name: "pr.review.requested",
 			data: {
@@ -76,6 +111,8 @@ export async function reviewPullRequest(
 				userId: respository.user.id,
 				before,
 				after,
+				headSha,
+				checkRunId,
 			},
 		});
 
@@ -116,7 +153,7 @@ export async function reviewPullRequest(
 }
 
 /**
- * Dispatches an event to Inngest when a comment mentions Code Horse
+ * Dispatches an event to Inngest when a comment mentions Code Sheriff
  */
 export async function replyToPullRequestComment(
 	owner: string,

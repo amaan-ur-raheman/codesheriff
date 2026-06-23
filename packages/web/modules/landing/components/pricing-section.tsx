@@ -100,8 +100,8 @@ export function PricingSection() {
 							variants={item}
 							className={`relative p-8 rounded-2xl border transition-all duration-500 ${
 								plan.highlight
-									? "border-primary/30 bg-primary/[0.05] shadow-lg shadow-primary/5"
-									: "border-white/5 bg-white/[0.02] hover:border-white/10"
+									? "border-primary/30 bg-primary/5 shadow-lg shadow-primary/5"
+									: "border-border bg-card hover:border-primary/20"
 							}`}
 						>
 							{plan.badge && (
@@ -144,11 +144,8 @@ export function PricingSection() {
 							</ul>
 
 							<Button
-								className={`w-full ${
-									plan.highlight
-										? "bg-primary text-primary-foreground hover:bg-primary/90"
-										: "bg-white/5 text-foreground hover:bg-white/10 border border-white/10"
-								}`}
+								variant={plan.highlight ? "default" : "outline"}
+								className="w-full"
 								asChild
 							>
 								<a href="/login">{plan.cta}</a>

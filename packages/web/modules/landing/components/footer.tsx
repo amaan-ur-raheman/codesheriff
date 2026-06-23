@@ -22,7 +22,7 @@ const footerLinks = {
 
 export function Footer() {
 	return (
-		<footer className="border-t border-white/5 bg-background">
+		<footer className="border-t border-border bg-background">
 			<div className="max-w-7xl mx-auto px-6 py-16">
 				<div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
 					<div className="col-span-2">
@@ -30,12 +30,12 @@ export function Footer() {
 							href="/"
 							className="flex items-center gap-2.5 font-bold text-lg text-foreground mb-4"
 						>
-							<div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+							<div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
 								<span className="text-xs font-black text-primary-foreground">
-									CH
+									CS
 								</span>
 							</div>
-							CodeHorse
+							CodeSheriff
 						</a>
 						<p className="text-sm text-muted-foreground max-w-xs leading-relaxed mb-6">
 							AI-powered code reviews that help your team ship
@@ -44,13 +44,13 @@ export function Footer() {
 						<div className="flex gap-3">
 							<a
 								href="#"
-								className="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-white/20 transition-all"
+								className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
 							>
 								<Github className="w-4 h-4" />
 							</a>
 							<a
 								href="#"
-								className="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-white/20 transition-all"
+								className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
 							>
 								<Twitter className="w-4 h-4" />
 							</a>
@@ -78,9 +78,9 @@ export function Footer() {
 					))}
 				</div>
 
-				<div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+				<div className="pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
 					<p className="text-xs text-muted-foreground">
-						© {new Date().getFullYear()} CodeHorse. All rights
+						© {new Date().getFullYear()} CodeSheriff. All rights
 						reserved.
 					</p>
 					<p className="text-xs text-muted-foreground">

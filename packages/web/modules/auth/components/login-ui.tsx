@@ -44,7 +44,7 @@ const LoginUI = () => {
 			>
 				<div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-primary/20 via-primary/5 to-primary/10 opacity-60" />
 
-				<div className="relative rounded-2xl border border-white/10 bg-card/80 backdrop-blur-xl p-10 shadow-2xl shadow-primary/5">
+				<div className="relative rounded-2xl border border-border bg-card/80 backdrop-blur-xl p-10 shadow-2xl shadow-primary/5">
 					<motion.div
 						initial={{ opacity: 0, y: 10 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -52,10 +52,10 @@ const LoginUI = () => {
 						className="text-center mb-10"
 					>
 						<a href="/" className="inline-flex items-center gap-2.5 font-bold text-xl text-foreground mb-6">
-							<div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20">
-								<span className="text-sm font-black text-primary-foreground">CH</span>
-							</div>
-							CodeHorse
+							<div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+							<span className="text-sm font-black text-primary-foreground">CS</span>
+						</div>
+						CodeSheriff
 						</a>
 						<h1 className="text-2xl font-bold tracking-tight mb-2">
 							Welcome back
@@ -91,10 +91,10 @@ const LoginUI = () => {
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						transition={{ delay: 0.4, duration: 0.5 }}
-						className="mt-8 pt-6 border-t border-white/5"
+						className="mt-8 pt-6 border-t border-border"
 					>
 						<p className="text-center text-xs text-muted-foreground mb-4">
-							New to CodeHorse?{" "}
+							New to CodeSheriff?{" "}
 							<a
 								href="/login"
 								className="text-primary hover:text-primary/80 font-medium transition-colors"
@@ -106,11 +106,11 @@ const LoginUI = () => {
 							<a href="#" className="hover:text-foreground transition-colors">
 								Terms
 							</a>
-							<span className="text-white/10">·</span>
+							<span className="text-border">·</span>
 							<a href="#" className="hover:text-foreground transition-colors">
 								Privacy
 							</a>
-							<span className="text-white/10">·</span>
+							<span className="text-border">·</span>
 							<a href="#" className="hover:text-foreground transition-colors">
 								Support
 							</a>

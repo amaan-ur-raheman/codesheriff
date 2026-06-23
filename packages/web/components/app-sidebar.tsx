@@ -36,7 +36,6 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -69,8 +68,7 @@ export const AppSidebar = () => {
 
 	if (!mounted || !session) return null;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const user = session.user as any;
+	const user = session.user as Record<string, unknown> & { name?: string; email?: string; image?: string; role?: string };
 
 	const navigationItems = [
 		{
@@ -129,7 +127,7 @@ export const AppSidebar = () => {
 
 	return (
 		<Sidebar>
-			<SidebarHeader className="border-b">
+			<SidebarHeader className="border-b border-border">
 				<div className="flex flex-col gap-4 px-2 py-6">
 					<div className="flex items-center gap-4 px-3 py-4 rounded-lg bg-sidebar-accent/50 hover:bg-sidebar-accent/70 transition-colors">
 						<div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary text-primary-foreground shrink-0">
@@ -162,7 +160,7 @@ export const AppSidebar = () => {
 								tooltip={item.title}
 								className={`h-11 px-4 rounded-lg transition-all duration-200 ${
 									isActive(item.url)
-										? "bg-primary/90 text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground font-semibold"
+										? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground font-semibold"
 										: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-accent-foreground"
 								}`}
 							>
@@ -181,7 +179,7 @@ export const AppSidebar = () => {
 				</SidebarMenu>
 			</SidebarContent>
 
-			<SidebarFooter className="border-t px-3 py-4">
+			<SidebarFooter className="border-t border-border px-3 py-4">
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<DropdownMenu>
@@ -241,7 +239,7 @@ hover:bg-sidebar-accent/50 transition-colors"
 									</div>
 								</div>
 
-								<div className="px-2 py-3 border-t border-b">
+								<div className="px-2 py-3 border-t border-b border-border">
 									<DropdownMenuItem asChild>
 										<button
 											onClick={() =>
@@ -266,7 +264,7 @@ hover:bg-sidebar-accent/50 transition-colors"
 											)}
 										</button>
 									</DropdownMenuItem>
-									<DropdownMenuItem className="cursor-pointer px-3 py-3 my-1 rounded-md hover:bg-red-500/10 hover:text-red-600 transition-colors font-medium">
+									<DropdownMenuItem className="cursor-pointer px-3 py-3 my-1 rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors font-medium">
 										<LogOut className="w-5 h-5 mr-3 shrink-0" />
 										<Logout>
 											Sign Out
