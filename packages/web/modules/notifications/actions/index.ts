@@ -22,6 +22,14 @@ async function getSession() {
 	return session;
 }
 
+async function shouldSendEmail(userId: string): Promise<boolean> {
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+		select: { emailNotifications: true },
+	});
+	return user?.emailNotifications !== false;
+}
+
 export async function getNotifications(limit: number = 20) {
 	const session = await getSession();
 
@@ -104,7 +112,7 @@ export async function sendReviewCompletedNotification(reviewId: string) {
 	if (!review || !review.repository?.user?.email) return;
 
 	const user = review.repository.user;
-	const reviewUrl = `https://codehorse.app/dashboard/reviews/${review.id}`;
+	const reviewUrl = `https://codesheriff.app/dashboard/reviews/${review.id}`;
 
 	await createNotification(
 		user.id,
@@ -115,16 +123,18 @@ export async function sendReviewCompletedNotification(reviewId: string) {
 	);
 
 	try {
-		await sendEmail({
-			to: user.email,
-			subject: `Review complete: #${review.prNumber} ${review.prTitle}`,
-			html: reviewCompletedEmail(
-				review.prTitle,
-				review.prNumber,
-				review.repository.fullName,
-				reviewUrl
-			),
-		});
+		if (await shouldSendEmail(user.id)) {
+			await sendEmail({
+				to: user.email,
+				subject: `Review complete: #${review.prNumber} ${review.prTitle}`,
+				html: reviewCompletedEmail(
+					review.prTitle,
+					review.prNumber,
+					review.repository.fullName,
+					reviewUrl
+				),
+			});
+		}
 	} catch (emailError) {
 		console.error("Failed to send review completed email:", emailError);
 	}
@@ -152,16 +162,18 @@ export async function sendReviewFailedNotification(
 	);
 
 	try {
-		await sendEmail({
-			to: user.email,
-			subject: `Review failed: #${review.prNumber} ${review.prTitle}`,
-			html: reviewFailedEmail(
-				review.prTitle,
-				review.prNumber,
-				review.repository.fullName,
-				error
-			),
-		});
+		if (await shouldSendEmail(user.id)) {
+			await sendEmail({
+				to: user.email,
+				subject: `Review failed: #${review.prNumber} ${review.prTitle}`,
+				html: reviewFailedEmail(
+					review.prTitle,
+					review.prNumber,
+					review.repository.fullName,
+					error
+				),
+			});
+		}
 	} catch (emailError) {
 		console.error("Failed to send review failed email:", emailError);
 	}
@@ -187,11 +199,13 @@ export async function sendUsageLimitWarning(
 	);
 
 	try {
-		await sendEmail({
-			to: user.email,
-			subject: `Usage warning: ${percent}% of monthly ${usageType} used`,
-			html: usageLimitWarningEmail(usageType, current, limit),
-		});
+		if (await shouldSendEmail(userId)) {
+			await sendEmail({
+				to: user.email,
+				subject: `Usage warning: ${percent}% of monthly ${usageType} used`,
+				html: usageLimitWarningEmail(usageType, current, limit),
+			});
+		}
 	} catch (emailError) {
 		console.error("Failed to send usage limit warning email:", emailError);
 	}
@@ -214,11 +228,13 @@ export async function sendSubscriptionChangedNotification(
 	);
 
 	try {
-		await sendEmail({
-			to: user.email,
-			subject: `Subscription updated: ${newTier} (${status})`,
-			html: subscriptionChangedEmail(newTier, status),
-		});
+		if (await shouldSendEmail(userId)) {
+			await sendEmail({
+				to: user.email,
+				subject: `Subscription updated: ${newTier} (${status})`,
+				html: subscriptionChangedEmail(newTier, status),
+			});
+		}
 	} catch (emailError) {
 		console.error("Failed to send subscription changed email:", emailError);
 	}
@@ -241,23 +257,25 @@ export async function sendCommentReplyNotification(
 	await createNotification(
 		user.id,
 		"comment_reply",
-		"Code Horse Replied",
-		`Code Horse replied to your comment on #${review.prNumber} ${review.prTitle}.`,
+		"Code Sheriff Replied",
+		`Code Sheriff replied to your comment on #${review.prNumber} ${review.prTitle}.`,
 		{ reviewId, prNumber: review.prNumber, prUrl: review.prUrl }
 	);
 
 	try {
-		await sendEmail({
-			to: user.email,
-			subject: `Code Horse replied: #${review.prNumber} ${review.prTitle}`,
-			html: commentReplyEmail(
-				review.prTitle,
-				review.prNumber,
-				review.repository.fullName,
-				snippet,
-				review.prUrl
-			),
-		});
+		if (await shouldSendEmail(user.id)) {
+			await sendEmail({
+				to: user.email,
+				subject: `Code Sheriff replied: #${review.prNumber} ${review.prTitle}`,
+				html: commentReplyEmail(
+					review.prTitle,
+					review.prNumber,
+					review.repository.fullName,
+					snippet,
+					review.prUrl
+				),
+			});
+		}
 	} catch (emailError) {
 		console.error("Failed to send comment reply email:", emailError);
 	}

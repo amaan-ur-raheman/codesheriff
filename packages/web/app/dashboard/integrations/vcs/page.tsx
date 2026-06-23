@@ -3,7 +3,7 @@ import VCSProviderSelector from "@/modules/vcs/components/vcs-provider-selector"
 
 export const metadata: Metadata = {
   title: "Version Control",
-  description: "Connect your Git providers to CodeHorse.",
+  description: "Connect your Git providers to Code Sheriff.",
 };
 
 export default function VCSPage() {

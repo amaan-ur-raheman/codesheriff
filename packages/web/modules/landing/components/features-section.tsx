@@ -74,11 +74,11 @@ export function FeaturesSection() {
 						<motion.div
 							key={feature.title}
 							variants={item}
-							className="group relative p-8 rounded-2xl border border-white/5 bg-white/[0.02] hover:border-primary/20 hover:bg-primary/[0.03] transition-all duration-500"
+							className="group relative p-8 rounded-2xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all duration-300"
 						>
-							<div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+							<div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 							<div className="relative">
-								<div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/15 transition-colors duration-500">
+								<div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/15 transition-colors duration-300">
 									<feature.icon className="w-6 h-6 text-primary" />
 								</div>
 								<h3 className="text-lg font-semibold mb-2">

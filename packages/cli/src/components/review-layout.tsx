@@ -114,7 +114,7 @@ export const ReviewLayout = ({ review, onBack }: ReviewLayoutProps) => {
 		<Box flexDirection="column" height={22} padding={1}>
 			{/* Top Header */}
 			<Box justifyContent="space-between" borderStyle="single" borderColor="cyan" paddingX={1} marginBottom={1}>
-				<Text bold color="cyan">🐴 Code Horse Interactive Review: #{review.prNumber} {review.prTitle}</Text>
+				<Text bold color="cyan">🤠 Code Sheriff Interactive Review: #{review.prNumber} {review.prTitle}</Text>
 				<Text color="gray">{review.status.toUpperCase()}</Text>
 			</Box>
 

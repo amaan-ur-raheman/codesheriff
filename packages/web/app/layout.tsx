@@ -1,5 +1,5 @@
 /**
- * Root layout component for Code Horse application
+ * Root layout component for Code Sheriff application
  * 
  * Provides:
  * - Global font configuration (Geist Sans & Mono)
@@ -30,23 +30,23 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
 	title: {
-		default: "Code Horse - AI-Powered Code Review Platform",
-		template: "%s | Code Horse",
+		default: "Code Sheriff - AI-Powered Code Review Platform",
+		template: "%s | Code Sheriff",
 	},
 	description: "Automate your code reviews with AI. Connect your GitHub repositories and get instant, intelligent code review feedback on every pull request.",
 	keywords: ["code review", "AI", "GitHub", "pull request", "automation", "code analysis", "developer tools"],
-	authors: [{ name: "Code Horse" }],
-	creator: "Code Horse",
+	authors: [{ name: "Code Sheriff" }],
+	creator: "Code Sheriff",
 	openGraph: {
 		type: "website",
 		locale: "en_US",
-		title: "Code Horse - AI-Powered Code Review Platform",
+		title: "Code Sheriff - AI-Powered Code Review Platform",
 		description: "Automate your code reviews with AI. Connect your GitHub repositories and get instant, intelligent code review feedback on every pull request.",
-		siteName: "Code Horse",
+		siteName: "Code Sheriff",
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "Code Horse - AI-Powered Code Review Platform",
+		title: "Code Sheriff - AI-Powered Code Review Platform",
 		description: "Automate your code reviews with AI. Connect your GitHub repositories and get instant, intelligent code review feedback on every pull request.",
 	},
 };

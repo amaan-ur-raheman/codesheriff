@@ -51,7 +51,7 @@ export default function DeviceVerificationPage() {
 						Connect a Device
 					</CardTitle>
 					<CardDescription>
-						Enter the code shown on your terminal to authorize the Code Horse CLI.
+						Enter the code shown on your terminal to authorize the Code Sheriff CLI.
 					</CardDescription>
 				</CardHeader>
 				<CardContent>

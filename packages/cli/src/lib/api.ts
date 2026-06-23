@@ -1,7 +1,7 @@
 const DEFAULT_SERVER_URL = "http://localhost:3000";
 
 const getServerUrl = (): string => {
-	return process.env.CODEHORSE_SERVER_URL || DEFAULT_SERVER_URL;
+	return process.env.CODESHERIFF_SERVER_URL || DEFAULT_SERVER_URL;
 };
 
 import { getToken } from "./config.js";

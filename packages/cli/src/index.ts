@@ -11,8 +11,8 @@ import { getToken } from "./lib/config.js";
 const program = new Command();
 
 program
-	.name("codehorse")
-	.description("Code Horse Interactive AI Pull Request Reviewer")
+	.name("codesheriff")
+	.description("Code Sheriff Interactive AI Pull Request Reviewer")
 	.version("0.1.0");
 
 // Default action (if no command is specified)
@@ -22,7 +22,7 @@ program
 
 		if (!token) {
 			console.log(chalk.yellow("\n⚠️  You are not logged in."));
-			console.log(`Run ${chalk.green.bold("codehorse login")} to connect your account first.\n`);
+			console.log(`Run ${chalk.green.bold("codesheriff login")} to connect your account first.\n`);
 			process.exit(1);
 		}
 
@@ -33,7 +33,7 @@ program
 
 program
 	.command("login")
-	.description("Authenticate Code Horse CLI via browser device code flow")
+	.description("Authenticate Code Sheriff CLI via browser device code flow")
 	.action(async () => {
 		await login();
 		process.exit(0);
@@ -41,7 +41,7 @@ program
 
 program
 	.command("logout")
-	.description("Disconnect your Code Horse account credentials from this machine")
+	.description("Disconnect your Code Sheriff account credentials from this machine")
 	.action(() => {
 		logout();
 		process.exit(0);

@@ -1,9 +1,13 @@
-name: 'Code Horse AI Review'
+name: 'Code Sheriff AI Review'
 description: 'Trigger an AI-powered code review for a pull request'
 inputs:
   api-key:
-    description: 'Code Horse API key'
+    description: 'Code Sheriff API key'
     required: true
+  api-url:
+    description: 'Code Sheriff API URL'
+    required: false
+    default: 'https://codehorse.vercel.app'
   pr-number:
     description: 'Pull request number (auto-detected if not provided)'
     required: false
@@ -14,20 +18,20 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Trigger Code Horse Review
+    - name: Trigger Code Sheriff Review
       shell: bash
       env:
-        CODEHORSE_API_KEY: ${{ inputs.api-key }}
+        CODESHERIFF_API_KEY: ${{ inputs.api-key }}
         PR_NUMBER: ${{ inputs.pr-number || github.event.pull_request.number }}
         OWNER: ${{ github.repository_owner }}
         REPO: ${{ github.event.repository.name }}
         GITHUB_TOKEN: ${{ inputs.github-token }}
-        API_URL: ${{ vars.CODEHORSE_API_URL || 'https://codehorse.vercel.app' }}
+        API_URL: ${{ inputs.api-url }}
       run: |
-        echo "Triggering Code Horse review for PR #${PR_NUMBER}..."
+        echo "Triggering Code Sheriff review for PR #${PR_NUMBER}..."
         RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
           "${API_URL}/api/reviews/trigger" \
-          -H "Authorization: Bearer ${CODEHORSE_API_KEY}" \
+          -H "Authorization: Bearer ${CODESHERIFF_API_KEY}" \
           -H "Content-Type: application/json" \
           -d "{\"owner\":\"${OWNER}\",\"repo\":\"${REPO}\",\"prNumber\":${PR_NUMBER}}")
         

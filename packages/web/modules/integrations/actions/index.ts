@@ -115,13 +115,13 @@ export async function testWebhook(type: string, webhookUrl: string) {
 
 	if (type === "slack") {
 		return sendSlackWebhook(webhookUrl, {
-			text: "Test notification from Code Horse",
+			text: "Test notification from Code Sheriff",
 			blocks: [
 				{
 					type: "section",
 					text: {
 						type: "mrkdwn",
-						text: ":horse: *Code Horse Integration Test*\nThis is a test message to verify your Slack webhook is working correctly.",
+						text: ":horse: *Code Sheriff Integration Test*\nThis is a test message to verify your Slack webhook is working correctly.",
 					},
 				},
 			],
@@ -133,7 +133,7 @@ export async function testWebhook(type: string, webhookUrl: string) {
 			content: "",
 			embeds: [
 				{
-					title: "Code Horse Integration Test",
+					title: "Code Sheriff Integration Test",
 					description:
 						"This is a test message to verify your Discord webhook is working correctly.",
 					color: 0x7c3aed,

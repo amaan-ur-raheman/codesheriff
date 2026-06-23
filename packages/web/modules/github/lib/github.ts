@@ -169,7 +169,7 @@ export const createWebhook = async (owner: string, repo: string) => {
 };
 
 /**
- * Deletes the Code Horse webhook from a GitHub repository.
+ * Deletes the Code Sheriff webhook from a GitHub repository.
  *
  * @param owner - Repository owner.
  * @param repo - Repository name.
@@ -348,7 +348,44 @@ export async function getPullRequestDiff(
 		diff: diff as unknown as string,
 		title: pr.title,
 		description: pr.body,
+		headSha: pr.head.sha,
 	};
+}
+
+/**
+ * Updates the commit status on GitHub for a PR commit.
+ *
+ * @param token - GitHub access token.
+ * @param owner - Repository owner username.
+ * @param repo - Repository name.
+ * @param sha - Commit SHA.
+ * @param state - Status check state.
+ * @param description - Description of the check status.
+ * @param targetUrl - Detail page url.
+ */
+export async function updatePRCommitStatus(
+	token: string,
+	owner: string,
+	repo: string,
+	sha: string,
+	state: "pending" | "success" | "failure" | "error",
+	description: string,
+	targetUrl?: string
+) {
+	try {
+		const octokit = new Octokit({ auth: token });
+		await octokit.rest.repos.createCommitStatus({
+			owner,
+			repo,
+			sha,
+			state,
+			description,
+			context: "CodeSheriff",
+			target_url: targetUrl,
+		});
+	} catch (error) {
+		console.error("Failed to update commit status on GitHub:", error);
+	}
 }
 
 /**
@@ -381,7 +418,7 @@ export async function postReviewComment(
 		owner,
 		repo,
 		issue_number: prNumber,
-		body: `## 🤖 AI Code Review\n\n${review}\n\n---\n*Powered By CodeHorse*`,
+		body: `## 🤖 AI Code Review\n\n${review}\n\n---\n*Powered By CodeSheriff*`,
 	});
 }
 
@@ -412,14 +449,14 @@ export async function postCommentReply(
 			repo,
 			pull_number: prNumber,
 			comment_id: commentId,
-			body: `🐴 **Code Horse Reply:**\n\n${replyContent}`,
+			body: `🤠 **Code Sheriff Reply:**\n\n${replyContent}`,
 		});
 	} else {
 		await octokit.rest.issues.createComment({
 			owner,
 			repo,
 			issue_number: prNumber,
-			body: `🐴 **Code Horse Reply:**\n\n${replyContent}`,
+			body: `🤠 **Code Sheriff Reply:**\n\n${replyContent}`,
 		});
 	}
 }
@@ -478,5 +515,157 @@ export async function postInlineReviewComments(
 		event: "COMMENT",
 		comments,
 	});
+}
+
+/**
+ * Creates a check run on GitHub for a PR commit.
+ */
+export async function createPRCheckRun(
+	token: string,
+	owner: string,
+	repo: string,
+	sha: string
+) {
+	try {
+		const octokit = new Octokit({ auth: token });
+		const response = await octokit.rest.checks.create({
+			owner,
+			repo,
+			name: "CodeSheriff Review",
+			head_sha: sha,
+			status: "in_progress",
+			started_at: new Date().toISOString(),
+		});
+		return response.data.id;
+	} catch (error: any) {
+		if (error && error.status === 403) {
+			console.error(
+				"Failed to create GitHub check run: 403 Forbidden. " +
+				"This usually indicates insufficient permissions (e.g., using an OAuth user token instead of a GitHub App installation token). " +
+				"The Checks API write endpoints require GitHub App permissions.",
+				error
+			);
+		} else {
+			console.error("Failed to create GitHub check run:", error);
+		}
+		return null;
+	}
+}
+
+/**
+ * Updates a check run on GitHub with completion status and annotations.
+ */
+export async function updatePRCheckRun(
+	token: string,
+	owner: string,
+	repo: string,
+	checkRunId: number,
+	status: "completed",
+	conclusion: "success" | "failure" | "cancelled" | "timed_out",
+	summary: string,
+	annotations?: {
+		path: string;
+		start_line: number;
+		end_line: number;
+		annotation_level: "notice" | "warning" | "failure";
+		message: string;
+		title?: string;
+	}[]
+) {
+	try {
+		const octokit = new Octokit({ auth: token });
+		
+		// GitHub limits annotations to 50 per request
+		const chunkedAnnotations = annotations ? annotations.slice(0, 50) : undefined;
+
+		await octokit.rest.checks.update({
+			owner,
+			repo,
+			check_run_id: checkRunId,
+			status,
+			conclusion,
+			completed_at: new Date().toISOString(),
+			output: {
+				title: "CodeSheriff Code Review",
+				summary,
+				annotations: chunkedAnnotations,
+			},
+		});
+	} catch (error) {
+		console.error("Failed to update GitHub check run:", error);
+	}
+}
+
+/**
+ * Fetches previous comments in a review comment thread
+ */
+export async function getReviewCommentThread(
+	token: string,
+	owner: string,
+	repo: string,
+	prNumber: number,
+	commentId: number
+) {
+	try {
+		const octokit = new Octokit({ auth: token });
+		
+		// Get the comment details to find the thread (in_reply_to_id)
+		const { data: targetComment } = await octokit.rest.pulls.getReviewComment({
+			owner,
+			repo,
+			comment_id: commentId,
+		});
+
+		// Fetch all review comments for this PR
+		const { data: allComments } = await octokit.rest.pulls.listReviewComments({
+			owner,
+			repo,
+			pull_number: prNumber,
+		});
+
+		// Find the root comment ID
+		const rootId = targetComment.in_reply_to_id || targetComment.id;
+
+		// Filter comments belonging to the same thread (root comment or replies to it)
+		const threadComments = allComments
+			.filter((c) => c.id === rootId || c.in_reply_to_id === rootId)
+			.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+		return threadComments.map((c) => ({
+			author: c.user?.login || "unknown",
+			body: c.body,
+			createdAt: c.created_at,
+		}));
+	} catch (error) {
+		console.error("Failed to fetch review comment thread:", error);
+		return [];
+	}
+}
+
+/**
+ * Fetches PR issue comments to get thread history
+ */
+export async function getIssueCommentThread(
+	token: string,
+	owner: string,
+	repo: string,
+	prNumber: number
+) {
+	try {
+		const octokit = new Octokit({ auth: token });
+		const { data: comments } = await octokit.rest.issues.listComments({
+			owner,
+			repo,
+			issue_number: prNumber,
+		});
+		return comments.map((c) => ({
+			author: c.user?.login || "unknown",
+			body: c.body || "",
+			createdAt: c.created_at,
+		}));
+	} catch (error) {
+		console.error("Failed to fetch issue comments:", error);
+		return [];
+	}
 }
 

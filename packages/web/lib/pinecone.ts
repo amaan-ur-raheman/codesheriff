@@ -17,5 +17,5 @@ export const pinecone = new Pinecone({
 	apiKey,
 });
 
-// The specific index used for Code Horse embeddings
-export const pineconeIndex = pinecone.Index("codehorse-vector-embedding-v3");
+// The specific index used for Code Sheriff embeddings
+export const pineconeIndex = pinecone.Index("codesheriff-vector-embedding-v3");

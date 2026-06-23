@@ -94,7 +94,7 @@ export class GitLabProvider implements VCSProvider {
     await this.request(`/projects/${projectId}/merge_requests/${prNumber}/notes`, {
       method: "POST",
       body: JSON.stringify({
-        body: `## 🤖 AI Code Review\n\n${comment}\n\n---\n*Powered By CodeHorse*`,
+        body: `## 🤖 AI Code Review\n\n${comment}\n\n---\n*Powered By CodeSheriff*`,
       }),
     });
   }

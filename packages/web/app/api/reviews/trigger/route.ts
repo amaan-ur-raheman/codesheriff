@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 			}
 		}
 
-		const isGlobalAuth = apiKey && apiKey === process.env.CODEHORSE_API_KEY;
+		const isGlobalAuth = apiKey && apiKey === process.env.CODESHERIFF_API_KEY;
 
 		if (!isGlobalAuth && !authenticatedUserId) {
 			return NextResponse.json(

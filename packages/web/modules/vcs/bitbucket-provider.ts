@@ -100,7 +100,7 @@ export class BitbucketProvider implements VCSProvider {
         method: "POST",
         body: JSON.stringify({
           content: {
-            raw: `## 🤖 AI Code Review\n\n${comment}\n\n---\n*Powered By CodeHorse*`,
+            raw: `## 🤖 AI Code Review\n\n${comment}\n\n---\n*Powered By CodeSheriff*`,
           },
         }),
       }
@@ -117,7 +117,7 @@ export class BitbucketProvider implements VCSProvider {
       {
         method: "POST",
         body: JSON.stringify({
-          description: "CodeHorse Webhook",
+          description: "CodeSheriff Webhook",
           url: callbackUrl,
           events: ["pullrequest:created", "pullrequest:updated"],
         }),

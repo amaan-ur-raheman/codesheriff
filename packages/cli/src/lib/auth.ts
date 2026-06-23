@@ -7,13 +7,13 @@ import { setToken, setUser, clearToken, clearUser } from "./config.js";
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function login(): Promise<void> {
-	const spinner = ora("Connecting to Code Horse...").start();
+	const spinner = ora("Connecting to Code Sheriff...").start();
 
 	try {
 		const deviceFlow = await fetchInitiateDeviceFlow();
 		spinner.stop();
 
-		console.log(chalk.bold("\n🐎 Code Horse Authorization"));
+		console.log(chalk.bold("\n🤠 Code Sheriff Authorization"));
 		console.log("-----------------------------------------");
 		console.log(`1. Visit the following URL in your browser:\n   ${chalk.cyan.underline(deviceFlow.verification_uri)}`);
 		console.log(`2. Enter the verification code:\n   ${chalk.green.bold(deviceFlow.user_code)}`);
@@ -60,5 +60,5 @@ export async function login(): Promise<void> {
 export function logout(): void {
 	clearToken();
 	clearUser();
-	console.log(chalk.green("👋 Successfully logged out of Code Horse CLI."));
+	console.log(chalk.green("👋 Successfully logged out of Code Sheriff CLI."));
 }

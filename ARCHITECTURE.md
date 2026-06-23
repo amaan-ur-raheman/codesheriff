@@ -1,6 +1,6 @@
 # Architecture Overview
 
-This document provides a high-level overview of the Code Horse architecture. Code Horse is a Next.js application designed to automate code reviews using AI.
+This document provides a high-level overview of the Code Sheriff architecture. Code Sheriff is a Next.js application designed to automate code reviews using AI.
 
 ## Directory Structure
 
@@ -30,7 +30,7 @@ The project follows a modular structure to separate concerns and improve maintai
 
 ### 1. Code Review Generation
 
-The core feature of Code Horse is the automated code review. This process is event-driven:
+The core feature of Code Sheriff is the automated code review. This process is event-driven:
 
 1.  **Webhook Trigger**: GitHub sends a `pull_request` webhook to `/api/webhooks/github`.
 2.  **Event Ingestion**: Inngest captures this event.

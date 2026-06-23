@@ -1,5 +1,5 @@
 /**
- * Inngest background job functions for Code Horse
+ * Inngest background job functions for Code Sheriff
  * 
  * This module contains serverless functions that handle:
  * - AI code review generation
@@ -18,6 +18,11 @@ import {
 	postCommentReply,
 	getCompareDiff,
 	postInlineReviewComments,
+	updatePRCommitStatus,
+	createPRCheckRun,
+	updatePRCheckRun,
+	getReviewCommentThread,
+	getIssueCommentThread,
 } from "@/modules/github/lib/github";
 import { retrieveContext } from "@/modules/ai/lib/rag";
 import { verifySuggestionsInSandbox } from "@/modules/ai/lib/sandbox";
@@ -48,10 +53,11 @@ export const generateReview = inngest.createFunction(
 	{ id: "generate-review", concurrency: 5 },
 	{ event: "pr.review.requested" },
 	async ({ event, step }) => {
-		const { owner, repo, prNumber, userId, before, after } = event.data;
+		const { owner, repo, prNumber, userId, before, after, checkRunId: eventCheckRunId } = event.data;
+		let checkRunId: any = eventCheckRunId || null;
 
 		try {
-			const { diff, title, description, token } = await step.run(
+			const { diff, title, description, token, headSha } = await step.run(
 				"fetch-pr-data",
 				async () => {
 					const account = await prisma.account.findFirst({
@@ -93,9 +99,28 @@ export const generateReview = inngest.createFunction(
 						title: prMetadata.title,
 						description: prMetadata.description,
 						token: account.accessToken,
+						headSha: prMetadata.headSha,
 					};
 				}
 			);
+
+			if (!checkRunId) {
+				await step.run("update-github-status-pending", async () => {
+					await updatePRCommitStatus(
+						token,
+						owner,
+						repo,
+						headSha,
+						"pending",
+						"Review in progress",
+						`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/reviews`
+					);
+				});
+
+				checkRunId = await step.run("create-github-check-run", async () => {
+					return await createPRCheckRun(token, owner, repo, headSha);
+				});
+			}
 
 			const context = await step.run("retrieve-context", async () => {
 				const query = `${title}\n${description}`;
@@ -259,15 +284,17 @@ Format the rest of your response in markdown.`;
 							const description = s.description ? `${s.description}\n\n` : "";
 							
 							let suggestionBlock = "";
-							if (s.suggestedCode !== undefined) {
-								suggestionBlock = `#### 💡 Suggested Fix\n\`\`\`suggestion\n${s.suggestedCode}\n\`\`\``;
+							if (s.suggestedCode !== undefined && s.suggestedCode !== null) {
+								suggestionBlock = `<details>\n<summary>Suggested fix</summary>\n\n\`\`\`suggestion\n${s.suggestedCode}\n\`\`\`\n</details>\n\n`;
 							}
+
+							const promptBlock = `<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\nVerify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn \`@${s.filePath}\` at line ${s.startLine}, ${s.title ? `${s.title}: ` : ""}${s.description}\n</details>\n\n`;
 
 							const commentObj: any = {
 								path: s.filePath,
 								line: s.endLine || s.startLine,
 								side: "RIGHT",
-								body: `${title}${description}${suggestionBlock}`,
+								body: `${title}${description}${suggestionBlock}${promptBlock}`,
 							};
 
 							// Support multi-line suggestions
@@ -316,6 +343,64 @@ Format the rest of your response in markdown.`;
 					await sendReviewCompletedNotification(savedReview.id);
 				}
 			});
+
+			await step.run("update-github-status-success", async () => {
+				await updatePRCommitStatus(
+					token,
+					owner,
+					repo,
+					headSha,
+					"success",
+					"Review complete",
+					`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/reviews`
+				);
+			});
+
+			if (checkRunId) {
+				await step.run("update-github-check-run-success", async () => {
+					const validSuggestions = (verifiedSuggestions?.suggestions || []).filter((s: any) => {
+						if (!s) return false;
+						const startLine = Number(s.startLine);
+						if (isNaN(startLine) || startLine <= 0) {
+							return false;
+						}
+						const endLine = s.endLine !== undefined ? Number(s.endLine) : startLine;
+						if (isNaN(endLine) || endLine < startLine || endLine <= 0) {
+							return false;
+						}
+						return true;
+					});
+
+					const annotations = validSuggestions.map((s: any) => {
+						let level: "notice" | "warning" | "failure" = "notice";
+						if (s.severity === "error") level = "failure";
+						else if (s.severity === "warning") level = "warning";
+						
+						const start = Number(s.startLine);
+						const end = s.endLine !== undefined ? Number(s.endLine) : start;
+
+						return {
+							path: s.filePath,
+							start_line: start,
+							end_line: end,
+							annotation_level: level,
+							message: s.description || "Code suggestion",
+							title: s.title || "CodeSheriff Finding",
+						};
+					});
+
+					await updatePRCheckRun(
+						token,
+						owner,
+						repo,
+						checkRunId,
+						"completed",
+						"success",
+						`CodeSheriff review completed. Found ${annotations.length} findings.`,
+						annotations
+					);
+				});
+			}
 
 			await step.run("send-webhook-notifications", async () => {
 				const repository = await prisma.repository.findFirst({
@@ -390,6 +475,59 @@ Format the rest of your response in markdown.`;
 			const errorMessage =
 				error instanceof Error ? error.message : "Unknown error";
 
+			// Attempt to update commit status to failure on GitHub
+			try {
+				const account = await prisma.account.findFirst({
+					where: {
+						userId: userId,
+						providerId: "github",
+					},
+				});
+				if (account?.accessToken) {
+					let sha = after;
+					if (!sha || sha === "0000000000000000000000000000000000000000") {
+						try {
+							const prData = await getPullRequestDiff(
+								account.accessToken,
+								owner,
+								repo,
+								prNumber
+							);
+							sha = prData.headSha;
+						} catch (_) {}
+					}
+					if (sha) {
+						await step.run("update-github-status-failed", async () => {
+							await updatePRCommitStatus(
+								account.accessToken as string,
+								owner,
+								repo,
+								sha,
+								"failure",
+								"Review failed: " + errorMessage.slice(0, 50),
+								`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/reviews`
+							);
+						});
+
+						if (checkRunId) {
+							await step.run("update-github-check-run-failed", async () => {
+								await updatePRCheckRun(
+									account.accessToken as string,
+									owner,
+									repo,
+									checkRunId,
+									"completed",
+									"failure",
+									"CodeSheriff review failed: " + errorMessage.slice(0, 100)
+								);
+							});
+						}
+					}
+				}
+			} catch (statusError) {
+				console.error("Failed to post error status to GitHub:", statusError);
+			}
+
 			const failedReview = await step.run("create-failed-review", async () => {
 				const repository = await prisma.repository.findFirst({
 					where: { owner, name: repo },
@@ -421,7 +559,7 @@ Format the rest of your response in markdown.`;
 );
 
 /**
- * Inngest function to handle conversational comment replies when @codehorse is mentioned.
+ * Inngest function to handle conversational comment replies when @codesheriff is mentioned.
  *
  * Triggered by: "pr.comment.replied" event.
  */
@@ -460,10 +598,22 @@ export const handleCommentReply = inngest.createFunction(
 				}
 			);
 
-			const replyContent = await step.run("generate-comment-reply", async () => {
-				const prompt = `You are Code Horse 🐴, an expert AI code reviewer. A developer has asked you a question regarding their Pull Request or a specific line of code.
+			const threadHistory = await step.run("fetch-thread-history", async () => {
+				if (isReviewComment && commentId) {
+					return await getReviewCommentThread(token, owner, repo, prNumber, commentId);
+				} else {
+					return await getIssueCommentThread(token, owner, repo, prNumber);
+				}
+			});
 
-PR Title: ${title}
+			const replyContent = await step.run("generate-comment-reply", async () => {
+				const threadPrompt = threadHistory && threadHistory.length > 0
+					? `Conversation History:\n${threadHistory.map((c: any) => `${c.author}: ${c.body}`).join("\n\n")}\n\n`
+					: "";
+
+				const prompt = `You are Code Sheriff 🤠, an expert AI code reviewer. A developer has asked you a question regarding their Pull Request or a specific line of code.
+
+${threadPrompt}PR Title: ${title}
 PR Description: ${description || "No description provided"}
 
 Code Changes:
@@ -474,7 +624,7 @@ ${diff}
 User's Question:
 "${commentBody}"
 
-Please provide a helpful, clear, and constructive answer. If they are asking you to suggest code improvements or fixes, specify them in inline code blocks with exact changes. Keep your response concise, polite, and technical.`;
+Please provide a helpful, clear, and constructive answer. Respond as a participant in the conversation thread. If they are asking you to suggest code improvements or fixes, specify them in inline code blocks with exact changes. Keep your response concise, polite, and technical.`;
 
 				const { text } = await generateText({
 					model: google("gemini-2.5-flash"),

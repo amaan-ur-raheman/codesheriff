@@ -96,6 +96,7 @@ export const UserScalarFieldEnum = {
   subscriptionStatus: 'subscriptionStatus',
   polarCustomerId: 'polarCustomerId',
   polarSubscriptionId: 'polarSubscriptionId',
+  emailNotifications: 'emailNotifications',
   role: 'role'
 } as const
 

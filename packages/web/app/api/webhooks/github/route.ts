@@ -5,8 +5,8 @@
  * appropriate actions based on the event type:
  * 
  * - pull_request events: Initiates AI code review generation
- * - issue_comment events: Responds when Code Horse is mentioned in PR comments
- * - pull_request_review_comment events: Responds when Code Horse is mentioned in inline review comments
+ * - issue_comment events: Responds when Code Sheriff is mentioned in PR comments
+ * - pull_request_review_comment events: Responds when Code Sheriff is mentioned in inline review comments
  * - ping events: Responds with pong for webhook verification
  * 
  * @route POST /api/webhooks/github
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 
 			const [owner, repoName] = repo.split("/");
 
-			if (action === "created" && isPR && commentBody.toLowerCase().includes("@codehorse")) {
+			if (action === "created" && isPR && commentBody.toLowerCase().includes("@codesheriff")) {
 				await replyToPullRequestComment(owner, repoName, prNumber, commentBody, commentId, false)
 					.then(() =>
 						console.log(
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
 
 			const [owner, repoName] = repo.split("/");
 
-			if (action === "created" && commentBody.toLowerCase().includes("@codehorse")) {
+			if (action === "created" && commentBody.toLowerCase().includes("@codesheriff")) {
 				await replyToPullRequestComment(owner, repoName, prNumber, commentBody, commentId, true)
 					.then(() =>
 						console.log(

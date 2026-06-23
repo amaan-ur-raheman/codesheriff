@@ -236,7 +236,7 @@ export async function getContributionStats() {
 }
 
 /**
- * Connects a GitHub repository to Code Horse for automated reviews
+ * Connects a GitHub repository to Code Sheriff for automated reviews
  * @param owner - Repository owner username
  * @param repo - Repository name
  * @param githubId - GitHub repository ID

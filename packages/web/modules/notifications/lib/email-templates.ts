@@ -50,14 +50,14 @@ function wrap(title: string, body: string) {
 <head><meta charset="utf-8"></head>
 <body style="${baseStyles}">
   <div style="${headerStyles}">
-    <h1 style="color: #ffffff; margin: 0; font-size: 24px;">🐴 Code Horse</h1>
+    <h1 style="color: #ffffff; margin: 0; font-size: 24px;">🤠 Code Sheriff</h1>
   </div>
   <div style="${bodyStyles}">
     <h2 style="margin: 0 0 20px; font-size: 20px;">${title}</h2>
     ${body}
     <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 24px 0;">
     <p style="color: #888; font-size: 12px; margin: 0;">
-      Code Horse — AI-powered code reviews. <a href="https://codehorse.app/dashboard/settings" style="color: #888;">Manage email preferences</a>
+      Code Sheriff — AI-powered code reviews. <a href="https://codesheriff.app/dashboard/settings" style="color: #888;">Manage email preferences</a>
     </p>
   </div>
 </body>
@@ -128,7 +128,7 @@ export function usageLimitWarningEmail(
           : "Consider upgrading to Pro for unlimited reviews."}
       </p>
     </div>
-    <a href="https://codehorse.app/dashboard/subscriptions" style="${buttonStyles}">Upgrade to Pro</a>
+    <a href="https://codesheriff.app/dashboard/subscriptions" style="${buttonStyles}">Upgrade to Pro</a>
     `
   );
 }
@@ -160,7 +160,7 @@ export function subscriptionChangedEmail(newTier: string, status: string) {
       : status === "CANCELLED"
         ? "<p>Your subscription has been cancelled. You'll retain Pro access until the end of your billing period.</p>"
         : "<p>Your plan has been updated.</p>"}
-    <a href="https://codehorse.app/dashboard/subscriptions" style="${buttonStyles}">Manage Subscription</a>
+    <a href="https://codesheriff.app/dashboard/subscriptions" style="${buttonStyles}">Manage Subscription</a>
     `
   );
 }
@@ -173,9 +173,9 @@ export function commentReplyEmail(
   prUrl: string
 ) {
   return wrap(
-    "Code Horse Replied",
+    "Code Sheriff Replied",
     `
-    <p>Code Horse replied to a comment on your pull request.</p>
+    <p>Code Sheriff replied to a comment on your pull request.</p>
     <div style="background: #f9f9f9; padding: 16px; border-radius: 8px; margin: 16px 0;">
       <p style="margin: 0; font-size: 12px; color: #888; text-transform: uppercase; font-weight: 600;">Pull Request</p>
       <p style="margin: 4px 0 0; font-weight: 600;">#${prNumber} ${prTitle}</p>

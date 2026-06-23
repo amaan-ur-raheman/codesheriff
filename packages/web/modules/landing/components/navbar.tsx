@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 
@@ -14,8 +14,6 @@ const navLinks = [
 export function Navbar() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [isScrolled, setIsScrolled] = useState(false);
-	const { scrollY } = useScroll();
-	const bgOpacity = useTransform(scrollY, [0, 80], [0, 0.95]);
 
 	useEffect(() => {
 		const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -25,19 +23,19 @@ export function Navbar() {
 
 	return (
 		<motion.nav
-			style={{ backgroundColor: `rgba(17,17,17,${bgOpacity.get()})` }}
-			className="fixed top-0 left-0 right-0 z-50 border-b border-white/5"
+			style={{
+				backgroundColor: isScrolled
+					? "color-mix(in srgb, var(--background) 95%, transparent)"
+					: "transparent",
+			}}
+			className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 backdrop-blur-xl transition-colors duration-300"
 		>
-			<motion.div
-				style={{ opacity: bgOpacity }}
-				className="absolute inset-0 backdrop-blur-xl bg-background/80"
-			/>
-			<div className="relative max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+			<div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 				<a href="/" className="flex items-center gap-2.5 font-bold text-lg text-foreground">
-					<div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-						<span className="text-xs font-black text-primary-foreground">CH</span>
+					<div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+						<span className="text-xs font-black text-primary-foreground">CS</span>
 					</div>
-					CodeHorse
+					CodeSheriff
 				</a>
 
 				<div className="hidden md:flex items-center gap-8">
@@ -45,7 +43,7 @@ export function Navbar() {
 						<a
 							key={link.href}
 							href={link.href}
-							className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+							className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
 						>
 							{link.label}
 						</a>
@@ -56,7 +54,7 @@ export function Navbar() {
 					<Button variant="ghost" size="sm" asChild>
 						<a href="/login">Log in</a>
 					</Button>
-					<Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" asChild>
+					<Button size="sm" asChild>
 						<a href="/login">Get Started</a>
 					</Button>
 				</div>
@@ -74,7 +72,7 @@ export function Navbar() {
 					initial={{ opacity: 0, height: 0 }}
 					animate={{ opacity: 1, height: "auto" }}
 					exit={{ opacity: 0, height: 0 }}
-					className="md:hidden border-t border-white/5 bg-background/95 backdrop-blur-xl"
+					className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl"
 				>
 					<div className="px-6 py-4 space-y-3">
 						{navLinks.map((link) => (
@@ -87,11 +85,11 @@ export function Navbar() {
 								{link.label}
 							</a>
 						))}
-						<div className="pt-3 border-t border-white/5 flex flex-col gap-2">
+						<div className="pt-3 border-t border-border flex flex-col gap-2">
 							<Button variant="ghost" size="sm" asChild>
 								<a href="/login">Log in</a>
 							</Button>
-							<Button size="sm" className="bg-primary text-primary-foreground" asChild>
+							<Button size="sm" asChild>
 								<a href="/login">Get Started</a>
 							</Button>
 						</div>

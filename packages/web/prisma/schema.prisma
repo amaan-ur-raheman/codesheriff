@@ -28,6 +28,7 @@ model User {
 	notifications       Notification[]
 	apiKeys             ApiKey[]
 	organizationMemberships OrganizationMember[]
+	emailNotifications Boolean   @default(true)
 	role                String    @default("user")
 
 	@@unique([email])

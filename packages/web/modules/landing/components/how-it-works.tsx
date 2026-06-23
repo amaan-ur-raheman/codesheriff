@@ -41,8 +41,8 @@ export function HowItWorks() {
 	return (
 		<section id="how-it-works" className="relative py-32">
 			<div className="absolute inset-0">
-				<div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-				<div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+				<div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+				<div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 			</div>
 
 			<div className="max-w-7xl mx-auto px-6">
@@ -72,14 +72,14 @@ export function HowItWorks() {
 				>
 					<div className="hidden md:block absolute top-12 left-[20%] right-[20%] h-px bg-gradient-to-r from-primary/30 via-primary/10 to-primary/30" />
 
-					{steps.map((step, i) => (
+					{steps.map((step) => (
 						<motion.div
 							key={step.number}
 							variants={item}
 							className="relative text-center"
 						>
 							<div className="relative mx-auto mb-8">
-								<div className="w-24 h-24 rounded-2xl border border-white/10 bg-card/50 backdrop-blur-sm flex items-center justify-center mx-auto relative z-10">
+								<div className="w-24 h-24 rounded-2xl border border-border bg-card flex items-center justify-center mx-auto relative z-10">
 									<step.icon className="w-10 h-10 text-primary" />
 								</div>
 								<div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center z-20">

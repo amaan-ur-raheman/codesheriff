@@ -27,7 +27,7 @@ export async function verifySuggestionsInSandbox(
 ): Promise<VerificationResult[]> {
 	if (suggestions.length === 0) return [];
 
-	const tempDir = path.join("/tmp", `codehorse-sandbox-${Date.now()}`);
+	const tempDir = path.join("/tmp", `codesheriff-sandbox-${Date.now()}`);
 	const octokit = new Octokit({ auth: token });
 
 	try {

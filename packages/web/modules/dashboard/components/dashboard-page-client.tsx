@@ -200,19 +200,19 @@ const DashboardPageClient = () => {
 										<Bar
 											dataKey="commits"
 											name="Commits"
-											fill="#3b82f6"
+											fill="var(--primary)"
 											radius={[4, 4, 0, 0]}
 										/>
 										<Bar
 											dataKey="prs"
 											name="Pull Requests"
-											fill="#8b5cf6"
+											fill="var(--chart-2)"
 											radius={[4, 4, 0, 0]}
 										/>
 										<Bar
 											dataKey="reviews"
 											name="AI Reviews"
-											fill="#10b981"
+											fill="var(--chart-4)"
 											radius={[4, 4, 0, 0]}
 										/>
 									</BarChart>
