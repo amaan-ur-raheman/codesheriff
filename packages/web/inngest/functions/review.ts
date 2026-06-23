@@ -35,6 +35,9 @@ import {
 import { sendSlackWebhook, sendDiscordWebhook } from "@/lib/webhooks";
 
 import { generateText } from "ai";
+
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/dashboard\/?$/, "");
+const dashboardReviewsUrl = `${appUrl}/dashboard/reviews`;
 import { google } from "@ai-sdk/google";
 
 /**
@@ -113,7 +116,7 @@ export const generateReview = inngest.createFunction(
 						headSha,
 						"pending",
 						"Review in progress",
-						`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/reviews`
+						dashboardReviewsUrl
 					);
 				});
 
@@ -352,7 +355,7 @@ Format the rest of your response in markdown.`;
 					headSha,
 					"success",
 					"Review complete",
-					`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/reviews`
+					dashboardReviewsUrl
 				);
 			});
 
@@ -505,7 +508,7 @@ Format the rest of your response in markdown.`;
 								sha,
 								"failure",
 								"Review failed: " + errorMessage.slice(0, 50),
-								`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/reviews`
+								dashboardReviewsUrl
 							);
 						});
 

@@ -9,6 +9,9 @@ import {
 import { Octokit } from "octokit";
 import { updatePRCommitStatus, createPRCheckRun } from "@/modules/github/lib/github";
 
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/dashboard\/?$/, "");
+const dashboardReviewsUrl = `${appUrl}/dashboard/reviews`;
+
 /**
  * Initiates an AI-powered code review for a pull request
  * @param owner - Repository owner username
@@ -95,7 +98,7 @@ export async function reviewPullRequest(
 				headSha,
 				"pending",
 				"Review in progress",
-				`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard/reviews`
+				dashboardReviewsUrl
 			);
 
 			// Instantly create Check Run in_progress (animating loading spinner)
