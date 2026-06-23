@@ -52,10 +52,10 @@ const LoginUI = () => {
 						className="text-center mb-10"
 					>
 						<a href="/" className="inline-flex items-center gap-2.5 font-bold text-xl text-foreground mb-6">
-							<div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-							<span className="text-sm font-black text-primary-foreground">CS</span>
-						</div>
-						CodeSheriff
+							<div className="relative w-9 h-9 flex items-center justify-center shrink-0">
+								<img src="/logo-64.png" alt="Code Sheriff Logo" className="object-contain w-full h-full" />
+							</div>
+							CodeSheriff
 						</a>
 						<h1 className="text-2xl font-bold tracking-tight mb-2">
 							Welcome back

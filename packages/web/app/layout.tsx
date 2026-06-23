@@ -29,6 +29,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+	metadataBase: new URL(
+		process.env.NEXT_PUBLIC_APP_URL ||
+		process.env.NEXT_PUBLIC_APP_BASE_URL ||
+		"http://localhost:3000"
+	),
 	title: {
 		default: "Code Sheriff - AI-Powered Code Review Platform",
 		template: "%s | Code Sheriff",
@@ -43,11 +48,20 @@ export const metadata: Metadata = {
 		title: "Code Sheriff - AI-Powered Code Review Platform",
 		description: "Automate your code reviews with AI. Connect your GitHub repositories and get instant, intelligent code review feedback on every pull request.",
 		siteName: "Code Sheriff",
+		images: [
+			{
+				url: "/codesheriff-poster.png",
+				width: 1200,
+				height: 630,
+				alt: "Code Sheriff - Automated AI Code Reviews",
+			},
+		],
 	},
 	twitter: {
 		card: "summary_large_image",
 		title: "Code Sheriff - AI-Powered Code Review Platform",
 		description: "Automate your code reviews with AI. Connect your GitHub repositories and get instant, intelligent code review feedback on every pull request.",
+		images: ["/codesheriff-poster.png"],
 	},
 };
 

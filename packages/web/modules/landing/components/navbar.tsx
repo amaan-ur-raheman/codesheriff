@@ -32,8 +32,8 @@ export function Navbar() {
 		>
 			<div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 				<a href="/" className="flex items-center gap-2.5 font-bold text-lg text-foreground">
-					<div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-						<span className="text-xs font-black text-primary-foreground">CS</span>
+					<div className="relative w-7 h-7 flex items-center justify-center shrink-0">
+						<img src="/logo-32.png" alt="Code Sheriff Logo" className="object-contain w-full h-full" />
 					</div>
 					CodeSheriff
 				</a>

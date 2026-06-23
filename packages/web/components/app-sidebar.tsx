@@ -129,6 +129,12 @@ export const AppSidebar = () => {
 		<Sidebar>
 			<SidebarHeader className="border-b border-border">
 				<div className="flex flex-col gap-4 px-2 py-6">
+					<div className="flex items-center gap-2.5 px-3 font-bold text-lg text-foreground">
+						<div className="relative w-7 h-7 flex items-center justify-center shrink-0">
+							<img src="/logo-32.png" alt="Code Sheriff Logo" className="object-contain w-full h-full" />
+						</div>
+						<span>CodeSheriff</span>
+					</div>
 					<div className="flex items-center gap-4 px-3 py-4 rounded-lg bg-sidebar-accent/50 hover:bg-sidebar-accent/70 transition-colors">
 						<div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary text-primary-foreground shrink-0">
 							<Github className="w-6 h-6" />
