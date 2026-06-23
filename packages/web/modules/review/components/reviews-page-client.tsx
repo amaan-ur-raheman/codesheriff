@@ -45,9 +45,13 @@ import InlineSuggestions from "@/modules/review/components/inline-suggestions";
 import ReviewFeedback from "@/modules/review/components/review-feedback";
 import ReviewFlowCanvas from "@/modules/review/components/review-flow-canvas";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MessageResponse } from "@/components/ai-elements/message";
+import { useTheme } from "next-themes";
 
 function ReviewCard({ review }: { review: any }) {
+	const { resolvedTheme } = useTheme();
 	const [showSuggestions, setShowSuggestions] = useState(false);
+	const [showFullReview, setShowFullReview] = useState(false);
 
 	return (
 		<Card className="hover:shadow-md transition-shadow">
@@ -100,12 +104,30 @@ function ReviewCard({ review }: { review: any }) {
 							addSuffix: true,
 						})}
 					</div>
-				<div className="prose prose-sm dark:prose-invert max-w-none">
-					<div className="bg-muted p-4 rounded-lg">
-						<pre className="whitespace-pre-wrap text-xs">
-							{review.review?.substring(0, 300) ?? "No review content"}....
-						</pre>
+				<div className="bg-muted p-6 rounded-lg">
+					<div className="prose prose-sm dark:prose-invert max-w-none">
+						<MessageResponse
+							key={showFullReview ? "full" : "short"}
+							mode="static"
+							mermaid={{
+								config: {
+									theme: resolvedTheme === "dark" ? "dark" : "default",
+								},
+							}}
+						>
+							{showFullReview
+								? (review.review ?? "")
+								: (review.review?.substring(0, 300) ?? "No review content") + (review.review && review.review.length > 300 ? "..." : "")}
+						</MessageResponse>
 					</div>
+					{review.review && review.review.length > 300 && (
+						<button
+							onClick={() => setShowFullReview(!showFullReview)}
+							className="mt-4 text-xs text-primary hover:underline block"
+						>
+							{showFullReview ? "Show less" : "Show full review"}
+						</button>
+					)}
 				</div>
 
 					{review.status === "completed" && (
@@ -132,7 +154,7 @@ function ReviewCard({ review }: { review: any }) {
 											<TabsTrigger value="visual">Visual Graph View</TabsTrigger>
 										</TabsList>
 										<TabsContent value="list" className="space-y-4">
-											<InlineSuggestions reviewText={review.review ?? ""} />
+											<InlineSuggestions review={review} />
 										</TabsContent>
 										<TabsContent value="visual" className="space-y-4">
 											<ReviewFlowCanvas review={review} />
