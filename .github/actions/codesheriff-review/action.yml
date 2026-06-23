@@ -4,6 +4,10 @@ inputs:
   api-key:
     description: 'Code Sheriff API key'
     required: true
+  api-url:
+    description: 'Code Sheriff API URL'
+    required: false
+    default: 'https://codehorse.vercel.app'
   pr-number:
     description: 'Pull request number (auto-detected if not provided)'
     required: false
@@ -22,7 +26,7 @@ runs:
         OWNER: ${{ github.repository_owner }}
         REPO: ${{ github.event.repository.name }}
         GITHUB_TOKEN: ${{ inputs.github-token }}
-        API_URL: ${{ vars.CODESHERIFF_API_URL || 'https://codesheriff.vercel.app' }}
+        API_URL: ${{ inputs.api-url }}
       run: |
         echo "Triggering Code Sheriff review for PR #${PR_NUMBER}..."
         RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
