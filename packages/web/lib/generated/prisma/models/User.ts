@@ -36,6 +36,7 @@ export type UserMinAggregateOutputType = {
   subscriptionStatus: string | null
   polarCustomerId: string | null
   polarSubscriptionId: string | null
+  emailNotifications: boolean | null
   role: string | null
 }
 
@@ -51,6 +52,7 @@ export type UserMaxAggregateOutputType = {
   subscriptionStatus: string | null
   polarCustomerId: string | null
   polarSubscriptionId: string | null
+  emailNotifications: boolean | null
   role: string | null
 }
 
@@ -66,6 +68,7 @@ export type UserCountAggregateOutputType = {
   subscriptionStatus: number
   polarCustomerId: number
   polarSubscriptionId: number
+  emailNotifications: number
   role: number
   _all: number
 }
@@ -83,6 +86,7 @@ export type UserMinAggregateInputType = {
   subscriptionStatus?: true
   polarCustomerId?: true
   polarSubscriptionId?: true
+  emailNotifications?: true
   role?: true
 }
 
@@ -98,6 +102,7 @@ export type UserMaxAggregateInputType = {
   subscriptionStatus?: true
   polarCustomerId?: true
   polarSubscriptionId?: true
+  emailNotifications?: true
   role?: true
 }
 
@@ -113,6 +118,7 @@ export type UserCountAggregateInputType = {
   subscriptionStatus?: true
   polarCustomerId?: true
   polarSubscriptionId?: true
+  emailNotifications?: true
   role?: true
   _all?: true
 }
@@ -201,6 +207,7 @@ export type UserGroupByOutputType = {
   subscriptionStatus: string | null
   polarCustomerId: string | null
   polarSubscriptionId: string | null
+  emailNotifications: boolean
   role: string
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
@@ -237,6 +244,7 @@ export type UserWhereInput = {
   subscriptionStatus?: Prisma.StringNullableFilter<"User"> | string | null
   polarCustomerId?: Prisma.StringNullableFilter<"User"> | string | null
   polarSubscriptionId?: Prisma.StringNullableFilter<"User"> | string | null
+  emailNotifications?: Prisma.BoolFilter<"User"> | boolean
   role?: Prisma.StringFilter<"User"> | string
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
@@ -260,6 +268,7 @@ export type UserOrderByWithRelationInput = {
   subscriptionStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   polarCustomerId?: Prisma.SortOrderInput | Prisma.SortOrder
   polarSubscriptionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailNotifications?: Prisma.SortOrder
   role?: Prisma.SortOrder
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   accounts?: Prisma.AccountOrderByRelationAggregateInput
@@ -286,6 +295,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   subscriptionTier?: Prisma.StringFilter<"User"> | string
   subscriptionStatus?: Prisma.StringNullableFilter<"User"> | string | null
+  emailNotifications?: Prisma.BoolFilter<"User"> | boolean
   role?: Prisma.StringFilter<"User"> | string
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
@@ -309,6 +319,7 @@ export type UserOrderByWithAggregationInput = {
   subscriptionStatus?: Prisma.SortOrderInput | Prisma.SortOrder
   polarCustomerId?: Prisma.SortOrderInput | Prisma.SortOrder
   polarSubscriptionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  emailNotifications?: Prisma.SortOrder
   role?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -330,6 +341,7 @@ export type UserScalarWhereWithAggregatesInput = {
   subscriptionStatus?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   polarCustomerId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   polarSubscriptionId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  emailNotifications?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   role?: Prisma.StringWithAggregatesFilter<"User"> | string
 }
 
@@ -345,6 +357,7 @@ export type UserCreateInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
@@ -368,6 +381,7 @@ export type UserUncheckedCreateInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
@@ -391,6 +405,7 @@ export type UserUpdateInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
@@ -414,6 +429,7 @@ export type UserUncheckedUpdateInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -437,6 +453,7 @@ export type UserCreateManyInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
 }
 
@@ -452,6 +469,7 @@ export type UserUpdateManyMutationInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -467,6 +485,7 @@ export type UserUncheckedUpdateManyInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -482,6 +501,7 @@ export type UserCountOrderByAggregateInput = {
   subscriptionStatus?: Prisma.SortOrder
   polarCustomerId?: Prisma.SortOrder
   polarSubscriptionId?: Prisma.SortOrder
+  emailNotifications?: Prisma.SortOrder
   role?: Prisma.SortOrder
 }
 
@@ -497,6 +517,7 @@ export type UserMaxOrderByAggregateInput = {
   subscriptionStatus?: Prisma.SortOrder
   polarCustomerId?: Prisma.SortOrder
   polarSubscriptionId?: Prisma.SortOrder
+  emailNotifications?: Prisma.SortOrder
   role?: Prisma.SortOrder
 }
 
@@ -512,6 +533,7 @@ export type UserMinOrderByAggregateInput = {
   subscriptionStatus?: Prisma.SortOrder
   polarCustomerId?: Prisma.SortOrder
   polarSubscriptionId?: Prisma.SortOrder
+  emailNotifications?: Prisma.SortOrder
   role?: Prisma.SortOrder
 }
 
@@ -660,6 +682,7 @@ export type UserCreateWithoutRepositoriesInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
@@ -682,6 +705,7 @@ export type UserUncheckedCreateWithoutRepositoriesInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
@@ -720,6 +744,7 @@ export type UserUpdateWithoutRepositoriesInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
@@ -742,6 +767,7 @@ export type UserUncheckedUpdateWithoutRepositoriesInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -764,6 +790,7 @@ export type UserCreateWithoutReviewFeedbacksInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
@@ -786,6 +813,7 @@ export type UserUncheckedCreateWithoutReviewFeedbacksInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
@@ -824,6 +852,7 @@ export type UserUpdateWithoutReviewFeedbacksInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
@@ -846,6 +875,7 @@ export type UserUncheckedUpdateWithoutReviewFeedbacksInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -868,6 +898,7 @@ export type UserCreateWithoutUsageInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
@@ -890,6 +921,7 @@ export type UserUncheckedCreateWithoutUsageInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
@@ -928,6 +960,7 @@ export type UserUpdateWithoutUsageInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
@@ -950,6 +983,7 @@ export type UserUncheckedUpdateWithoutUsageInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -972,6 +1006,7 @@ export type UserCreateWithoutSessionsInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   repositories?: Prisma.RepositoryCreateNestedManyWithoutUserInput
@@ -994,6 +1029,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   repositories?: Prisma.RepositoryUncheckedCreateNestedManyWithoutUserInput
@@ -1032,6 +1068,7 @@ export type UserUpdateWithoutSessionsInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   repositories?: Prisma.RepositoryUpdateManyWithoutUserNestedInput
@@ -1054,6 +1091,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   repositories?: Prisma.RepositoryUncheckedUpdateManyWithoutUserNestedInput
@@ -1076,6 +1114,7 @@ export type UserCreateWithoutAccountsInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   repositories?: Prisma.RepositoryCreateNestedManyWithoutUserInput
@@ -1098,6 +1137,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   repositories?: Prisma.RepositoryUncheckedCreateNestedManyWithoutUserInput
@@ -1136,6 +1176,7 @@ export type UserUpdateWithoutAccountsInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   repositories?: Prisma.RepositoryUpdateManyWithoutUserNestedInput
@@ -1158,6 +1199,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   repositories?: Prisma.RepositoryUncheckedUpdateManyWithoutUserNestedInput
@@ -1180,6 +1222,7 @@ export type UserCreateWithoutOrganizationMembershipsInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
@@ -1202,6 +1245,7 @@ export type UserUncheckedCreateWithoutOrganizationMembershipsInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
@@ -1240,6 +1284,7 @@ export type UserUpdateWithoutOrganizationMembershipsInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
@@ -1262,6 +1307,7 @@ export type UserUncheckedUpdateWithoutOrganizationMembershipsInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -1284,6 +1330,7 @@ export type UserCreateWithoutNotificationsInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
@@ -1306,6 +1353,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
@@ -1344,6 +1392,7 @@ export type UserUpdateWithoutNotificationsInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
@@ -1366,6 +1415,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -1388,6 +1438,7 @@ export type UserCreateWithoutApiKeysInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
@@ -1410,6 +1461,7 @@ export type UserUncheckedCreateWithoutApiKeysInput = {
   subscriptionStatus?: string | null
   polarCustomerId?: string | null
   polarSubscriptionId?: string | null
+  emailNotifications?: boolean
   role?: string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
@@ -1448,6 +1500,7 @@ export type UserUpdateWithoutApiKeysInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
@@ -1470,6 +1523,7 @@ export type UserUncheckedUpdateWithoutApiKeysInput = {
   subscriptionStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   polarSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailNotifications?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.StringFieldUpdateOperationsInput | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
@@ -1577,6 +1631,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   subscriptionStatus?: boolean
   polarCustomerId?: boolean
   polarSubscriptionId?: boolean
+  emailNotifications?: boolean
   role?: boolean
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
@@ -1601,6 +1656,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   subscriptionStatus?: boolean
   polarCustomerId?: boolean
   polarSubscriptionId?: boolean
+  emailNotifications?: boolean
   role?: boolean
 }, ExtArgs["result"]["user"]>
 
@@ -1616,6 +1672,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   subscriptionStatus?: boolean
   polarCustomerId?: boolean
   polarSubscriptionId?: boolean
+  emailNotifications?: boolean
   role?: boolean
 }, ExtArgs["result"]["user"]>
 
@@ -1631,10 +1688,11 @@ export type UserSelectScalar = {
   subscriptionStatus?: boolean
   polarCustomerId?: boolean
   polarSubscriptionId?: boolean
+  emailNotifications?: boolean
   role?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "createdAt" | "updatedAt" | "subscriptionTier" | "subscriptionStatus" | "polarCustomerId" | "polarSubscriptionId" | "role", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "createdAt" | "updatedAt" | "subscriptionTier" | "subscriptionStatus" | "polarCustomerId" | "polarSubscriptionId" | "emailNotifications" | "role", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
@@ -1673,6 +1731,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     subscriptionStatus: string | null
     polarCustomerId: string | null
     polarSubscriptionId: string | null
+    emailNotifications: boolean
     role: string
   }, ExtArgs["result"]["user"]>
   composites: {}
@@ -2116,6 +2175,7 @@ export interface UserFieldRefs {
   readonly subscriptionStatus: Prisma.FieldRef<"User", 'String'>
   readonly polarCustomerId: Prisma.FieldRef<"User", 'String'>
   readonly polarSubscriptionId: Prisma.FieldRef<"User", 'String'>
+  readonly emailNotifications: Prisma.FieldRef<"User", 'Boolean'>
   readonly role: Prisma.FieldRef<"User", 'String'>
 }
     

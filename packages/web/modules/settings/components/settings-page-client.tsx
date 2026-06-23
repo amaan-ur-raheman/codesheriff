@@ -3,6 +3,7 @@
 import { ProfileForm } from "@/modules/settings/components/profile-form";
 import { RepositoryList } from "@/modules/settings/components/repository-list";
 import { ApiKeysManager } from "@/modules/settings/components/api-keys-manager";
+import { EmailNotifications } from "@/modules/settings/components/email-notifications";
 
 const SettingsPageClient = () => {
 	return (
@@ -15,6 +16,8 @@ const SettingsPageClient = () => {
 			</div>
             
             <ProfileForm />
+
+            <EmailNotifications />
             
             <RepositoryList />
 

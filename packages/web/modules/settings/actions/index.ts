@@ -202,3 +202,49 @@ export async function disconnectAllRepositories() {
 		};
 	}
 }
+
+export async function getEmailPreference() {
+	try {
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
+
+		if (!session?.user) {
+			throw new Error("Unauthorized");
+		}
+
+		const user = await prisma.user.findUnique({
+			where: { id: session.user.id },
+			select: { emailNotifications: true },
+		});
+
+		return { emailNotifications: user?.emailNotifications !== false };
+	} catch (error) {
+		console.error("Error fetching email preference:", error);
+		return { emailNotifications: true };
+	}
+}
+
+export async function setEmailPreference(enabled: boolean) {
+	try {
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
+
+		if (!session?.user) {
+			throw new Error("Unauthorized");
+		}
+
+		await prisma.user.update({
+			where: { id: session.user.id },
+			data: { emailNotifications: enabled },
+		});
+
+		revalidatePath("/dashboard/settings", "page");
+
+		return { success: true };
+	} catch (error) {
+		console.error("Error updating email preference:", error);
+		return { success: false, error: "Failed to update preference" };
+	}
+}
