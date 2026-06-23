@@ -1,4 +1,4 @@
-name: Code Horse AI Review
+name: Code Sheriff AI Review
 
 on:
   pull_request:
@@ -15,7 +15,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Code Horse Review
-        uses: ./.github/actions/codehorse-review
+      - name: Run Code Sheriff Review
+        uses: ./.github/actions/codesheriff-review
         with:
-          api-key: ${{ secrets.CODEHORSE_API_KEY }}
+          api-key: ${{ secrets.CODESHERIFF_API_KEY }}

@@ -1,0 +1,9 @@
+procs:
+    web:
+        cmd: ["bun", "run", "web:dev"]
+
+    inngest:
+        cmd: ["bun", "run", "inngest:dev"]
+
+    ngrok:
+        cmd: ["bun", "run", "ngrok:dev"]
