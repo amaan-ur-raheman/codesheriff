@@ -66,11 +66,21 @@ export class GitHubProvider implements VCSProvider {
     prNumber: number,
     comment: string
   ): Promise<void> {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const isProdUrl = appUrl && !appUrl.includes("localhost") && !appUrl.includes("127.0.0.1");
+
+    let footer = "*Powered By CodeSheriff*";
+    if (isProdUrl) {
+      const cleanUrl = appUrl.replace(/\/dashboard\/?$/, "");
+      const logoUrl = `${cleanUrl}/logo.png`;
+      footer = `<img src="${logoUrl}" width="32" height="32" align="left" style="margin-right: 8px;" /> *Powered By [CodeSheriff](${cleanUrl})*`;
+    }
+
     await this.octokit.rest.issues.createComment({
       owner,
       repo,
       issue_number: prNumber,
-      body: `## 🤖 AI Code Review\n\n${comment}\n\n---\n*Powered By CodeSheriff*`,
+      body: `## 🤠 AI Code Review\n\n${comment}\n\n---\n${footer}`,
     });
   }
 
