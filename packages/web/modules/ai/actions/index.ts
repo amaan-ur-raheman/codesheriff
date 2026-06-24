@@ -7,7 +7,7 @@ import {
 	incrementReviewCount,
 } from "@/modules/payment/lib/subscription";
 import { Octokit } from "octokit";
-import { updatePRCommitStatus, createPRCheckRun } from "@/modules/github/lib/github";
+import { updatePRCommitStatus, createPRCheckRun, getOctokit } from "@/modules/github/lib/github";
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/dashboard\/?$/, "");
 const dashboardReviewsUrl = `${appUrl}/dashboard/reviews`;
@@ -76,7 +76,7 @@ export async function reviewPullRequest(
 		let headSha = after;
 		if (!headSha || headSha === "0000000000000000000000000000000000000000") {
 			try {
-				const octokit = new Octokit({ auth: token });
+				const octokit = await getOctokit({ token, owner, repo });
 				const { data: pr } = await octokit.rest.pulls.get({
 					owner,
 					repo,
