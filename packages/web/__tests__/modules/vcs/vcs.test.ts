@@ -126,6 +126,9 @@ describe("VCS Providers", () => {
 
 		describe("postReviewComment", () => {
 			it("creates issue comment on github", async () => {
+				const originalAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+				process.env.NEXT_PUBLIC_APP_URL = "https://codehorse.vercel.app";
+
 				mockOctokit.rest.issues.createComment.mockResolvedValueOnce({});
 
 				await provider.postReviewComment("owner", "repo", 5, "Hello feedback");
@@ -134,8 +137,28 @@ describe("VCS Providers", () => {
 					owner: "owner",
 					repo: "repo",
 					issue_number: 5,
-					body: "## 🤖 AI Code Review\n\nHello feedback\n\n---\n*Powered By CodeSheriff*",
+					body: "## 🤠 AI Code Review\n\nHello feedback\n\n---\n<img src=\"https://codehorse.vercel.app/logo.png\" width=\"32\" height=\"32\" align=\"left\" style=\"margin-right: 8px;\" /> *Powered By [CodeSheriff](https://codehorse.vercel.app)*",
 				});
+
+				process.env.NEXT_PUBLIC_APP_URL = originalAppUrl;
+			});
+
+			it("omits the logo and shows a text-only footer when APP_URL is localhost or unset", async () => {
+				const originalAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+				process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000";
+
+				mockOctokit.rest.issues.createComment.mockResolvedValueOnce({});
+
+				await provider.postReviewComment("owner", "repo", 5, "Hello feedback");
+
+				expect(mockOctokit.rest.issues.createComment).toHaveBeenCalledWith({
+					owner: "owner",
+					repo: "repo",
+					issue_number: 5,
+					body: "## 🤠 AI Code Review\n\nHello feedback\n\n---\n*Powered By CodeSheriff*",
+				});
+
+				process.env.NEXT_PUBLIC_APP_URL = originalAppUrl;
 			});
 		});
 

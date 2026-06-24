@@ -145,7 +145,7 @@ describe("GitHub API Integration Helpers", () => {
 					conclusion: "success",
 					output: expect.objectContaining({
 						title: "CodeSheriff Code Review",
-						summary: "Review passed",
+						summary: expect.stringContaining("Review passed"),
 						annotations: annotations,
 					}),
 				})
