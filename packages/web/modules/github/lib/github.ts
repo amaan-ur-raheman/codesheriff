@@ -1,4 +1,4 @@
-import { Octokit } from "octokit";
+import { Octokit, App } from "octokit";
 import { headers } from "next/headers";
 
 import { auth } from "@/lib/auth";
@@ -33,6 +33,59 @@ export const getGithubAccessToken = async () => {
 	return account.accessToken;
 };
 
+let appInstance: App | null = null;
+
+/**
+ * Gets an authenticated Octokit instance. If GITHUB_APP_ID and GITHUB_APP_PRIVATE_KEY
+ * are present, it authenticates as the GitHub App (the CodeSheriff Bot) for the given
+ * repository. Otherwise, it falls back to the user's OAuth access token.
+ */
+export async function getOctokit(params: {
+	token?: string;
+	owner?: string;
+	repo?: string;
+}): Promise<Octokit> {
+	const appId = process.env.GITHUB_APP_ID;
+	const privateKey = process.env.GITHUB_APP_PRIVATE_KEY;
+
+	if (appId && privateKey && params.owner && params.repo) {
+		try {
+			if (!appInstance) {
+				const formattedKey = privateKey.replace(/\\n/g, "\n");
+				appInstance = new App({
+					appId,
+					privateKey: formattedKey,
+				});
+			}
+
+			// Get the installation for the specified repository
+			const { data: installation } = await appInstance.octokit.request(
+				"GET /repos/{owner}/{repo}/installation",
+				{
+					owner: params.owner,
+					repo: params.repo,
+				}
+			);
+
+			return await appInstance.getInstallationOctokit(installation.id);
+		} catch (error) {
+			console.error(
+				"Failed to authenticate as GitHub App, falling back to OAuth access token:",
+				error
+			);
+		}
+	}
+
+	const token = params.token || (await getGithubAccessToken().catch(() => undefined));
+	if (!token) {
+		throw new Error(
+			"No authorization method available (no GitHub App credentials and no access token)"
+		);
+	}
+
+	return new Octokit({ auth: token });
+}
+
 /**
  * Fetches user contribution data from GitHub GraphQL API.
  *
@@ -47,7 +100,7 @@ export const getGithubAccessToken = async () => {
  * @returns Promise resolving to contribution calendar data
  */
 export async function fetchUserContribution(token: string, username: string) {
-	const octokit = new Octokit({ auth: token });
+	const octokit = await getOctokit({ token });
 
 	const query = `
         query($username: String!) {
@@ -116,7 +169,7 @@ export const getRepositories = async (
 	perPage: number = 10
 ) => {
 	const token = await getGithubAccessToken();
-	const octokit = new Octokit({ auth: token });
+	const octokit = await getOctokit({ token });
 
 	const { data } = await octokit.rest.repos.listForAuthenticatedUser({
 		sort: "updated",
@@ -139,7 +192,7 @@ export const getRepositories = async (
  */
 export const createWebhook = async (owner: string, repo: string) => {
 	const token = await getGithubAccessToken();
-	const octokit = new Octokit({ auth: token });
+	const octokit = await getOctokit({ token, owner, repo });
 
 	const webhookUrl = `${process.env.NEXT_PUBLIC_APP_BASE_URL}/api/webhooks/github`;
 
@@ -177,7 +230,7 @@ export const createWebhook = async (owner: string, repo: string) => {
  */
 export const deleteWebhook = async (owner: string, repo: string) => {
 	const token = await getGithubAccessToken();
-	const octokit = new Octokit({ auth: token });
+	const octokit = await getOctokit({ token, owner, repo });
 	const webhookUrl = `${process.env.NEXT_PUBLIC_APP_BASE_URL}/api/webhooks/github`;
 
 	try {
@@ -235,7 +288,7 @@ export async function getRepoFileContents(
 		content: string;
 	}[]
 > {
-	const octokit = new Octokit({ auth: token });
+	const octokit = await getOctokit({ token, owner, repo });
 
 	const { data } = await octokit.rest.repos.getContent({
 		owner,
@@ -327,7 +380,7 @@ export async function getPullRequestDiff(
 	repo: string,
 	prNumber: number
 ) {
-	const octokit = new Octokit({ auth: token });
+	const octokit = await getOctokit({ token, owner, repo });
 
 	const { data: pr } = await octokit.rest.pulls.get({
 		owner,
@@ -373,7 +426,7 @@ export async function updatePRCommitStatus(
 	targetUrl?: string
 ) {
 	try {
-		const octokit = new Octokit({ auth: token });
+		const octokit = await getOctokit({ token, owner, repo });
 		await octokit.rest.repos.createCommitStatus({
 			owner,
 			repo,
@@ -412,13 +465,15 @@ export async function postReviewComment(
 	prNumber: number,
 	review: string
 ) {
-	const octokit = new Octokit({ auth: token });
+	const octokit = await getOctokit({ token, owner, repo });
+	const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/dashboard\/?$/, "");
+	const logoUrl = `${appUrl}/logo.png`;
 
 	await octokit.rest.issues.createComment({
 		owner,
 		repo,
 		issue_number: prNumber,
-		body: `## 🤖 AI Code Review\n\n${review}\n\n---\n*Powered By CodeSheriff*`,
+		body: `## 🤠 AI Code Review\n\n${review}\n\n---\n<img src="${logoUrl}" width="32" height="32" align="left" style="margin-right: 8px;" /> *Powered By [CodeSheriff](${appUrl})*`,
 	});
 }
 
@@ -441,7 +496,11 @@ export async function postCommentReply(
 	commentId?: number,
 	isReviewComment: boolean = false
 ) {
-	const octokit = new Octokit({ auth: token });
+	const octokit = await getOctokit({ token, owner, repo });
+	const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/dashboard\/?$/, "");
+	const logoUrl = `${appUrl}/logo.png`;
+
+	const commentBody = `<img src="${logoUrl}" width="24" height="24" align="left" style="margin-right: 8px;" /> 🤠 **Code Sheriff Reply:**\n\n${replyContent}`;
 
 	if (isReviewComment && commentId) {
 		await octokit.rest.pulls.createReplyForReviewComment({
@@ -449,14 +508,14 @@ export async function postCommentReply(
 			repo,
 			pull_number: prNumber,
 			comment_id: commentId,
-			body: `🤠 **Code Sheriff Reply:**\n\n${replyContent}`,
+			body: commentBody,
 		});
 	} else {
 		await octokit.rest.issues.createComment({
 			owner,
 			repo,
 			issue_number: prNumber,
-			body: `🤠 **Code Sheriff Reply:**\n\n${replyContent}`,
+			body: commentBody,
 		});
 	}
 }
@@ -477,7 +536,7 @@ export async function getCompareDiff(
 	base: string,
 	head: string
 ): Promise<string> {
-	const octokit = new Octokit({ auth: token });
+	const octokit = await getOctokit({ token, owner, repo });
 
 	const { data: diff } = await octokit.rest.repos.compareCommits({
 		owner,
@@ -506,7 +565,7 @@ export async function postInlineReviewComments(
 		start_side?: "LEFT" | "RIGHT";
 	}[]
 ) {
-	const octokit = new Octokit({ auth: token });
+	const octokit = await getOctokit({ token, owner, repo });
 
 	await octokit.rest.pulls.createReview({
 		owner,
@@ -527,7 +586,7 @@ export async function createPRCheckRun(
 	sha: string
 ) {
 	try {
-		const octokit = new Octokit({ auth: token });
+		const octokit = await getOctokit({ token, owner, repo });
 		const response = await octokit.rest.checks.create({
 			owner,
 			repo,
@@ -573,7 +632,9 @@ export async function updatePRCheckRun(
 	}[]
 ) {
 	try {
-		const octokit = new Octokit({ auth: token });
+		const octokit = await getOctokit({ token, owner, repo });
+		const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/dashboard\/?$/, "");
+		const logoUrl = `${appUrl}/logo.png`;
 		
 		// GitHub limits annotations to 50 per request
 		const chunkedAnnotations = annotations ? annotations.slice(0, 50) : undefined;
@@ -587,7 +648,7 @@ export async function updatePRCheckRun(
 			completed_at: new Date().toISOString(),
 			output: {
 				title: "CodeSheriff Code Review",
-				summary,
+				summary: `<img src="${logoUrl}" width="48" height="48" align="right" />\n\n${summary}`,
 				annotations: chunkedAnnotations,
 			},
 		});
@@ -607,7 +668,7 @@ export async function getReviewCommentThread(
 	commentId: number
 ) {
 	try {
-		const octokit = new Octokit({ auth: token });
+		const octokit = await getOctokit({ token, owner, repo });
 		
 		// Get the comment details to find the thread (in_reply_to_id)
 		const { data: targetComment } = await octokit.rest.pulls.getReviewComment({
@@ -652,7 +713,7 @@ export async function getIssueCommentThread(
 	prNumber: number
 ) {
 	try {
-		const octokit = new Octokit({ auth: token });
+		const octokit = await getOctokit({ token, owner, repo });
 		const { data: comments } = await octokit.rest.issues.listComments({
 			owner,
 			repo,

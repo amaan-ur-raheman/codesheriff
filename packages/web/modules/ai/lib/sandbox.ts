@@ -3,6 +3,7 @@ import { promisify } from "util";
 import fs from "fs/promises";
 import path from "path";
 import { Octokit } from "octokit";
+import { getOctokit } from "@/modules/github/lib/github";
 import { CodeSuggestion } from "./suggestions";
 
 const execAsync = promisify(exec);
@@ -28,7 +29,7 @@ export async function verifySuggestionsInSandbox(
 	if (suggestions.length === 0) return [];
 
 	const tempDir = path.join("/tmp", `codesheriff-sandbox-${Date.now()}`);
-	const octokit = new Octokit({ auth: token });
+	const octokit = await getOctokit({ token, owner, repo });
 
 	try {
 		// 1. Fetch pull request details to get head branch information

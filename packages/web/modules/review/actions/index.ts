@@ -4,6 +4,7 @@ import prisma from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { Octokit } from "octokit";
+import { getOctokit } from "@/modules/github/lib/github";
 
 export async function getReviews() {
 	const session = await auth.api.getSession({
@@ -88,7 +89,7 @@ export async function applySuggestion(reviewId: string, suggestionId: string) {
 	const prNumber = review.prNumber;
 
 	// 3. Fetch PR info from GitHub to find the head branch branch
-	const octokit = new Octokit({ auth: token });
+	const octokit = await getOctokit({ token, owner, repo });
 	const { data: pr } = await octokit.rest.pulls.get({
 		owner,
 		repo,
@@ -237,7 +238,7 @@ export async function applySuggestionsBatch(reviewId: string, suggestionIds: str
 	const prNumber = review.prNumber;
 
 	// 3. Fetch PR info from GitHub to find the head branch branch
-	const octokit = new Octokit({ auth: token });
+	const octokit = await getOctokit({ token, owner, repo });
 	const { data: pr } = await octokit.rest.pulls.get({
 		owner,
 		repo,
