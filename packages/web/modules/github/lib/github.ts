@@ -464,16 +464,83 @@ export async function postReviewComment(
 	repo: string,
 	prNumber: number,
 	review: string
+): Promise<number> {
+	const octokit = await getOctokit({ token, owner, repo });
+	const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/dashboard\/?$/, "");
+	const logoUrl = `${appUrl}/logo.png`;
+
+	const response = await octokit.rest.issues.createComment({
+		owner,
+		repo,
+		issue_number: prNumber,
+		body: `## 🤠 AI Code Review\n\n${review}\n\n---\n<img src="${logoUrl}" width="32" height="32" align="left" style="margin-right: 8px;" /> *Powered By [CodeSheriff](${appUrl})*`,
+	});
+	return response.data.id;
+}
+
+/**
+ * Posts a loading review comment on a pull request.
+ */
+export async function postLoadingReviewComment(
+	token: string,
+	owner: string,
+	repo: string,
+	prNumber: number
+): Promise<number> {
+	const octokit = await getOctokit({ token, owner, repo });
+	const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/dashboard\/?$/, "");
+	const logoUrl = `${appUrl}/logo.png`;
+
+	const response = await octokit.rest.issues.createComment({
+		owner,
+		repo,
+		issue_number: prNumber,
+		body: `## 🤠 AI Code Review\n\n⏳ **Review in progress...** CodeSheriff is analyzing your pull request and generating review suggestions. This usually takes less than a minute.\n\n---\n<img src="${logoUrl}" width="32" height="32" align="left" style="margin-right: 8px;" /> *Powered By [CodeSheriff](${appUrl})*`,
+	});
+	return response.data.id;
+}
+
+/**
+ * Updates a previously posted review comment.
+ */
+export async function updateReviewComment(
+	token: string,
+	owner: string,
+	repo: string,
+	commentId: number,
+	review: string
 ) {
 	const octokit = await getOctokit({ token, owner, repo });
 	const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/dashboard\/?$/, "");
 	const logoUrl = `${appUrl}/logo.png`;
 
-	await octokit.rest.issues.createComment({
+	await octokit.rest.issues.updateComment({
 		owner,
 		repo,
-		issue_number: prNumber,
+		comment_id: commentId,
 		body: `## 🤠 AI Code Review\n\n${review}\n\n---\n<img src="${logoUrl}" width="32" height="32" align="left" style="margin-right: 8px;" /> *Powered By [CodeSheriff](${appUrl})*`,
+	});
+}
+
+/**
+ * Updates a previously posted review comment with a failure message.
+ */
+export async function updateReviewCommentFailed(
+	token: string,
+	owner: string,
+	repo: string,
+	commentId: number,
+	errorMessage: string
+) {
+	const octokit = await getOctokit({ token, owner, repo });
+	const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/dashboard\/?$/, "");
+	const logoUrl = `${appUrl}/logo.png`;
+
+	await octokit.rest.issues.updateComment({
+		owner,
+		repo,
+		comment_id: commentId,
+		body: `## 🤠 AI Code Review\n\n❌ **Review failed.** An error occurred while generating the review. Please try triggering it again.\n\n**Error:** ${errorMessage}\n\n---\n<img src="${logoUrl}" width="32" height="32" align="left" style="margin-right: 8px;" /> *Powered By [CodeSheriff](${appUrl})*`,
 	});
 }
 
