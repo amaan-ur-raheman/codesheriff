@@ -15,6 +15,9 @@ import { inngest } from "../client";
 import {
 	getPullRequestDiff,
 	postReviewComment,
+	postLoadingReviewComment,
+	updateReviewComment,
+	updateReviewCommentFailed,
 	postCommentReply,
 	getCompareDiff,
 	postInlineReviewComments,
@@ -58,6 +61,7 @@ export const generateReview = inngest.createFunction(
 	async ({ event, step }) => {
 		const { owner, repo, prNumber, userId, before, after, checkRunId: eventCheckRunId } = event.data;
 		let checkRunId: any = eventCheckRunId || null;
+		let loadingCommentId: number | null = null;
 
 		try {
 			const { diff, title, description, token, headSha } = await step.run(
@@ -107,22 +111,33 @@ export const generateReview = inngest.createFunction(
 				}
 			);
 
-			if (!checkRunId) {
-				await step.run("update-github-status-pending", async () => {
-					await updatePRCommitStatus(
-						token,
-						owner,
-						repo,
-						headSha,
-						"pending",
-						"Review in progress",
-						dashboardReviewsUrl
-					);
-				});
+			loadingCommentId = await step.run("create-loading-comment", async () => {
+				try {
+					return await postLoadingReviewComment(token, owner, repo, prNumber);
+				} catch (commentError) {
+					console.error("Failed to post loading comment:", commentError);
+					return null;
+				}
+			});
 
+			if (!checkRunId) {
 				checkRunId = await step.run("create-github-check-run", async () => {
 					return await createPRCheckRun(token, owner, repo, headSha);
 				});
+
+				if (!checkRunId) {
+					await step.run("update-github-status-pending", async () => {
+						await updatePRCommitStatus(
+							token,
+							owner,
+							repo,
+							headSha,
+							"pending",
+							"Review in progress",
+							dashboardReviewsUrl
+						);
+					});
+				}
 			}
 
 			const context = await step.run("retrieve-context", async () => {
@@ -161,8 +176,9 @@ Please provide:
 3. **Summary**: Brief overview.
 4. **Strengths**: What's done well.
 5. **Issues**: Bugs, security concerns, code smells.
-6. **Suggestions**: Specific code improvements with inline code blocks.
-7. **Poem**: A short, creative poem summarizing the changes at the very end.
+6. **Poem**: A short, creative poem summarizing the changes at the very end.
+
+IMPORTANT: Do NOT include any code suggestions, code improvements, or diff blocks in the main markdown sections of your response (Walkthrough, Summary, Issues, etc.), as these will be posted separately as inline comments directly on GitHub. Provide ALL code suggestions, improvements, and diffs ONLY inside the SUGGESTIONS_JSON block at the end.
 
 After the poem, you MUST include a JSON suggestions block in the following exact format. This block must appear at the very end of your response, wrapped in an HTML comment:
 
@@ -270,8 +286,12 @@ Format the rest of your response in markdown.`;
 			});
 
 			await step.run("post-comment", async () => {
-				// Post the main overview review comment
-				await postReviewComment(token as string, owner, repo, prNumber, review as string);
+				// Post or update the main overview review comment
+				if (loadingCommentId) {
+					await updateReviewComment(token as string, owner, repo, loadingCommentId, review as string);
+				} else {
+					await postReviewComment(token as string, owner, repo, prNumber, review as string);
+				}
 
 				// Post inline file suggestions if they exist
 				if (verifiedSuggestions && verifiedSuggestions.suggestions && verifiedSuggestions.suggestions.length > 0) {
@@ -347,19 +367,19 @@ Format the rest of your response in markdown.`;
 				}
 			});
 
-			await step.run("update-github-status-success", async () => {
-				await updatePRCommitStatus(
-					token,
-					owner,
-					repo,
-					headSha,
-					"success",
-					"Review complete",
-					dashboardReviewsUrl
-				);
-			});
-
-			if (checkRunId) {
+			if (!checkRunId) {
+				await step.run("update-github-status-success", async () => {
+					await updatePRCommitStatus(
+						token,
+						owner,
+						repo,
+						headSha,
+						"success",
+						"Review complete",
+						dashboardReviewsUrl
+					);
+				});
+			} else {
 				await step.run("update-github-check-run-success", async () => {
 					const validSuggestions = (verifiedSuggestions?.suggestions || []).filter((s: any) => {
 						if (!s) return false;
@@ -487,6 +507,18 @@ Format the rest of your response in markdown.`;
 					},
 				});
 				if (account?.accessToken) {
+					if (loadingCommentId) {
+						await step.run("update-github-comment-failed", async () => {
+							await updateReviewCommentFailed(
+								account.accessToken as string,
+								owner,
+								repo,
+								loadingCommentId as number,
+								errorMessage
+							);
+						});
+					}
+
 					let sha = after;
 					if (!sha || sha === "0000000000000000000000000000000000000000") {
 						try {
@@ -500,19 +532,19 @@ Format the rest of your response in markdown.`;
 						} catch (_) {}
 					}
 					if (sha) {
-						await step.run("update-github-status-failed", async () => {
-							await updatePRCommitStatus(
-								account.accessToken as string,
-								owner,
-								repo,
-								sha,
-								"failure",
-								"Review failed: " + errorMessage.slice(0, 50),
-								dashboardReviewsUrl
-							);
-						});
-
-						if (checkRunId) {
+						if (!checkRunId) {
+							await step.run("update-github-status-failed", async () => {
+								await updatePRCommitStatus(
+									account.accessToken as string,
+									owner,
+									repo,
+									sha,
+									"failure",
+									"Review failed: " + errorMessage.slice(0, 50),
+									dashboardReviewsUrl
+								);
+							});
+						} else {
 							await step.run("update-github-check-run-failed", async () => {
 								await updatePRCheckRun(
 									account.accessToken as string,

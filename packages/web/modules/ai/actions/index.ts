@@ -90,19 +90,22 @@ export async function reviewPullRequest(
 
 		let checkRunId: number | null = null;
 		if (headSha) {
-			// Instantly set commit status to pending (pulsing yellow/orange dot)
-			await updatePRCommitStatus(
-				token,
-				owner,
-				repo,
-				headSha,
-				"pending",
-				"Review in progress",
-				dashboardReviewsUrl
-			);
-
 			// Instantly create Check Run in_progress (animating loading spinner)
 			checkRunId = await createPRCheckRun(token, owner, repo, headSha);
+
+			// If Check Run creation failed (e.g. 403 Forbidden/lack of App permissions),
+			// fall back to setting commit status to pending (pulsing yellow/orange dot)
+			if (!checkRunId) {
+				await updatePRCommitStatus(
+					token,
+					owner,
+					repo,
+					headSha,
+					"pending",
+					"Review in progress",
+					dashboardReviewsUrl
+				);
+			}
 		}
 
 		await inngest.send({
