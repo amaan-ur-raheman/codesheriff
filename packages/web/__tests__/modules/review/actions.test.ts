@@ -152,6 +152,84 @@ describe("Review Server Actions", () => {
 				})
 			);
 		});
+
+		it("throws an error when originalCode is empty and startLine is invalid", async () => {
+			const mockReview = {
+				id: "rev-1",
+				prNumber: 42,
+				suggestions: {
+					suggestions: [
+						{
+							id: "sug-1",
+							filePath: "src/utils.ts",
+							startLine: 0,
+							endLine: 0,
+							originalCode: "",
+							suggestedCode: "console.log('suggested');",
+							applied: false,
+						},
+					],
+				},
+				repository: {
+					owner: "test-owner",
+					name: "test-repo",
+					user: {
+						accounts: [{ providerId: "github", accessToken: "github-token" }],
+					},
+				},
+			};
+
+			mockPrisma.review.findFirst.mockResolvedValue(mockReview);
+			mockOctokit.rest.repos.getContent.mockResolvedValue({
+				data: {
+					content: Buffer.from("console.log('original');\n").toString("base64"),
+					sha: "file-sha-123",
+				},
+			});
+
+			await expect(applySuggestion("rev-1", "sug-1")).rejects.toThrow(
+				"Could not find the original code block to replace."
+			);
+		});
+
+		it("throws an error when originalCode is empty and startLine is valid but file content line is not empty", async () => {
+			const mockReview = {
+				id: "rev-1",
+				prNumber: 42,
+				suggestions: {
+					suggestions: [
+						{
+							id: "sug-1",
+							filePath: "src/utils.ts",
+							startLine: 1,
+							endLine: 1,
+							originalCode: "",
+							suggestedCode: "console.log('suggested');",
+							applied: false,
+						},
+					],
+				},
+				repository: {
+					owner: "test-owner",
+					name: "test-repo",
+					user: {
+						accounts: [{ providerId: "github", accessToken: "github-token" }],
+					},
+				},
+			};
+
+			mockPrisma.review.findFirst.mockResolvedValue(mockReview);
+			mockOctokit.rest.repos.getContent.mockResolvedValue({
+				data: {
+					content: Buffer.from("console.log('original');\n").toString("base64"),
+					sha: "file-sha-123",
+				},
+			});
+
+			await expect(applySuggestion("rev-1", "sug-1")).rejects.toThrow(
+				"Target file content does not match the original suggestion. It may have been modified."
+			);
+		});
 	});
 
 	describe("applySuggestionsBatch", () => {

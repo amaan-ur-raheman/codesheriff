@@ -797,3 +797,40 @@ export async function getIssueCommentThread(
 	}
 }
 
+/**
+ * Parses a unified diff string and returns a map of file paths to a Set of line numbers
+ * that are valid for inline commenting (i.e., lines present on the RIGHT/new side of hunks).
+ */
+export function getValidDiffLines(diffContent: string): Record<string, Set<number>> {
+	const validLines: Record<string, Set<number>> = {};
+	if (!diffContent) return validLines;
+
+	// Split by diff files
+	const fileDiffs = diffContent.split(/^diff --git /m);
+
+	for (const fileDiff of fileDiffs) {
+		if (!fileDiff.trim()) continue;
+
+		// Extract target file path (e.g. +++ b/path/to/file)
+		const matchFile = fileDiff.match(/^\+\+\+ b\/(.+)$/m);
+		if (!matchFile) continue;
+		const filePath = matchFile[1].trim();
+
+		validLines[filePath] = new Set<number>();
+
+		// Find all hunk headers: @@ -oldStart,oldLength +newStart,newLength @@
+		const hunkHeaderRegex = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/gm;
+		let match;
+		while ((match = hunkHeaderRegex.exec(fileDiff)) !== null) {
+			const newStart = parseInt(match[1], 10);
+			const newLength = match[2] ? parseInt(match[2], 10) : 1;
+			for (let i = 0; i < newLength; i++) {
+				validLines[filePath].add(newStart + i);
+			}
+		}
+	}
+
+	return validLines;
+}
+
+

@@ -136,13 +136,13 @@ export async function applySuggestion(reviewId: string, suggestionId: string) {
 			const updatedLines = [...lines];
 			updatedLines.splice(startIdx, endIdx - startIdx, ...replacement.split(/\r?\n/));
 			newContent = updatedLines.join("\n");
-		} else if (currentContent.includes(original)) {
+		} else if (original && currentContent.includes(original)) {
 			// Fallback to exact match text replace if lines shifted
 			newContent = currentContent.replace(original, () => replacement);
 		} else {
 			throw new Error("Target file content does not match the original suggestion. It may have been modified.");
 		}
-	} else if (currentContent.includes(original)) {
+	} else if (original && currentContent.includes(original)) {
 		newContent = currentContent.replace(original, () => replacement);
 	} else {
 		throw new Error("Could not find the original code block to replace.");
@@ -300,13 +300,13 @@ export async function applySuggestionsBatch(reviewId: string, suggestionIds: str
 					const updatedLines = [...lines];
 					updatedLines.splice(startIdx, endIdx - startIdx, ...replacement.split(/\r?\n/));
 					fileContent = updatedLines.join("\n");
-				} else if (fileContent.includes(original)) {
-					fileContent = fileContent.replace(original, replacement);
+				} else if (original && fileContent.includes(original)) {
+					fileContent = fileContent.replace(original, () => replacement);
 				} else {
 					throw new Error(`Content mismatch in ${filePath} for suggestion: ${suggestion.title}`);
 				}
-			} else if (fileContent.includes(original)) {
-				fileContent = fileContent.replace(original, replacement);
+			} else if (original && fileContent.includes(original)) {
+				fileContent = fileContent.replace(original, () => replacement);
 			} else {
 				throw new Error(`Could not find suggestion snippet in ${filePath}`);
 			}

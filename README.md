@@ -4,7 +4,7 @@
   <img src="./public/codesheriff-poster.png" alt="Code Sheriff Poster" width="100%" style="border-radius: 12px" />
 </p>
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge)](https://codesheriff.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen?style=for-the-badge)](https://codesheriff.amaanurraheman.qzz.io)
 
 **Code Sheriff** is a premium, AI-powered automated code review platform designed to elevate code quality and accelerate development workflows. Organized as a monorepo workspace, Code Sheriff contains both a high-fidelity Next.js web application and an interactive terminal-based TUI (Text User Interface) built with React.
 

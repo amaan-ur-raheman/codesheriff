@@ -26,6 +26,7 @@ import {
 	updatePRCheckRun,
 	getReviewCommentThread,
 	getIssueCommentThread,
+	getValidDiffLines,
 } from "@/modules/github/lib/github";
 import { retrieveContext } from "@/modules/ai/lib/rag";
 import { verifySuggestionsInSandbox } from "@/modules/ai/lib/sandbox";
@@ -38,6 +39,7 @@ import {
 import { sendSlackWebhook, sendDiscordWebhook } from "@/lib/webhooks";
 
 import { generateText } from "ai";
+import { generateTextWithFallback } from "@/modules/ai/lib/models";
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/dashboard\/?$/, "");
 const dashboardReviewsUrl = `${appUrl}/dashboard/reviews`;
@@ -217,12 +219,7 @@ Rules for the SUGGESTIONS_JSON block:
 
 Format the rest of your response in markdown.`;
 
-				const { text } = await generateText({
-					model: google("gemini-2.5-flash"),
-					prompt,
-				});
-
-				return text;
+				return await generateTextWithFallback(prompt);
 			});
 
 			const parsedSuggestions = await step.run("parse-suggestions", async () => {
@@ -296,40 +293,75 @@ Format the rest of your response in markdown.`;
 				// Post inline file suggestions if they exist
 				if (verifiedSuggestions && verifiedSuggestions.suggestions && verifiedSuggestions.suggestions.length > 0) {
 					try {
-						const inlineComments = verifiedSuggestions.suggestions.map((s: any) => {
-							const severityText = s.severity === "error" 
-								? "⚠️ Potential issue | 🔴 Critical" 
-								: s.severity === "warning" 
-									? "⚠️ Potential issue | 🟡 Major" 
-									: "ℹ️ Suggestion";
-							
-							const title = s.title ? `### ${severityText}\n**${s.title}**\n\n` : `### ${severityText}\n\n`;
-							const description = s.description ? `${s.description}\n\n` : "";
-							
-							let suggestionBlock = "";
-							if (s.suggestedCode !== undefined && s.suggestedCode !== null) {
-								suggestionBlock = `<details>\n<summary>Suggested fix</summary>\n\n\`\`\`suggestion\n${s.suggestedCode}\n\`\`\`\n</details>\n\n`;
-							}
+						const validDiffLines = getValidDiffLines(diff);
+						const inlineComments = verifiedSuggestions.suggestions
+							.map((s: any) => {
+								const severityText = s.severity === "error" 
+									? "⚠️ Potential issue | 🔴 Critical" 
+									: s.severity === "warning" 
+										? "⚠️ Potential issue | 🟡 Major" 
+										: "ℹ️ Suggestion";
+								
+								const title = s.title ? `### ${severityText}\n**${s.title}**\n\n` : `### ${severityText}\n\n`;
+								const description = s.description ? `${s.description}\n\n` : "";
+								
+								let suggestionBlock = "";
+								if (s.suggestedCode !== undefined && s.suggestedCode !== null) {
+									suggestionBlock = `\`\`\`suggestion\n${s.suggestedCode}\n\`\`\`\n\n`;
+								}
 
-							const promptBlock = `<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\nVerify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn \`@${s.filePath}\` at line ${s.startLine}, ${s.title ? `${s.title}: ` : ""}${s.description}\n</details>\n\n`;
+								const promptBlock = `<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\nVerify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn \`@${s.filePath}\` at line ${s.startLine}, ${s.title ? `${s.title}: ` : ""}${s.description || ""}\n</details>\n\n`;
 
-							const commentObj: any = {
-								path: s.filePath,
-								line: s.endLine || s.startLine,
-								side: "RIGHT",
-								body: `${title}${description}${suggestionBlock}${promptBlock}`,
-							};
+								const endLine = s.endLine || s.startLine;
+								const commentObj: any = {
+									path: s.filePath,
+									line: endLine,
+									side: "RIGHT",
+									body: `${title}${description}${suggestionBlock}${promptBlock}`,
+								};
 
-							// Support multi-line suggestions
-							if (s.startLine && s.endLine && s.startLine < s.endLine) {
-								commentObj.start_line = s.startLine;
-								commentObj.start_side = "RIGHT";
-							}
+								// Support multi-line suggestions
+								if (s.startLine && s.endLine && s.startLine < s.endLine) {
+									commentObj.start_line = s.startLine;
+									commentObj.start_side = "RIGHT";
+								}
 
-							return commentObj;
-						});
+								return commentObj;
+							})
+							.filter((comment: any) => {
+								const filePath = comment.path;
+								const line = comment.line;
+								const startLine = comment.start_line;
 
-						await postInlineReviewComments(token as string, owner, repo, prNumber, inlineComments);
+								const fileValidLines = validDiffLines[filePath];
+								if (!fileValidLines) {
+									console.warn(`Skipping comment for file not in diff: ${filePath}`);
+									return false;
+								}
+
+								// Check if end line is in diff
+								if (!fileValidLines.has(line)) {
+									console.warn(`Skipping comment for line not in diff: ${filePath}:${line}`);
+									return false;
+								}
+
+								// If multi-line, check start line. If start line is not in diff, degrade to single line.
+								if (startLine && !fileValidLines.has(startLine)) {
+									console.warn(`Degrading multi-line comment to single line: ${filePath}:${startLine}-${line}`);
+									delete comment.start_line;
+									delete comment.start_side;
+									// Remove the suggestion block to avoid posting an invalid multi-line suggestion on a single-line comment
+									comment.body = comment.body.replace(/```suggestion\r?\n[\s\S]*?\r?\n```\r?\n\r?\n/, "");
+								}
+
+								return true;
+							});
+
+						if (inlineComments.length > 0) {
+							await postInlineReviewComments(token as string, owner, repo, prNumber, inlineComments);
+						} else {
+							console.log("No valid inline comments within the PR diff to post.");
+						}
 					} catch (inlineError) {
 						console.error("Failed to post inline review comments:", inlineError);
 					}
@@ -661,12 +693,7 @@ User's Question:
 
 Please provide a helpful, clear, and constructive answer. Respond as a participant in the conversation thread. If they are asking you to suggest code improvements or fixes, specify them in inline code blocks with exact changes. Keep your response concise, polite, and technical.`;
 
-				const { text } = await generateText({
-					model: google("gemini-2.5-flash"),
-					prompt,
-				});
-
-				return text;
+				return await generateTextWithFallback(prompt);
 			});
 
 			await step.run("post-reply-comment", async () => {
