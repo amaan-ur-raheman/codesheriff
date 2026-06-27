@@ -90,7 +90,7 @@ To see the platform features in action, view the walkthrough below:
 [Fetch Diff] ──> [RAG Pinecone Search] ──> [Gemini Review Generation] ──> [Commit PR Status]
 ```
 1.  **Webhook Ingestion**: GitHub triggers a `pull_request` payload to `/api/webhooks/github`.
-2.  **Inngest Orchestration**: Handled asynchronously via `pr.review.requested` function in [review.ts](file:///Users/amaan/Desktop/Programming/next-js/code-horse/packages/web/inngest/functions/review.ts).
+2.  **Inngest Orchestration**: Handled asynchronously via `pr.review.requested` function in [review.ts](file:///Users/amaan/Desktop/Programming/next-js/codesheriff/packages/web/inngest/functions/review.ts).
 3.  **Context Retrieval (RAG)**: Generates query embeddings using `gemini-embedding-001` and retrieves relevant files from Pinecone.
 4.  **LLM Verification**: Code changes and retrieved snippets are passed to Gemini to draft actionable reviews.
 5.  **GitHub Status Write**: Commits status updates (pending, success, failure) back to the GitHub PR commit check run.
@@ -172,8 +172,8 @@ Limits are automatically checked and incremented upon repository linking or PR r
 ### 1. Installation & Environment Config
 Clone and install dependencies from the monorepo root:
 ```bash
-git clone https://github.com/amaan-ur-raheman/code-sheriff.git
-cd code-sheriff
+git clone https://github.com/amaan-ur-raheman/codesheriff.git
+cd codesheriff
 bun install
 ```
 
