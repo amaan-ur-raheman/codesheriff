@@ -12,7 +12,7 @@ const opencodeProvider = createOpenAICompatible({
 export const opencode = (modelId: string) => opencodeProvider.chatModel(modelId) as any;
 
 /**
- * Generates text using the OpenCode Zen model (defaulting to north-mini-code-free),
+ * Generates text using the OpenCode Zen model (defaulting to mimo-v2.5-free),
  * falling back to google("gemini-2.5-flash") if the OpenCode Zen generation fails
  * or if no API key is provided.
  *
@@ -21,7 +21,7 @@ export const opencode = (modelId: string) => opencodeProvider.chatModel(modelId)
  */
 export async function generateTextWithFallback(prompt: string): Promise<string> {
 	const opencodeApiKey = process.env.OPENCODE_API_KEY;
-	const opencodeModelName = process.env.OPENCODE_MODEL || "north-mini-code-free";
+	const opencodeModelName = process.env.OPENCODE_MODEL || "mimo-v2.5-free";
 
 	if (opencodeApiKey) {
 		try {
