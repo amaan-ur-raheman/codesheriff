@@ -4,23 +4,23 @@ import crypto from "crypto";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
-// Persist the device codes map across hot reloads in development
-const globalForDeviceCodes = global as unknown as {
-	deviceCodes?: Map<
-		string,
-		{
-			userCode: string;
-			expiresAt: number;
-			status: "pending" | "verified";
-			userId?: string;
-			apiKey?: string;
-		}
-	>;
-};
+const DEVICE_CODE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
-const deviceCodes = globalForDeviceCodes.deviceCodes || new Map();
-if (process.env.NODE_ENV !== "production") {
-	globalForDeviceCodes.deviceCodes = deviceCodes;
+// Removed ambiguous letters/numbers (0/O, 1/I/L, etc.)
+const USER_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+function generateUserCode(): string {
+	let userCode = "";
+	for (let i = 0; i < 8; i++) {
+		if (i === 4) userCode += "-";
+		userCode += USER_CODE_ALPHABET.charAt(Math.floor(Math.random() * USER_CODE_ALPHABET.length));
+	}
+	return userCode;
+}
+
+/** Normalized form stored in the DB; lookups are exact matches on the unique index. */
+function normalizeUserCode(code: string): string {
+	return code.replace(/-/g, "").toUpperCase();
 }
 
 export async function POST(request: NextRequest) {
@@ -29,26 +29,37 @@ export async function POST(request: NextRequest) {
 		const action = searchParams.get("action");
 
 		if (action === "initiate") {
-			const deviceCode = crypto.randomUUID();
-			// Generate user code in the format XXXX-XXXX
-			const characters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Removed ambiguous letters/numbers
-			let userCode = "";
-			for (let i = 0; i < 8; i++) {
-				if (i === 4) userCode += "-";
-				userCode += characters.charAt(Math.floor(Math.random() * characters.length));
-			}
+			const id = crypto.randomUUID();
+			let displayCode = generateUserCode();
 
-			deviceCodes.set(deviceCode, {
-				userCode,
-				status: "pending",
-				expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes expiry
-			});
+			// The user code is unique-indexed, so a (vanishingly rare) collision is
+			// retried with a fresh code instead of surfacing as a 500.
+			for (let attempt = 0; ; attempt++) {
+				try {
+					await prisma.deviceCode.create({
+						data: {
+							id,
+							userCode: normalizeUserCode(displayCode),
+							expiresAt: new Date(Date.now() + DEVICE_CODE_TTL_MS),
+						},
+					});
+					break;
+				} catch (error) {
+					const isUniqueViolation =
+						typeof error === "object" &&
+						error !== null &&
+						"code" in error &&
+						(error as { code?: string }).code === "P2002";
+					if (!isUniqueViolation || attempt >= 2) throw error;
+					displayCode = generateUserCode();
+				}
+			}
 
 			const baseUrl = process.env.BETTER_AUTH_URL || "http://localhost:3000";
 
 			return NextResponse.json({
-				device_code: deviceCode,
-				user_code: userCode,
+				device_code: id,
+				user_code: displayCode,
 				verification_uri: `${baseUrl}/device`,
 			});
 		}
@@ -61,32 +72,42 @@ export async function POST(request: NextRequest) {
 				return NextResponse.json({ error: "Missing device_code" }, { status: 400 });
 			}
 
-			const codeData = deviceCodes.get(device_code);
+			const code = await prisma.deviceCode.findUnique({
+				where: { id: device_code },
+			});
 
-			if (!codeData) {
+			if (!code) {
 				return NextResponse.json({ error: "Invalid device_code" }, { status: 400 });
 			}
 
-			if (Date.now() > codeData.expiresAt) {
-				deviceCodes.delete(device_code);
+			if (code.expiresAt.getTime() < Date.now()) {
+				// Lazy cleanup: expired codes are inert and removed on touch.
+				await prisma.deviceCode.delete({ where: { id: code.id } });
 				return NextResponse.json({ error: "expired_token" }, { status: 400 });
 			}
 
-			if (codeData.status === "verified" && codeData.apiKey && codeData.userId) {
-				deviceCodes.delete(device_code);
-				const user = await prisma.user.findUnique({
-					where: { id: codeData.userId },
+			if (code.status === "verified" && code.apiKey && code.userId) {
+				// One-time use: the key is handed to the CLI exactly once. The conditional
+				// deleteMany is the atomic claim — a concurrent poll that also read
+				// "verified" loses (count 0) and falls through to pending for its next tick.
+				const deleted = await prisma.deviceCode.deleteMany({
+					where: { id: code.id, status: "verified" },
 				});
+				if (deleted.count === 1) {
+					const user = await prisma.user.findUnique({
+						where: { id: code.userId },
+					});
 
-				return NextResponse.json({
-					status: "success",
-					token: codeData.apiKey,
-					user: {
-						id: user?.id,
-						name: user?.name,
-						email: user?.email,
-					},
-				});
+					return NextResponse.json({
+						status: "success",
+						token: code.apiKey,
+						user: {
+							id: user?.id,
+							name: user?.name,
+							email: user?.email,
+						},
+					});
+				}
 			}
 
 			return NextResponse.json({ status: "authorization_pending" });
@@ -109,44 +130,45 @@ export async function POST(request: NextRequest) {
 				return NextResponse.json({ error: "Missing user_code" }, { status: 400 });
 			}
 
-			// Find device code matching userCode
-			let targetDeviceCode: string | null = null;
-			let targetCodeData: any = null;
+			const code = await prisma.deviceCode.findUnique({
+				where: { userCode: normalizeUserCode(user_code) },
+			});
 
-			for (const [dCode, data] of deviceCodes.entries()) {
-				if (data.userCode.replace("-", "").toUpperCase() === user_code.replace("-", "").toUpperCase()) {
-					targetDeviceCode = dCode;
-					targetCodeData = data;
-					break;
-				}
-			}
-
-			if (!targetDeviceCode || !targetCodeData) {
+			if (!code) {
 				return NextResponse.json({ error: "Invalid verification code" }, { status: 400 });
 			}
 
-			if (Date.now() > targetCodeData.expiresAt) {
-				deviceCodes.delete(targetDeviceCode);
+			if (code.expiresAt.getTime() < Date.now()) {
+				await prisma.deviceCode.delete({ where: { id: code.id } });
 				return NextResponse.json({ error: "Verification code expired" }, { status: 400 });
 			}
 
-			// Create a new API Key for the authenticated user
+			// Atomic exactly-once claim: the conditional updateMany on status ===
+			// "pending" AND unexpired succeeds for exactly one concurrent verifier; the
+			// API key is only created when the claim wins, all inside a single
+			// transaction. The expiry predicate makes the claim itself expiry-safe even
+			// if the code lapses between the pre-check above and the transaction.
 			const keyToken = "cs_" + crypto.randomBytes(24).toString("hex");
-			await prisma.apiKey.create({
-				data: {
-					userId: session.user.id,
-					name: `Code Sheriff CLI (${new Date().toLocaleDateString()})`,
-					key: keyToken,
-				},
+			const claimed = await prisma.$transaction(async (tx) => {
+				const updated = await tx.deviceCode.updateMany({
+					where: { id: code.id, status: "pending", expiresAt: { gt: new Date() } },
+					data: { status: "verified", userId: session.user.id, apiKey: keyToken },
+				});
+				if (updated.count === 0) return false;
+
+				await tx.apiKey.create({
+					data: {
+						userId: session.user.id,
+						name: `Code Sheriff CLI (${new Date().toLocaleDateString()})`,
+						key: keyToken,
+					},
+				});
+				return true;
 			});
 
-			// Update device code mapping
-			deviceCodes.set(targetDeviceCode, {
-				...targetCodeData,
-				status: "verified",
-				userId: session.user.id,
-				apiKey: keyToken,
-			});
+			if (!claimed) {
+				return NextResponse.json({ error: "Verification code already used" }, { status: 400 });
+			}
 
 			return NextResponse.json({ success: true });
 		}
