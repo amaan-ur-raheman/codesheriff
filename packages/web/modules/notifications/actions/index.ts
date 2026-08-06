@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/db";
 import { sendEmail } from "@/lib/email";
+import { sendSlackWebhook, sendDiscordWebhook } from "@/lib/webhooks";
 import {
 	reviewCompletedEmail,
 	reviewFailedEmail,
@@ -28,6 +29,89 @@ async function shouldSendEmail(userId: string): Promise<boolean> {
 		select: { emailNotifications: true },
 	});
 	return user?.emailNotifications !== false;
+}
+
+interface WebhookPayload {
+	type: "completed" | "failed";
+	prNumber: number;
+	prTitle: string;
+	prUrl: string;
+	repositoryName: string;
+	error?: string;
+}
+
+const WEBHOOK_TIMEOUT_MS = Number(process.env.WEBHOOK_DELIVERY_TIMEOUT_MS) || 5000;
+
+async function postWithTimeout<T>(fn: () => Promise<T>): Promise<T> {
+	let lastError: unknown;
+	for (let attempt = 0; attempt < 2; attempt++) {
+		try {
+			return await Promise.race([
+				fn(),
+				new Promise<T>((_, reject) =>
+					setTimeout(() => reject(new Error("webhook delivery timed out")), WEBHOOK_TIMEOUT_MS)
+				),
+			]);
+		} catch (err) {
+			lastError = err;
+			if (attempt === 0) await new Promise((r) => setTimeout(r, 500));
+		}
+	}
+	throw lastError;
+}
+
+async function deliverToIntegrations(
+	orgId: string | null | undefined,
+	payload: WebhookPayload
+): Promise<void> {
+	if (!orgId) return;
+	if (process.env.WEBHOOK_DELIVERY_ENABLED === "false") return;
+
+	const configs = await prisma.integrationConfig.findMany({
+		where: { organizationId: orgId, isActive: true },
+	});
+
+	const title = `#${payload.prNumber} ${payload.prTitle}`;
+	const text =
+		payload.type === "failed"
+			? `:horse: Review failed for ${title}${payload.error ? `: ${payload.error}` : ""}`
+			: `:horse: Review complete for ${title}`;
+
+	for (const cfg of configs) {
+		const webhookUrl = (cfg.config as { webhookUrl?: string } | null)?.webhookUrl;
+		if (!webhookUrl) continue;
+		try {
+			if (cfg.type === "slack") {
+				await postWithTimeout(async () => {
+					const result = await sendSlackWebhook(webhookUrl, {
+						text,
+						blocks: [{ type: "section", text: { type: "mrkdwn", text } }],
+					});
+					if (!result.success) {
+						throw new Error(result.error || "Slack webhook delivery failed");
+					}
+				});
+			} else if (cfg.type === "discord") {
+				await postWithTimeout(async () => {
+					const result = await sendDiscordWebhook(webhookUrl, {
+						content: "",
+						embeds: [
+							{
+								title: `Code Sheriff Review ${payload.type === "failed" ? "Failed" : "Complete"}`,
+								description: `${payload.repositoryName} · ${title}${payload.error ? `\n${payload.error}` : ""}`,
+								color: payload.type === "failed" ? 0xff0000 : 0x7c3aed,
+							},
+						],
+					})
+					if (!result.success) {
+						throw new Error(result.error || "Discord webhook delivery failed");
+					}
+				});
+			}
+		} catch (err) {
+			console.error(`Webhook delivery failed (${cfg.type}, org ${orgId}):`, err);
+		}
+	}
 }
 
 export async function getNotifications(limit: number = 20) {
@@ -138,6 +222,18 @@ export async function sendReviewCompletedNotification(reviewId: string) {
 	} catch (emailError) {
 		console.error("Failed to send review completed email:", emailError);
 	}
+
+	try {
+		await deliverToIntegrations(review.repository.orgId, {
+			type: "completed",
+			prNumber: review.prNumber,
+			prTitle: review.prTitle,
+			prUrl: review.prUrl,
+			repositoryName: review.repository.fullName,
+		});
+	} catch (webhookError) {
+		console.error("Failed to deliver review webhook:", webhookError);
+	}
 }
 
 export async function sendReviewFailedNotification(
@@ -176,6 +272,19 @@ export async function sendReviewFailedNotification(
 		}
 	} catch (emailError) {
 		console.error("Failed to send review failed email:", emailError);
+	}
+
+	try {
+		await deliverToIntegrations(review.repository.orgId, {
+			type: "failed",
+			prNumber: review.prNumber,
+			prTitle: review.prTitle,
+			prUrl: review.prUrl,
+			repositoryName: review.repository.fullName,
+			error,
+		});
+	} catch (webhookError) {
+		console.error("Failed to deliver review webhook:", webhookError);
 	}
 }
 

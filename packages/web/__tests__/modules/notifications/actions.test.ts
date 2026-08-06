@@ -16,6 +16,9 @@ vi.mock("@/lib/db", () => ({
 		review: {
 			findUnique: vi.fn(),
 		},
+		integrationConfig: {
+			findMany: vi.fn().mockResolvedValue([]),
+		},
 	},
 }));
 
@@ -35,6 +38,12 @@ vi.mock("@/lib/email", () => ({
 	sendEmail: vi.fn().mockResolvedValue({}),
 }));
 
+// Mock webhooks
+vi.mock("@/lib/webhooks", () => ({
+	sendSlackWebhook: vi.fn().mockResolvedValue({ success: true }),
+	sendDiscordWebhook: vi.fn().mockResolvedValue({ success: true }),
+}));
+
 // Mock email templates
 vi.mock("@/modules/notifications/lib/email-templates", () => ({
 	reviewCompletedEmail: vi.fn().mockReturnValue("completed-html"),
@@ -50,6 +59,7 @@ vi.mock("next/headers", () => ({
 
 import prisma from "@/lib/db";
 import { sendEmail } from "@/lib/email";
+import { sendSlackWebhook, sendDiscordWebhook } from "@/lib/webhooks";
 import {
 	getNotifications,
 	getUnreadCount,
@@ -71,6 +81,7 @@ const mockPrisma = prisma as unknown as {
 		create: ReturnType<typeof vi.fn>;
 	};
 	review: { findUnique: ReturnType<typeof vi.fn> };
+	integrationConfig: { findMany: ReturnType<typeof vi.fn> };
 };
 
 describe("Notifications Server Actions", () => {
@@ -254,6 +265,72 @@ describe("Notifications Server Actions", () => {
 					}),
 				})
 			);
+		});
+	});
+
+	describe("review event webhook delivery", () => {
+		const slackRepo = {
+			id: "rev-1",
+			prNumber: 5,
+			prTitle: "Fix issues",
+			prUrl: "http://github.com/pr",
+			repository: {
+				fullName: "owner/repo",
+				orgId: "org-1",
+				user: { id: "user-123", email: "user@example.com" },
+			},
+		} as never;
+
+		it("delivers a completed review to the org's active Slack integration", async () => {
+			mockPrisma.review.findUnique.mockResolvedValue(slackRepo);
+			mockPrisma.user.findUnique.mockResolvedValue({ emailNotifications: true } as never);
+			mockPrisma.notification.findFirst.mockResolvedValue(null);
+			mockPrisma.integrationConfig.findMany.mockResolvedValue([
+				{ id: "cfg-1", type: "slack", isActive: true, config: { webhookUrl: "https://hooks.slack.com/abc" } },
+			]);
+
+			await sendReviewCompletedNotification("rev-1");
+
+			expect(sendSlackWebhook).toHaveBeenCalledWith(
+				"https://hooks.slack.com/abc",
+				expect.objectContaining({ text: expect.stringContaining("Review complete") })
+			);
+		});
+
+		it("does not deliver when the repository has no linked org", async () => {
+			mockPrisma.review.findUnique.mockResolvedValue({
+				id: "rev-1",
+				prNumber: 5,
+				prTitle: "Fix issues",
+				prUrl: "http://github.com/pr",
+				repository: {
+					fullName: "owner/repo",
+					orgId: null,
+					user: { id: "user-123", email: "user@example.com" },
+				},
+			} as never);
+			mockPrisma.user.findUnique.mockResolvedValue({ emailNotifications: true } as never);
+			mockPrisma.notification.findFirst.mockResolvedValue(null);
+
+			await sendReviewCompletedNotification("rev-1");
+
+			expect(sendSlackWebhook).not.toHaveBeenCalled();
+		});
+
+		it("does not deliver when WEBHOOK_DELIVERY_ENABLED is false", async () => {
+			const prev = process.env.WEBHOOK_DELIVERY_ENABLED;
+			process.env.WEBHOOK_DELIVERY_ENABLED = "false";
+			mockPrisma.review.findUnique.mockResolvedValue(slackRepo);
+			mockPrisma.user.findUnique.mockResolvedValue({ emailNotifications: true } as never);
+			mockPrisma.notification.findFirst.mockResolvedValue(null);
+			mockPrisma.integrationConfig.findMany.mockResolvedValue([
+				{ id: "cfg-1", type: "slack", isActive: true, config: { webhookUrl: "https://hooks.slack.com/abc" } },
+			]);
+
+			await sendReviewCompletedNotification("rev-1");
+
+			expect(sendSlackWebhook).not.toHaveBeenCalled();
+			process.env.WEBHOOK_DELIVERY_ENABLED = prev;
 		});
 	});
 });

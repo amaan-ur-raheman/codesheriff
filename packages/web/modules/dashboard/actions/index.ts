@@ -240,12 +240,14 @@ export async function getContributionStats() {
  * @param owner - Repository owner username
  * @param repo - Repository name
  * @param githubId - GitHub repository ID
+ * @param orgId - Optional organization to link the repository to (org-context connections)
  * @returns Promise resolving to webhook creation result
  */
 export async function connectRepository(
 	owner: string,
 	repo: string,
-	githubId: number
+	githubId: number,
+	orgId?: string
 ) {
 	const session = await auth.api.getSession({
 		headers: await headers(),
@@ -253,6 +255,23 @@ export async function connectRepository(
 
 	if (!session) {
 		throw new Error("Unauthorized");
+	}
+
+	if (orgId) {
+		const membership = await prisma.organizationMember.findUnique({
+			where: {
+				organizationId_userId: {
+					organizationId: orgId,
+					userId: session.user.id,
+				},
+			},
+		});
+		if (!membership) {
+			throw new Error("You are not a member of this organization");
+		}
+		if (membership.role === "member") {
+			throw new Error("Only organization owners and admins can connect repositories");
+		}
 	}
 
 	const canConnect = await canConnectRepository(session.user.id);
@@ -274,6 +293,7 @@ export async function connectRepository(
 				fullName: `${owner}/${repo}`,
 				url: `https://github.com/${owner}/${repo}`,
 				userId: session.user.id,
+				orgId: orgId || null,
 			},
 		});
 

@@ -16,6 +16,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { getOrganizations } from "@/modules/organization/actions";
 import CreateOrgDialog from "@/modules/organization/components/create-org-dialog";
 import OrgMembers from "@/modules/organization/components/org-members";
+import OrgRepositories from "@/modules/organization/components/org-repositories";
 
 export default function OrganizationPageClient() {
 	const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
@@ -148,11 +149,19 @@ export default function OrganizationPageClient() {
 			)}
 
 			{selectedOrg && (
-				<OrgMembers
-					orgId={selectedOrg.id}
-					orgName={selectedOrg.name}
-					currentUserRole={selectedOrg.currentUserRole}
-				/>
+				<>
+					<OrgMembers
+						orgId={selectedOrg.id}
+						orgName={selectedOrg.name}
+						currentUserRole={selectedOrg.currentUserRole}
+					/>
+					{selectedOrg.currentUserRole !== "member" && (
+						<OrgRepositories
+							orgId={selectedOrg.id}
+							orgName={selectedOrg.name}
+						/>
+					)}
+				</>
 			)}
 		</div>
 	);
