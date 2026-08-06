@@ -140,6 +140,8 @@ describe("verifySuggestionsInSandbox (E2B mode)", () => {
 		const cloneCmd = String(cloneCall![0]);
 		expect(cloneCmd).not.toContain("token");
 		expect(cloneCmd).toContain("https://github.com/owner/repo.git");
+		// Clones into a writable dir — the template root "/" is read-only
+		expect(cloneCmd).toContain("/tmp/repo");
 		// The credential helper is wired via git config before the clone.
 		const configCall = mockRun.mock.calls.find((c) => String(c[0]).includes("credential.helper"));
 		expect(configCall).toBeDefined();
@@ -229,6 +231,29 @@ describe("verifySuggestionsInSandbox (E2B mode)", () => {
 			verifySuggestionsInSandbox("token", "owner", "repo", 1, suggestions)
 		).rejects.toBeInstanceOf(SandboxUnavailableError);
 		expect(mockKill).toHaveBeenCalledTimes(1);
+	});
+
+	it("falls back to npm when bun is not installed even if bun.lock exists", async () => {
+		mockRun.mockImplementation((cmd: string) => {
+			if (cmd.includes("test -f")) return Promise.resolve(makeCommandResult(0, "yes")); // bun.lock present
+			if (cmd.includes("command -v bun")) return Promise.resolve(makeCommandResult(127)); // bun missing
+			if (cmd.includes("npm run test")) return Promise.resolve(makeCommandResult(0));
+			if (cmd.includes("npm install")) return Promise.resolve(makeCommandResult(0));
+			return Promise.resolve(makeCommandResult(0));
+		});
+		mockRead.mockResolvedValue('const a = 1;');
+		mockRead.mockResolvedValueOnce('{"scripts":{"test":"vitest run"}}');
+
+		const results = await verifySuggestionsInSandbox("token", "owner", "repo", 1, suggestions);
+
+		// Despite the bun.lock, the runner must use npm when the binary is absent.
+		expect(results[0]).toMatchObject({ id: "s1", verifyStatus: "verified", success: true });
+		const installCall = mockRun.mock.calls.find((c) => String(c[0]).includes("install"));
+		expect(installCall).toBeDefined();
+		expect(String(installCall![0])).toContain("npm install");
+		const testCall = mockRun.mock.calls.find((c) => String(c[0]).includes("run test"));
+		expect(testCall).toBeDefined();
+		expect(String(testCall![0])).toContain("npm run test");
 	});
 
 	it("restores the file between two suggestions on the same file", async () => {

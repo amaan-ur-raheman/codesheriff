@@ -18,7 +18,10 @@ export class SandboxUnavailableError extends Error {
 	}
 }
 
-const REPO_DIR = "/repo";
+// The default E2B template runs as a non-root user: the filesystem root is
+// read-only, while /tmp (and $HOME) are writable. The clone/install/verify
+// session lives under /tmp. Confirmed live against the base template.
+const REPO_DIR = "/tmp/repo";
 const HELPER_PATH = "/tmp/git-credential-helper.sh";
 const MAX_ERROR_LENGTH = 2000;
 
@@ -120,9 +123,20 @@ export async function verifyWithE2B(
 			// No package.json — skip install/tests.
 		}
 
+		// The base template ships node/npm but NOT bun — so unlike the local
+		// exec path, a bun.lock alone is not enough: only use bun when the
+		// binary is actually present, otherwise fall back to npm.
 		const hasBunLock = await fileExists(sandbox, `${REPO_DIR}/bun.lock`);
-		const installCmd = hasBunLock ? "bun install" : "npm install";
-		const testCmd = hasBunLock ? "bun test" : "npm run test";
+		let bunAvailable = false;
+		try {
+			const bunCheck = await sandbox.commands.run("command -v bun");
+			bunAvailable = bunCheck.exitCode === 0;
+		} catch {
+			bunAvailable = false;
+		}
+		const useBun = hasBunLock && bunAvailable;
+		const installCmd = useBun ? "bun install" : "npm install";
+		const testCmd = useBun ? "bun test" : "npm run test";
 
 		if (hasTestScript) {
 			const installRes = await sandbox.commands.run(`cd ${REPO_DIR} && ${installCmd}`, {
