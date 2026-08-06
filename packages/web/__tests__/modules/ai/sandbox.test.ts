@@ -1,19 +1,38 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { mockCreate, mockKill, mockRun, mockRead, mockWrite, MockTimeoutError, MockFileNotFoundError } =
-	vi.hoisted(() => {
-		class MockTimeoutError extends Error {}
-		class MockFileNotFoundError extends Error {}
-		return {
-			mockCreate: vi.fn(),
-			mockKill: vi.fn(),
-			mockRun: vi.fn(),
-			mockRead: vi.fn(),
-			mockWrite: vi.fn(),
-			MockTimeoutError,
-			MockFileNotFoundError,
-		};
-	});
+const {
+	mockCreate,
+	mockKill,
+	mockRun,
+	mockRead,
+	mockWrite,
+	MockTimeoutError,
+	MockFileNotFoundError,
+	MockCommandExitError,
+} = vi.hoisted(() => {
+	class MockTimeoutError extends Error {}
+	class MockFileNotFoundError extends Error {}
+	// Mirrors the real E2B SDK: commands.run throws this on non-zero exits.
+	class MockCommandExitError extends Error {
+		constructor(
+			public exitCode: number,
+			public stdout: string,
+			public stderr: string
+		) {
+			super(`Command exited with code ${exitCode}`);
+		}
+	}
+	return {
+		mockCreate: vi.fn(),
+		mockKill: vi.fn(),
+		mockRun: vi.fn(),
+		mockRead: vi.fn(),
+		mockWrite: vi.fn(),
+		MockTimeoutError,
+		MockFileNotFoundError,
+		MockCommandExitError,
+	};
+});
 
 // Mock the E2B SDK before any import of the sandbox module.
 vi.mock("e2b", () => ({
@@ -22,6 +41,7 @@ vi.mock("e2b", () => ({
 	},
 	TimeoutError: MockTimeoutError,
 	FileNotFoundError: MockFileNotFoundError,
+	CommandExitError: MockCommandExitError,
 }));
 
 // Mock the GitHub lib so no real network is touched.
@@ -183,6 +203,29 @@ describe("verifySuggestionsInSandbox (E2B mode)", () => {
 			verifyError: "FAIL: 1 test failed",
 		});
 		expect(results[0].verifyDurationMs).toBeGreaterThanOrEqual(0);
+	});
+
+	it("maps a throwing CommandExitError (failing tests) to failed, not sandbox_error", async () => {
+		// The real E2B SDK throws CommandExitError on non-zero exits instead of
+		// returning { exitCode }; the runner must normalize that to a failed
+		// verdict, never a sandbox_error.
+		mockRun.mockImplementation((cmd: string) => {
+			if (cmd.includes("test -f")) return Promise.resolve(makeCommandResult(0, "yes"));
+			if (cmd.includes("run test") || cmd.includes("bun test"))
+				return Promise.reject(new MockCommandExitError(1, "", "FAIL: 1 test failed"));
+			return Promise.resolve(makeCommandResult(0));
+		});
+		mockRead.mockResolvedValue('const a = 1;');
+		mockRead.mockResolvedValueOnce('{"scripts":{"test":"vitest run"}}');
+
+		const results = await verifySuggestionsInSandbox("token", "owner", "repo", 1, suggestions);
+
+		expect(results[0]).toMatchObject({
+			id: "s1",
+			verifyStatus: "failed",
+			success: false,
+			verifyError: "FAIL: 1 test failed",
+		});
 	});
 
 	it("maps a command timeout to sandbox_error, not failed", async () => {

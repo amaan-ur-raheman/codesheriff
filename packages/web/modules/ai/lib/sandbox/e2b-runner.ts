@@ -1,4 +1,4 @@
-import { Sandbox, TimeoutError, FileNotFoundError } from "e2b";
+import { Sandbox, TimeoutError, FileNotFoundError, CommandExitError } from "e2b";
 import { getOctokit } from "@/modules/github/lib/github";
 import type { CodeSuggestion } from "../suggestions";
 import type { SandboxConfig } from "./config";
@@ -26,9 +26,29 @@ const REPO_DIR = "/tmp/repo";
 const HELPER_PATH = "/tmp/git-credential-helper.sh";
 const MAX_ERROR_LENGTH = 2000;
 
+/**
+ * The E2B SDK throws {@link CommandExitError} on non-zero exit codes rather
+ * than returning { exitCode, stdout, stderr }. Normalize it back to a result
+ * object so the caller's exit-code checks work as written.
+ */
+async function runCommand(
+	sandbox: Sandbox,
+	command: string,
+	opts?: { timeoutMs?: number }
+): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+	try {
+		return await sandbox.commands.run(command, opts);
+	} catch (err) {
+		if (err instanceof CommandExitError) {
+			return { exitCode: err.exitCode, stdout: err.stdout, stderr: err.stderr };
+		}
+		throw err;
+	}
+}
+
 async function fileExists(sandbox: Sandbox, path: string): Promise<boolean> {
 	try {
-		const res = await sandbox.commands.run(`test -f ${path} && echo yes`);
+		const res = await runCommand(sandbox, `test -f ${path} && echo yes`);
 		return res.stdout.trim() === "yes";
 	} catch {
 		return false;
@@ -101,10 +121,11 @@ export async function verifyWithE2B(
 		// Clone once via a git credential helper — the token only ever lives
 		// inside the helper file (0700) inside the ephemeral sandbox.
 		await sandbox.files.write(HELPER_PATH, buildGitCredentialHelperScript(token));
-		await sandbox.commands.run(`chmod 700 ${HELPER_PATH}`);
-		await sandbox.commands.run(`git config --global credential.helper ${HELPER_PATH}`);
+		await runCommand(sandbox, `chmod 700 ${HELPER_PATH}`);
+		await runCommand(sandbox, `git config --global credential.helper ${HELPER_PATH}`);
 
-		const cloneRes = await sandbox.commands.run(
+		const cloneRes = await runCommand(
+			sandbox,
 			`git clone --depth 1 --branch ${ref} ${cloneUrl} ${REPO_DIR}`,
 			{ timeoutMs: config.timeoutMs }
 		);
@@ -130,7 +151,7 @@ export async function verifyWithE2B(
 		const hasBunLock = await fileExists(sandbox, `${REPO_DIR}/bun.lock`);
 		let bunAvailable = false;
 		try {
-			const bunCheck = await sandbox.commands.run("command -v bun");
+			const bunCheck = await runCommand(sandbox, "command -v bun");
 			bunAvailable = bunCheck.exitCode === 0;
 		} catch {
 			bunAvailable = false;
@@ -140,9 +161,11 @@ export async function verifyWithE2B(
 		const testCmd = useBun ? "bun test" : "npm run test";
 
 		if (hasTestScript) {
-			const installRes = await sandbox.commands.run(`cd ${REPO_DIR} && ${installCmd}`, {
-				timeoutMs: config.timeoutMs,
-			});
+			const installRes = await runCommand(
+				sandbox,
+				`cd ${REPO_DIR} && ${installCmd}`,
+				{ timeoutMs: config.timeoutMs }
+			);
 			if (installRes.exitCode !== 0) {
 				throw new SandboxUnavailableError(
 					`Dependency install failed: ${(installRes.stderr || installRes.stdout).slice(0, MAX_ERROR_LENGTH)}`
@@ -200,7 +223,7 @@ export async function verifyWithE2B(
 					continue;
 				}
 
-				const testRes = await sandbox.commands.run(`cd ${REPO_DIR} && ${testCmd}`, {
+				const testRes = await runCommand(sandbox, `cd ${REPO_DIR} && ${testCmd}`, {
 					timeoutMs: config.timeoutMs,
 				});
 				if (testRes.exitCode === 0) {
@@ -216,9 +239,10 @@ export async function verifyWithE2B(
 				}
 			} catch (err) {
 				// Timeout and any sandbox-level failure are sandbox errors, never a
-				// verdict on the suggestion itself. A missing file or an unsafe path
-				// IS a verdict on the suggestion — it maps to failed, matching the
-				// exec runner's semantics for the same input.
+				// verdict on the suggestion itself. A missing file, an unsafe path, or
+				// a non-zero command exit (tests ran and failed) IS a verdict on the
+				// suggestion — it maps to failed, matching the exec runner's
+				// semantics for the same input.
 				if (err instanceof TimeoutError) {
 					record({ verifyStatus: "sandbox_error", verifyError: "Sandbox timed out" });
 				} else if (err instanceof UnsafeFilePathError) {
@@ -227,6 +251,17 @@ export async function verifyWithE2B(
 					record({
 						verifyStatus: "failed",
 						verifyError: `Could not apply fix: File not found in ${suggestion.filePath}`,
+					});
+				} else if (err instanceof CommandExitError) {
+					// The SDK throws this on non-zero exits (e.g. tests that ran and
+					// failed). runCommand normalizes it for commands.run calls, but
+					// stay safe if one escapes from another API.
+					record({
+						verifyStatus: "failed",
+						verifyError: (err.stderr || err.stdout || "Command exited with an error").slice(
+							0,
+							MAX_ERROR_LENGTH
+						),
 					});
 				} else {
 					record({
