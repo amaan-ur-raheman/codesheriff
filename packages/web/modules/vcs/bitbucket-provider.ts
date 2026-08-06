@@ -100,6 +100,7 @@ export class BitbucketProvider implements VCSProvider {
       diff,
       url: pr.links.html.href,
       state: pr.state === "MERGED" ? "merged" : pr.state === "CLOSED" ? "closed" : "open",
+      headSha: pr.source?.commit?.hash,
     };
   }
 

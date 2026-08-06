@@ -109,6 +109,7 @@ export class GitHubProvider implements ReviewCapableProvider {
       diff: diff as unknown as string,
       url: pr.html_url,
       state: pr.merged ? "merged" : pr.state === "closed" ? "closed" : "open",
+      headSha: pr.head?.sha,
     };
   }
 

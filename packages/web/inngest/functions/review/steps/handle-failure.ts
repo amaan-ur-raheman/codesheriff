@@ -1,29 +1,22 @@
 import prisma from "@/lib/db";
-import {
-	updateReviewCommentFailed,
-	getPullRequestDiff,
-	updatePRCommitStatus,
-	updatePRCheckRun,
-} from "@/modules/github/lib/github";
+import { isReviewCapableProvider } from "@/modules/vcs/resolve";
 import { dashboardReviewsUrl } from "../context";
+import type { ReviewContext } from "../context";
 import { sendReviewFailedNotification } from "@/modules/notifications/actions";
 
 /**
  * Step: update-github-comment-failed
- * Rewrites the loading comment into a failure message.
+ * Rewrites the loading comment into a failure message (ReviewCapable only).
  */
 export async function updateCommentFailed(
-	token: string,
-	owner: string,
-	repo: string,
-	loadingCommentId: number,
+	ctx: ReviewContext,
 	errorMessage: string
 ): Promise<void> {
-	await updateReviewCommentFailed(
-		token as string,
-		owner,
-		repo,
-		loadingCommentId as number,
+	if (!isReviewCapableProvider(ctx.provider) || !ctx.loadingCommentId) return;
+	await ctx.provider.updateReviewCommentFailed(
+		ctx.owner,
+		ctx.repo,
+		ctx.loadingCommentId,
 		errorMessage
 	);
 }
@@ -33,17 +26,18 @@ export async function updateCommentFailed(
  * the PR head sha when the event sha is the zero sha).
  */
 export async function resolveFailureSha(
-	token: string,
-	owner: string,
-	repo: string,
-	prNumber: number,
+	ctx: ReviewContext,
 	after?: string
 ): Promise<string | undefined> {
 	let sha = after;
 	if (!sha || sha === "0000000000000000000000000000000000000000") {
 		try {
-			const prData = await getPullRequestDiff(token, owner, repo, prNumber);
-			sha = prData.headSha;
+			const pr = await ctx.provider.getPullRequestDiff(
+				ctx.owner,
+				ctx.repo,
+				ctx.prNumber
+			);
+			sha = pr.headSha;
 		} catch (_) {}
 	}
 	return sha;
@@ -51,19 +45,17 @@ export async function resolveFailureSha(
 
 /**
  * Step: update-github-status-failed
- * Commit-status failure path when no check run exists.
+ * Commit-status failure path when no check run exists (ReviewCapable only).
  */
 export async function updateStatusFailed(
-	token: string,
-	owner: string,
-	repo: string,
+	ctx: ReviewContext,
 	sha: string,
 	errorMessage: string
 ): Promise<void> {
-	await updatePRCommitStatus(
-		token as string,
-		owner,
-		repo,
+	if (!isReviewCapableProvider(ctx.provider)) return;
+	await ctx.provider.updatePRCommitStatus(
+		ctx.owner,
+		ctx.repo,
 		sha,
 		"failure",
 		"Review failed: " + errorMessage.slice(0, 50),
@@ -73,20 +65,17 @@ export async function updateStatusFailed(
 
 /**
  * Step: update-github-check-run-failed
- * Completes the check run with a failure conclusion.
+ * Completes the check run with a failure conclusion (ReviewCapable only).
  */
 export async function updateCheckRunFailed(
-	token: string,
-	owner: string,
-	repo: string,
-	checkRunId: number,
+	ctx: ReviewContext,
 	errorMessage: string
 ): Promise<void> {
-	await updatePRCheckRun(
-		token as string,
-		owner,
-		repo,
-		checkRunId,
+	if (!isReviewCapableProvider(ctx.provider) || !ctx.checkRunId) return;
+	await ctx.provider.updatePRCheckRun(
+		ctx.owner,
+		ctx.repo,
+		ctx.checkRunId,
 		"completed",
 		"failure",
 		"CodeSheriff review failed: " + errorMessage.slice(0, 100)

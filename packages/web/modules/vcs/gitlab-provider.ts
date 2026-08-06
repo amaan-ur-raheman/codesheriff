@@ -95,6 +95,7 @@ export class GitLabProvider implements VCSProvider {
       diff,
       url: mr.web_url,
       state: mr.state === "merged" ? "merged" : mr.state === "closed" ? "closed" : "open",
+      headSha: mr.sha,
     };
   }
 

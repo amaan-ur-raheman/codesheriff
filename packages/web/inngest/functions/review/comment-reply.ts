@@ -7,11 +7,10 @@
 import { inngest } from "../../client";
 import prisma from "@/lib/db";
 import {
-	getPullRequestDiff,
-	getReviewCommentThread,
-	getIssueCommentThread,
-	postCommentReply,
-} from "@/modules/github/lib/github";
+	resolveProviderForRepository,
+	isReviewCapableProvider,
+} from "@/modules/vcs/resolve";
+import type { VCSProvider } from "@/modules/vcs/types";
 import { generateTextWithFallback } from "@/modules/ai/lib/models";
 import { sendCommentReplyNotification } from "@/modules/notifications/actions";
 
@@ -20,35 +19,19 @@ interface ReplyContext {
 	repo: string;
 	prNumber: number;
 	userId: string;
-	token: string;
 	diff: string;
 	title: string;
 	description: string | null;
 }
 
 async function fetchReplyPrData(
+	provider: VCSProvider,
 	userId: string,
 	owner: string,
 	repo: string,
 	prNumber: number
 ): Promise<ReplyContext> {
-	const account = await prisma.account.findFirst({
-		where: {
-			userId,
-			providerId: "github",
-		},
-	});
-
-	if (!account?.accessToken) {
-		throw new Error("No GitHub access token found");
-	}
-
-	const data = await getPullRequestDiff(
-		account.accessToken,
-		owner,
-		repo,
-		prNumber
-	);
+	const data = await provider.getPullRequestDiff(owner, repo, prNumber);
 
 	return {
 		...data,
@@ -56,30 +39,30 @@ async function fetchReplyPrData(
 		repo,
 		prNumber,
 		userId,
-		token: account.accessToken,
 	};
 }
 
 async function fetchThreadHistory(
-	ctx: ReplyContext,
+	owner: string,
+	repo: string,
+	prNumber: number,
+	provider: VCSProvider | undefined,
 	commentId?: number,
 	isReviewComment: boolean = false
 ) {
+	// Thread history is a ReviewCapable capability; non-capable providers
+	// (GitLab/Bitbucket) degrade to an empty thread.
+	if (!provider || !isReviewCapableProvider(provider)) return [];
+
 	if (isReviewComment && commentId) {
-		return await getReviewCommentThread(
-			ctx.token,
-			ctx.owner,
-			ctx.repo,
-			ctx.prNumber,
+		return await provider.getReviewCommentThread(
+			owner,
+			repo,
+			prNumber,
 			commentId
 		);
 	} else {
-		return await getIssueCommentThread(
-			ctx.token,
-			ctx.owner,
-			ctx.repo,
-			ctx.prNumber
-		);
+		return await provider.getIssueCommentThread(owner, repo, prNumber);
 	}
 }
 
@@ -154,12 +137,22 @@ export const handleCommentReply = inngest.createFunction(
 		} = event.data;
 
 		try {
+			const resolved = await resolveProviderForRepository(owner, repo);
+			const provider = resolved.provider;
+
 			const ctx = await step.run("fetch-pr-data-for-reply", async () => {
-				return await fetchReplyPrData(userId, owner, repo, prNumber);
+				return await fetchReplyPrData(provider, userId, owner, repo, prNumber);
 			});
 
 			const threadHistory = await step.run("fetch-thread-history", async () => {
-				return await fetchThreadHistory(ctx, commentId, isReviewComment);
+				return await fetchThreadHistory(
+					owner,
+					repo,
+					prNumber,
+					provider,
+					commentId,
+					isReviewComment
+				);
 			});
 
 			const replyContent = await step.run("generate-comment-reply", async () => {
@@ -167,15 +160,24 @@ export const handleCommentReply = inngest.createFunction(
 			});
 
 			await step.run("post-reply-comment", async () => {
-				await postCommentReply(
-					ctx.token,
-					ctx.owner,
-					ctx.repo,
-					ctx.prNumber,
-					replyContent,
-					commentId,
-					isReviewComment
-				);
+				if (isReviewCapableProvider(provider)) {
+					await provider.postCommentReply(
+						owner,
+						repo,
+						prNumber,
+						replyContent,
+						commentId,
+						isReviewComment
+					);
+				} else {
+					// GitLab/Bitbucket degrade: post the reply as a plain comment.
+					await provider.postReviewComment(
+						owner,
+						repo,
+						prNumber,
+						replyContent
+					);
+				}
 			});
 
 			await step.run("send-reply-notification", async () => {

@@ -25,6 +25,8 @@ export interface VCSPullRequest {
   diff: string;
   url: string;
   state: "open" | "closed" | "merged";
+  /** Head commit SHA of the PR, used for check runs and commit statuses. */
+  headSha?: string;
 }
 
 export interface VCSProvider {

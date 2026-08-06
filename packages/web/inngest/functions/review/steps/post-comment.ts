@@ -1,41 +1,42 @@
-import {
-	postReviewComment,
-	updateReviewComment,
-	postInlineReviewComments,
-	getValidDiffLines,
-} from "@/modules/github/lib/github";
+import { isReviewCapableProvider } from "@/modules/vcs/resolve";
+import { getValidDiffLines } from "@/modules/github/lib/github";
 import type { ReviewContext, ParsedSuggestions } from "../context";
 
 /**
  * Step: post-comment
- * Updates the loading comment (or posts a fresh overview comment when there
- * was none), then posts inline file suggestions that land on valid diff lines.
+ * Posts the final overview review comment (updating the loading comment where
+ * possible), then posts inline file suggestions that land on valid diff lines.
+ * Inline comments are only posted on ReviewCapableProvider; GitLab/Bitbucket
+ * degrade to the overview comment only.
  */
 export async function postComment(
 	ctx: ReviewContext,
 	review: string,
 	verifiedSuggestions: ParsedSuggestions | null
 ): Promise<void> {
+	const provider = ctx.provider;
+	const capable = isReviewCapableProvider(provider);
+
 	// Post or update the main overview review comment
-	if (ctx.loadingCommentId) {
-		await updateReviewComment(
-			ctx.token as string,
+	if (ctx.loadingCommentId && capable) {
+		await provider.updateReviewComment(
 			ctx.owner,
 			ctx.repo,
 			ctx.loadingCommentId,
-			review as string
+			review
 		);
 	} else {
-		await postReviewComment(
-			ctx.token as string,
+		await provider.postReviewComment(
 			ctx.owner,
 			ctx.repo,
 			ctx.prNumber,
-			review as string
+			review
 		);
 	}
 
-	// Post inline file suggestions if they exist
+	// Post inline file suggestions if they exist (ReviewCapable only)
+	if (!capable) return;
+
 	if (
 		verifiedSuggestions &&
 		verifiedSuggestions.suggestions &&
@@ -124,8 +125,7 @@ export async function postComment(
 				});
 
 			if (inlineComments.length > 0) {
-				await postInlineReviewComments(
-					ctx.token as string,
+				await provider.postInlineReviewComments(
 					ctx.owner,
 					ctx.repo,
 					ctx.prNumber,

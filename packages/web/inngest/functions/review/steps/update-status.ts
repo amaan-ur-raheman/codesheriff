@@ -1,17 +1,15 @@
-import {
-	updatePRCommitStatus,
-	updatePRCheckRun,
-} from "@/modules/github/lib/github";
+import { isReviewCapableProvider } from "@/modules/vcs/resolve";
 import { dashboardReviewsUrl } from "../context";
 import type { ReviewContext, ParsedSuggestions } from "../context";
 
 /**
  * Step: update-github-status-success
- * Commit-status fallback path when no check run exists.
+ * Commit-status fallback path when no check run exists. No-op for providers
+ * without commit-status support.
  */
 export async function updateStatusSuccess(ctx: ReviewContext): Promise<void> {
-	await updatePRCommitStatus(
-		ctx.token,
+	if (!isReviewCapableProvider(ctx.provider)) return;
+	await ctx.provider.updatePRCommitStatus(
 		ctx.owner,
 		ctx.repo,
 		ctx.headSha,
@@ -24,11 +22,14 @@ export async function updateStatusSuccess(ctx: ReviewContext): Promise<void> {
 /**
  * Step: update-github-check-run-success
  * Completes the check run with annotations built from the valid suggestions.
+ * Only runs on ReviewCapableProvider (check run ids only exist there).
  */
 export async function updateCheckRunSuccess(
 	ctx: ReviewContext,
 	verifiedSuggestions: ParsedSuggestions | null
 ): Promise<void> {
+	if (!isReviewCapableProvider(ctx.provider) || !ctx.checkRunId) return;
+
 	const validSuggestions = (verifiedSuggestions?.suggestions || []).filter(
 		(s: any) => {
 			if (!s) return false;
@@ -63,11 +64,10 @@ export async function updateCheckRunSuccess(
 		};
 	});
 
-	await updatePRCheckRun(
-		ctx.token,
+	await ctx.provider.updatePRCheckRun(
 		ctx.owner,
 		ctx.repo,
-		ctx.checkRunId as number,
+		ctx.checkRunId,
 		"completed",
 		"success",
 		`CodeSheriff review completed. Found ${annotations.length} findings.`,

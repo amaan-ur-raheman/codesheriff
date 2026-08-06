@@ -1,4 +1,5 @@
 import { verifySuggestionsInSandbox } from "@/modules/ai/lib/sandbox";
+import { isReviewCapableProvider } from "@/modules/vcs/resolve";
 import type { ReviewContext, ParsedSuggestions } from "../context";
 
 /**
@@ -17,6 +18,13 @@ export async function verifySuggestions(
 		!parsedSuggestions.suggestions ||
 		parsedSuggestions.suggestions.length === 0
 	) {
+		return parsedSuggestions;
+	}
+
+	// Sandbox verification fetches repository files with the provider token and
+	// is a ReviewCapable capability; skip it for GitLab/Bitbucket (the review
+	// still posts, just without sandbox-verified suggestions).
+	if (!isReviewCapableProvider(ctx.provider)) {
 		return parsedSuggestions;
 	}
 

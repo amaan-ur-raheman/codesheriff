@@ -12,9 +12,9 @@
  * @module inngest/functions
  */
 import { inngest } from "../client";
-import prisma from "@/lib/db";
 
 import type { ReviewContext } from "./review/context";
+import { resolveProviderForRepository } from "@/modules/vcs/resolve";
 import { fetchPrData } from "./review/steps/fetch-pr-data";
 import { createLoadingComment } from "./review/steps/create-loading-comment";
 import {
@@ -50,6 +50,10 @@ import {
  * Thin orchestrator: each pipeline stage lives in `./review/steps` as an
  * independently testable step that takes the typed ReviewContext and returns
  * its output. Step names are stable (durable-execution contract).
+ *
+ * The VCS provider is resolved once via the shared factory helper
+ * (`resolveProviderForRepository`) and threaded through `ctx.provider`; steps
+ * call provider methods instead of importing GitHub helpers directly.
  */
 export const generateReview = inngest.createFunction(
 	{ id: "generate-review", concurrency: 5 },
@@ -65,59 +69,55 @@ export const generateReview = inngest.createFunction(
 			checkRunId: eventCheckRunId,
 		} = event.data;
 
-		const ctx: ReviewContext = {
-			provider: "github",
-			owner,
-			repo,
-			prNumber,
-			userId,
-			before,
-			after,
-			token: "",
-			diff: "",
-			title: "",
-			description: null,
-			headSha: "",
-			checkRunId: eventCheckRunId || null,
-			loadingCommentId: null,
-		};
+		let ctx: ReviewContext | null = null;
 
 		try {
+			const resolved = await resolveProviderForRepository(owner, repo); 			ctx = {
+ 				provider: resolved.provider,
+ 				providerType: resolved.providerType,
+ 				owner,
+ 				repo,
+ 				prNumber,
+ 				userId,
+ 				before,
+ 				after,
+ 				token: resolved.token,
+ 				diff: "",
+ 				title: "",
+ 				description: null,
+ 				headSha: "",
+ 				checkRunId: eventCheckRunId || null,
+ 				loadingCommentId: null,
+ 			};
+
 			const prData = await step.run("fetch-pr-data", async () => {
-				return await fetchPrData({
-					userId,
-					owner,
-					repo,
-					prNumber,
-					before,
-					after,
-				});
+				return await fetchPrData(ctx as ReviewContext);
 			});
 
 			Object.assign(ctx, prData);
 
 			ctx.loadingCommentId = await step.run("create-loading-comment", async () => {
-				return await createLoadingComment(ctx);
+				return await createLoadingComment(ctx as ReviewContext);
 			});
 
 			if (!ctx.checkRunId) {
 				ctx.checkRunId = await step.run("create-github-check-run", async () => {
-					return await createCheckRun(ctx);
+					return await createCheckRun(ctx as ReviewContext);
 				});
 
 				if (!ctx.checkRunId) {
 					await step.run("update-github-status-pending", async () => {
-						await updateStatusPending(ctx);
+						await updateStatusPending(ctx as ReviewContext);
 					});
 				}
 			}
 
 			const context = await step.run("retrieve-context", async () => {
-				return await retrieveReviewContext(ctx);
+				return await retrieveReviewContext(ctx as ReviewContext);
 			});
 
 			const review = await step.run("generate-ai-review", async () => {
-				return await generateAiReview(ctx, context);
+				return await generateAiReview(ctx as ReviewContext, context);
 			});
 
 			const parsedSuggestions = await step.run("parse-suggestions", async () => {
@@ -125,15 +125,15 @@ export const generateReview = inngest.createFunction(
 			});
 
 			const verifiedSuggestions = await step.run("verify-suggestions-sandbox", async () => {
-				return await verifySuggestions(ctx, parsedSuggestions);
+				return await verifySuggestions(ctx as ReviewContext, parsedSuggestions);
 			});
 
 			await step.run("post-comment", async () => {
-				await postComment(ctx, review as string, verifiedSuggestions);
+				await postComment(ctx as ReviewContext, review as string, verifiedSuggestions);
 			});
 
 			const savedReview = await step.run("save-review", async () => {
-				return await saveReview(ctx, review as string, verifiedSuggestions);
+				return await saveReview(ctx as ReviewContext, review as string, verifiedSuggestions);
 			});
 
 			await step.run("send-notification", async () => {
@@ -142,16 +142,16 @@ export const generateReview = inngest.createFunction(
 
 			if (!ctx.checkRunId) {
 				await step.run("update-github-status-success", async () => {
-					await updateStatusSuccess(ctx);
+					await updateStatusSuccess(ctx as ReviewContext);
 				});
 			} else {
 				await step.run("update-github-check-run-success", async () => {
-					await updateCheckRunSuccess(ctx, verifiedSuggestions);
+					await updateCheckRunSuccess(ctx as ReviewContext, verifiedSuggestions);
 				});
 			}
 
 			await step.run("send-webhook-notifications", async () => {
-				await sendWebhookNotifications(ctx, review as string);
+				await sendWebhookNotifications(ctx as ReviewContext, review as string);
 			});
 
 			return { success: true };
@@ -159,61 +159,31 @@ export const generateReview = inngest.createFunction(
 			const errorMessage =
 				error instanceof Error ? error.message : "Unknown error";
 
-			// Attempt to update commit status to failure on GitHub
+			// Attempt to update commit status to failure via the resolved provider
 			try {
-				const account = await prisma.account.findFirst({
-					where: {
-						userId,
-						providerId: "github",
-					},
-				});
-				if (account?.accessToken) {
+				if (ctx) {
 					if (ctx.loadingCommentId) {
 						await step.run("update-github-comment-failed", async () => {
-							await updateCommentFailed(
-								account.accessToken as string,
-								owner,
-								repo,
-								ctx.loadingCommentId as number,
-								errorMessage
-							);
+							await updateCommentFailed(ctx as ReviewContext, errorMessage);
 						});
 					}
 
-					const sha = await resolveFailureSha(
-						account.accessToken,
-						owner,
-						repo,
-						prNumber,
-						after
-					);
+					const sha = await resolveFailureSha(ctx as ReviewContext, after);
 
 					if (sha) {
 						if (!ctx.checkRunId) {
 							await step.run("update-github-status-failed", async () => {
-								await updateStatusFailed(
-									account.accessToken as string,
-									owner,
-									repo,
-									sha,
-									errorMessage
-								);
+								await updateStatusFailed(ctx as ReviewContext, sha as string, errorMessage);
 							});
 						} else {
 							await step.run("update-github-check-run-failed", async () => {
-								await updateCheckRunFailed(
-									account.accessToken as string,
-									owner,
-									repo,
-									ctx.checkRunId as number,
-									errorMessage
-								);
+								await updateCheckRunFailed(ctx as ReviewContext, errorMessage);
 							});
 						}
 					}
 				}
 			} catch (statusError) {
-				console.error("Failed to post error status to GitHub:", statusError);
+				console.error("Failed to post error status:", statusError);
 			}
 
 			const failedReview = await step.run("create-failed-review", async () => {
