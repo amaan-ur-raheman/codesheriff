@@ -65,7 +65,8 @@ export const ModelName = {
   OrganizationMember: 'OrganizationMember',
   Notification: 'Notification',
   ApiKey: 'ApiKey',
-  IntegrationConfig: 'IntegrationConfig'
+  IntegrationConfig: 'IntegrationConfig',
+  DeviceCode: 'DeviceCode'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -112,6 +113,7 @@ export const RepositoryScalarFieldEnum = {
   url: 'url',
   userId: 'userId',
   orgId: 'orgId',
+  provider: 'provider',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -296,6 +298,19 @@ export const IntegrationConfigScalarFieldEnum = {
 } as const
 
 export type IntegrationConfigScalarFieldEnum = (typeof IntegrationConfigScalarFieldEnum)[keyof typeof IntegrationConfigScalarFieldEnum]
+
+
+export const DeviceCodeScalarFieldEnum = {
+  id: 'id',
+  userCode: 'userCode',
+  status: 'status',
+  userId: 'userId',
+  apiKey: 'apiKey',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type DeviceCodeScalarFieldEnum = (typeof DeviceCodeScalarFieldEnum)[keyof typeof DeviceCodeScalarFieldEnum]
 
 
 export const SortOrder = {

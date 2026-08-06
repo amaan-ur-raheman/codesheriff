@@ -398,7 +398,8 @@ export const ModelName = {
   OrganizationMember: 'OrganizationMember',
   Notification: 'Notification',
   ApiKey: 'ApiKey',
-  IntegrationConfig: 'IntegrationConfig'
+  IntegrationConfig: 'IntegrationConfig',
+  DeviceCode: 'DeviceCode'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -414,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "repository" | "review" | "reviewFeedback" | "reviewConfig" | "customReviewRule" | "userUsage" | "session" | "account" | "verification" | "organization" | "organizationMember" | "notification" | "apiKey" | "integrationConfig"
+    modelProps: "user" | "repository" | "review" | "reviewFeedback" | "reviewConfig" | "customReviewRule" | "userUsage" | "session" | "account" | "verification" | "organization" | "organizationMember" | "notification" | "apiKey" | "integrationConfig" | "deviceCode"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1528,6 +1529,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DeviceCode: {
+      payload: Prisma.$DeviceCodePayload<ExtArgs>
+      fields: Prisma.DeviceCodeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DeviceCodeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceCodePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DeviceCodeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceCodePayload>
+        }
+        findFirst: {
+          args: Prisma.DeviceCodeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceCodePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DeviceCodeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceCodePayload>
+        }
+        findMany: {
+          args: Prisma.DeviceCodeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceCodePayload>[]
+        }
+        create: {
+          args: Prisma.DeviceCodeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceCodePayload>
+        }
+        createMany: {
+          args: Prisma.DeviceCodeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DeviceCodeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceCodePayload>[]
+        }
+        delete: {
+          args: Prisma.DeviceCodeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceCodePayload>
+        }
+        update: {
+          args: Prisma.DeviceCodeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceCodePayload>
+        }
+        deleteMany: {
+          args: Prisma.DeviceCodeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DeviceCodeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DeviceCodeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceCodePayload>[]
+        }
+        upsert: {
+          args: Prisma.DeviceCodeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeviceCodePayload>
+        }
+        aggregate: {
+          args: Prisma.DeviceCodeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDeviceCode>
+        }
+        groupBy: {
+          args: Prisma.DeviceCodeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DeviceCodeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DeviceCodeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DeviceCodeCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1595,6 +1670,7 @@ export const RepositoryScalarFieldEnum = {
   url: 'url',
   userId: 'userId',
   orgId: 'orgId',
+  provider: 'provider',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1779,6 +1855,19 @@ export const IntegrationConfigScalarFieldEnum = {
 } as const
 
 export type IntegrationConfigScalarFieldEnum = (typeof IntegrationConfigScalarFieldEnum)[keyof typeof IntegrationConfigScalarFieldEnum]
+
+
+export const DeviceCodeScalarFieldEnum = {
+  id: 'id',
+  userCode: 'userCode',
+  status: 'status',
+  userId: 'userId',
+  apiKey: 'apiKey',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type DeviceCodeScalarFieldEnum = (typeof DeviceCodeScalarFieldEnum)[keyof typeof DeviceCodeScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2035,6 +2124,7 @@ export type GlobalOmitConfig = {
   notification?: Prisma.NotificationOmit
   apiKey?: Prisma.ApiKeyOmit
   integrationConfig?: Prisma.IntegrationConfigOmit
+  deviceCode?: Prisma.DeviceCodeOmit
 }
 
 /* Types for Logging */

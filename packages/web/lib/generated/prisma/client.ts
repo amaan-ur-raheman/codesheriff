@@ -114,3 +114,8 @@ export type ApiKey = Prisma.ApiKeyModel
  * 
  */
 export type IntegrationConfig = Prisma.IntegrationConfigModel
+/**
+ * Model DeviceCode
+ * 
+ */
+export type DeviceCode = Prisma.DeviceCodeModel

@@ -45,6 +45,7 @@ model Repository {
 	userId    String
 	user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 	orgId     String?
+	provider  String  @default("github")
 
 	createdAt DateTime @default(now())
 	updatedAt DateTime @updatedAt
@@ -250,4 +251,16 @@ model IntegrationConfig {
 	updatedAt      DateTime     @updatedAt
 
 	@@map("integration_config")
+}
+
+model DeviceCode {
+	id        String   @id
+	userCode  String   @unique
+	status    String   @default("pending")
+	userId    String?
+	apiKey    String?
+	expiresAt DateTime
+	createdAt DateTime @default(now())
+
+	@@map("device_code")
 }
