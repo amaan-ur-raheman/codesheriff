@@ -111,6 +111,7 @@ export const RepositoryScalarFieldEnum = {
   fullName: 'fullName',
   url: 'url',
   userId: 'userId',
+  orgId: 'orgId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
