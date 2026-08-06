@@ -1,13 +1,18 @@
-import { verifySuggestionsInSandbox } from "@/modules/ai/lib/sandbox";
+import {
+	verifySuggestionsInSandbox,
+	SandboxUnavailableError,
+} from "@/modules/ai/lib/sandbox";
 import { isReviewCapableProvider } from "@/modules/vcs/resolve";
 import type { ReviewContext, ParsedSuggestions } from "../context";
+import type { CodeSuggestion } from "@/modules/ai/lib/suggestions";
 
 /**
  * Step: verify-suggestions-sandbox
- * Verifies each parsed suggestion in the sandbox and attaches the
- * verified/verificationLog fields. Returns the parsed suggestions untouched
- * when there are none or when verification fails entirely (never fails the
- * review).
+ * Verifies each parsed suggestion in the sandbox and attaches the per-suggestion
+ * verify results (verifyStatus / verifyError / verifyDurationMs, plus the
+ * legacy verified/verificationLog flags). Returns the parsed suggestions
+ * untouched when there are none, when verification fails entirely, or when the
+ * sandbox is unavailable — the review never fails.
  */
 export async function verifySuggestions(
 	ctx: ReviewContext,
@@ -37,12 +42,17 @@ export async function verifySuggestions(
 			parsedSuggestions.suggestions
 		);
 
-		const updatedSuggestions = parsedSuggestions.suggestions.map((s: any) => {
+		const updatedSuggestions = parsedSuggestions.suggestions.map((s: CodeSuggestion) => {
 			const result = verificationResults.find((r) => r.id === s.id);
 			return {
 				...s,
+				// Legacy flags for existing UI rendering.
 				verified: result ? result.success : false,
 				verificationLog: result?.errorLog || undefined,
+				// New per-suggestion verify results.
+				verifyStatus: result?.verifyStatus,
+				verifyError: result?.verifyError,
+				verifyDurationMs: result?.verifyDurationMs,
 			};
 		});
 
@@ -51,7 +61,12 @@ export async function verifySuggestions(
 			suggestions: updatedSuggestions,
 		};
 	} catch (sandboxError) {
-		console.error("Sandbox verification execution failed:", sandboxError);
+		// Sandbox unavailable → suggestions posted unlabeled, review succeeds.
+		if (sandboxError instanceof SandboxUnavailableError) {
+			console.warn("Sandbox unavailable, posting suggestions unlabeled:", sandboxError.message);
+		} else {
+			console.error("Sandbox verification execution failed:", sandboxError);
+		}
 		return parsedSuggestions;
 	}
 }

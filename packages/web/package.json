@@ -57,6 +57,7 @@
 		"cmdk": "^1.1.1",
 		"date-fns": "^4.1.0",
 		"dotenv": "^17.2.3",
+		"e2b": "^2.38.0",
 		"embla-carousel-react": "^8.6.0",
 		"inngest": "^3.54.0",
 		"input-otp": "^1.4.2",
