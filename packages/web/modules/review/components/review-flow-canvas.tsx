@@ -5,7 +5,8 @@ import { Handle, Position, useNodesState, useEdgesState } from "@xyflow/react";
 import { Canvas } from "@/components/ai-elements/canvas";
 import { Badge } from "@/components/ui/badge";
 import { parseSuggestionsFromReview } from "@/modules/ai/lib/suggestions";
-import { FileCode2, Check, AlertCircle } from "lucide-react";
+import { resolveVerifyStatus } from "@/modules/review/lib/verify-status";
+import { FileCode2, Check, AlertCircle, AlertTriangle } from "lucide-react";
 
 // PR Node Component
 const PRNode = ({ data }: any) => (
@@ -51,14 +52,19 @@ const SuggestionNode = ({ data }: any) => {
 				<Badge variant="outline" className="text-[9px] uppercase tracking-widest py-0 font-bold px-1.5 bg-background">
 					{data.severity}
 				</Badge>
-				{data.verified === true && (
+				{data.verifyStatus === "verified" && (
 					<Badge variant="outline" className="text-[8px] bg-emerald-500/10 border-emerald-500/50 text-emerald-600 font-semibold py-0 gap-0.5">
 						<Check className="h-2 w-2" /> Verified
 					</Badge>
 				)}
-				{data.verified === false && (
+				{data.verifyStatus === "failed" && (
 					<Badge variant="outline" className="text-[8px] bg-red-500/10 border-red-500/50 text-red-600 font-semibold py-0 gap-0.5">
 						<AlertCircle className="h-2 w-2" /> Failed
+					</Badge>
+				)}
+				{data.verifyStatus === "sandbox_error" && (
+					<Badge variant="outline" className="text-[8px] bg-amber-500/10 border-amber-500/50 text-amber-600 font-semibold py-0 gap-0.5">
+						<AlertTriangle className="h-2 w-2" /> Sandbox Error
 					</Badge>
 				)}
 			</div>
@@ -158,7 +164,9 @@ export default function ReviewFlowCanvas({ review }: ReviewFlowCanvasProps) {
 						title: s.title,
 						description: s.description,
 						severity: s.severity,
-						verified: s.verified,
+						// Per-suggestion sandbox verify status ("neutral" when unlabeled;
+						// the node renders nothing for it).
+						verifyStatus: resolveVerifyStatus(s),
 					},
 				});
 

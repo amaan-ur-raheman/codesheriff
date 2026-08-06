@@ -1,5 +1,6 @@
 import { isReviewCapableProvider } from "@/modules/vcs/resolve";
 import { getValidDiffLines } from "@/modules/github/lib/github";
+import { verifyStatusMarkdown } from "@/modules/review/lib/verify-status";
 import type { ReviewContext, ParsedSuggestions } from "../context";
 
 /**
@@ -66,6 +67,10 @@ export async function postComment(
 						suggestionBlock = `\`\`\`suggestion\n${s.suggestedCode}\n\`\`\`\n\n`;
 					}
 
+					// Per-suggestion sandbox verify status (verified / failed /
+					// sandbox_error). Neutral suggestions render no status line.
+					const verifyStatusLine = verifyStatusMarkdown(s);
+
 					const promptBlock = `<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\nVerify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn \`@${s.filePath}\` at line ${s.startLine}, ${
 						s.title ? `${s.title}: ` : ""
 					}${s.description || ""}\n</details>\n\n`;
@@ -75,7 +80,7 @@ export async function postComment(
 						path: s.filePath,
 						line: endLine,
 						side: "RIGHT",
-						body: `${title}${description}${suggestionBlock}${promptBlock}`,
+						body: `${verifyStatusLine}${title}${description}${suggestionBlock}${promptBlock}`,
 					};
 
 					// Support multi-line suggestions
