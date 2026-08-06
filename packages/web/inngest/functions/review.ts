@@ -1,528 +1,157 @@
 /**
  * Inngest background job functions for Code Sheriff
- * 
+ *
  * This module contains serverless functions that handle:
  * - AI code review generation
  * - Repository indexing for RAG
  * - Webhook processing
- * 
+ *
  * All functions are executed asynchronously to avoid blocking the main application
  * and provide reliable processing with automatic retries.
- * 
+ *
  * @module inngest/functions
  */
 import { inngest } from "../client";
-import {
-	getPullRequestDiff,
-	postReviewComment,
-	postLoadingReviewComment,
-	updateReviewComment,
-	updateReviewCommentFailed,
-	postCommentReply,
-	getCompareDiff,
-	postInlineReviewComments,
-	updatePRCommitStatus,
-	createPRCheckRun,
-	updatePRCheckRun,
-	getReviewCommentThread,
-	getIssueCommentThread,
-	getValidDiffLines,
-} from "@/modules/github/lib/github";
-import { retrieveContext } from "@/modules/ai/lib/rag";
-import { verifySuggestionsInSandbox } from "@/modules/ai/lib/sandbox";
 import prisma from "@/lib/db";
+
+import type { ReviewContext } from "./review/context";
+import { fetchPrData } from "./review/steps/fetch-pr-data";
+import { createLoadingComment } from "./review/steps/create-loading-comment";
 import {
-	sendReviewCompletedNotification,
-	sendReviewFailedNotification,
-	sendCommentReplyNotification,
-} from "@/modules/notifications/actions";
-import { sendSlackWebhook, sendDiscordWebhook } from "@/lib/webhooks";
-
-import { generateText } from "ai";
-import { generateTextWithFallback } from "@/modules/ai/lib/models";
-
-const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/dashboard\/?$/, "");
-const dashboardReviewsUrl = `${appUrl}/dashboard/reviews`;
-import { google } from "@ai-sdk/google";
+	createCheckRun,
+	updateStatusPending,
+} from "./review/steps/create-check-run";
+import { retrieveReviewContext } from "./review/steps/retrieve-context";
+import { generateAiReview } from "./review/steps/generate-ai-review";
+import { parseSuggestions } from "./review/steps/parse-suggestions";
+import { verifySuggestions } from "./review/steps/verify-suggestions";
+import { postComment } from "./review/steps/post-comment";
+import { saveReview } from "./review/steps/save-review";
+import { sendNotification } from "./review/steps/send-notification";
+import {
+	updateStatusSuccess,
+	updateCheckRunSuccess,
+} from "./review/steps/update-status";
+import { sendWebhookNotifications } from "./review/steps/send-webhooks";
+import {
+	updateCommentFailed,
+	resolveFailureSha,
+	updateStatusFailed,
+	updateCheckRunFailed,
+	createFailedReview,
+	sendFailureNotification,
+} from "./review/steps/handle-failure";
 
 /**
  * Inngest function to generate an AI code review for a Pull Request.
  *
  * Triggered by: "pr.review.requested" event.
  *
- * Workflow:
- * 1. **fetch-pr-data**: Retrieves the PR diff, title, and description from GitHub.
- * 2. **retrieve-context**: Uses RAG to fetch relevant code snippets from the vector DB based on PR content.
- * 3. **generate-ai-review**: Sends the diff and context to Google Gemini to generate the review markdown.
- * 4. **post-comment**: Posts the generated review as a comment on the GitHub PR.
- * 5. **save-review**: Saves the review details to the database.
+ * Thin orchestrator: each pipeline stage lives in `./review/steps` as an
+ * independently testable step that takes the typed ReviewContext and returns
+ * its output. Step names are stable (durable-execution contract).
  */
 export const generateReview = inngest.createFunction(
 	{ id: "generate-review", concurrency: 5 },
 	{ event: "pr.review.requested" },
 	async ({ event, step }) => {
-		const { owner, repo, prNumber, userId, before, after, checkRunId: eventCheckRunId } = event.data;
-		let checkRunId: any = eventCheckRunId || null;
-		let loadingCommentId: number | null = null;
+		const {
+			owner,
+			repo,
+			prNumber,
+			userId,
+			before,
+			after,
+			checkRunId: eventCheckRunId,
+		} = event.data;
+
+		const ctx: ReviewContext = {
+			provider: "github",
+			owner,
+			repo,
+			prNumber,
+			userId,
+			before,
+			after,
+			token: "",
+			diff: "",
+			title: "",
+			description: null,
+			headSha: "",
+			checkRunId: eventCheckRunId || null,
+			loadingCommentId: null,
+		};
 
 		try {
-			const { diff, title, description, token, headSha } = await step.run(
-				"fetch-pr-data",
-				async () => {
-					const account = await prisma.account.findFirst({
-						where: {
-							userId: userId,
-							providerId: "github",
-						},
-					});
-
-					if (!account?.accessToken) {
-						throw new Error("No GitHub access token found");
-					}
-
-					const prMetadata = await getPullRequestDiff(
-						account.accessToken,
-						owner,
-						repo,
-						prNumber
-					);
-
-					let diffContent = prMetadata.diff;
-
-					if (before && after && before !== "0000000000000000000000000000000000000000") {
-						try {
-							diffContent = await getCompareDiff(
-								account.accessToken,
-								owner,
-								repo,
-								before,
-								after
-							);
-						} catch (compareError) {
-							console.warn("Failed to get compare diff, falling back to full PR diff:", compareError);
-						}
-					}
-
-					return {
-						diff: diffContent,
-						title: prMetadata.title,
-						description: prMetadata.description,
-						token: account.accessToken,
-						headSha: prMetadata.headSha,
-					};
-				}
-			);
-
-			loadingCommentId = await step.run("create-loading-comment", async () => {
-				try {
-					return await postLoadingReviewComment(token, owner, repo, prNumber);
-				} catch (commentError) {
-					console.error("Failed to post loading comment:", commentError);
-					return null;
-				}
+			const prData = await step.run("fetch-pr-data", async () => {
+				return await fetchPrData({
+					userId,
+					owner,
+					repo,
+					prNumber,
+					before,
+					after,
+				});
 			});
 
-			if (!checkRunId) {
-				checkRunId = await step.run("create-github-check-run", async () => {
-					return await createPRCheckRun(token, owner, repo, headSha);
+			Object.assign(ctx, prData);
+
+			ctx.loadingCommentId = await step.run("create-loading-comment", async () => {
+				return await createLoadingComment(ctx);
+			});
+
+			if (!ctx.checkRunId) {
+				ctx.checkRunId = await step.run("create-github-check-run", async () => {
+					return await createCheckRun(ctx);
 				});
 
-				if (!checkRunId) {
+				if (!ctx.checkRunId) {
 					await step.run("update-github-status-pending", async () => {
-						await updatePRCommitStatus(
-							token,
-							owner,
-							repo,
-							headSha,
-							"pending",
-							"Review in progress",
-							dashboardReviewsUrl
-						);
+						await updateStatusPending(ctx);
 					});
 				}
 			}
 
 			const context = await step.run("retrieve-context", async () => {
-				const query = `${title}\n${description}`;
-
-				return await retrieveContext(query, `${owner}/${repo}`);
+				return await retrieveReviewContext(ctx);
 			});
 
 			const review = await step.run("generate-ai-review", async () => {
-				const isIncremental = !!(before && after && before !== "0000000000000000000000000000000000000000");
-
-				const prompt = `You are an expert code reviewer. Analyze the following pull request and provide a detailed, constructive code review.
-${isIncremental ? `\n**NOTE:** This is an incremental review focusing ONLY on the latest changes pushed to the PR (base commit: ${before} to head commit: ${after}). Do not re-review parts of the code that are unchanged in this diff.\n` : ""}
-PR Title: ${title}
-PR Description: ${description || "No description provided"}
-
-Context from Codebase:
-${context.join("\n\n")}
-
-Code Changes:
-\`\`\`diff
-${diff}
-\`\`\`
-
-Please provide:
-1. **Walkthrough**: A file-by-file explanation of the changes.
-2. **Sequence Diagram**: A Mermaid JS sequence diagram visualizing the flow of the changes (if applicable). Use \`\`\`mermaid ... \`\`\` block. 
-   **STRICT MERMAID RULES**:
-   - Start with \`sequenceDiagram\`.
-   - **MUST** explicitly declare all participants at the top using \`participant Alias as Name\`.
-   - **DO NOT** use special characters like parentheses \`()\`, slashes \`/\`, dots \`.\`, brackets \`[]\`, or braces \`{}\` in participant names or message labels. Use only alphanumeric characters and spaces.
-   - Example of a GOOD label: \`Process Payment Request\`
-   - Example of a BAD label: \`processPayment(data)\`
-   - Keep the diagram focused on the core logic changes.
-   - If a diagram is not helpful for these changes, omit this section entirely.
-3. **Summary**: Brief overview.
-4. **Strengths**: What's done well.
-5. **Issues**: Bugs, security concerns, code smells.
-6. **Poem**: A short, creative poem summarizing the changes at the very end.
-
-IMPORTANT: Do NOT include any code suggestions, code improvements, or diff blocks in the main markdown sections of your response (Walkthrough, Summary, Issues, etc.), as these will be posted separately as inline comments directly on GitHub. Provide ALL code suggestions, improvements, and diffs ONLY inside the SUGGESTIONS_JSON block at the end.
-
-After the poem, you MUST include a JSON suggestions block in the following exact format. This block must appear at the very end of your response, wrapped in an HTML comment:
-
-<!-- SUGGESTIONS_JSON
-{
-  "suggestions": [
-    {
-      "id": "unique-id-1",
-      "filePath": "path/to/file.ts",
-      "startLine": 10,
-      "endLine": 15,
-      "severity": "error",
-      "title": "Short title for the issue",
-      "description": "Detailed explanation of the problem and how to fix it.",
-      "originalCode": "the problematic code",
-      "suggestedCode": "the improved code",
-      "category": "security"
-    }
-  ],
-  "summary": {
-    "totalIssues": 3,
-    "errors": 1,
-    "warnings": 1,
-    "suggestions": 1
-  }
-}
--->
-
-Rules for the SUGGESTIONS_JSON block:
-- "severity" must be one of: "error", "warning", "info", "suggestion"
-- "category" should be one of: "security", "performance", "bug", "style", "maintainability", "best-practice", "general"
-- Each suggestion must have a unique "id"
-- "originalCode" and "suggestedCode" should contain the exact code snippets (use the original indentation)
-- If no actionable inline suggestions exist, return an empty suggestions array with all summary counts at 0
-- Do NOT include any markdown or text after the closing --> of the SUGGESTIONS_JSON block
-
-Format the rest of your response in markdown.`;
-
-				return await generateTextWithFallback(prompt);
+				return await generateAiReview(ctx, context);
 			});
 
 			const parsedSuggestions = await step.run("parse-suggestions", async () => {
-				const match = (review as string).match(
-					/<!--\s*SUGGESTIONS_JSON\s*\n([\s\S]*?)\n\s*-->/
-				);
-
-				if (match?.[1]) {
-					try {
-						const parsed = JSON.parse(match[1]);
-						return {
-							suggestions: Array.isArray(parsed.suggestions)
-								? parsed.suggestions
-								: [],
-							summary: parsed.summary ?? {
-								totalIssues: 0,
-								errors: 0,
-								warnings: 0,
-								suggestions: 0,
-							},
-						};
-					} catch {
-						return null;
-					}
-				}
-
-				return null;
+				return await parseSuggestions(review as string);
 			});
 
 			const verifiedSuggestions = await step.run("verify-suggestions-sandbox", async () => {
-				if (!parsedSuggestions || !parsedSuggestions.suggestions || parsedSuggestions.suggestions.length === 0) {
-					return parsedSuggestions;
-				}
-
-				try {
-					const verificationResults = await verifySuggestionsInSandbox(
-						token as string,
-						owner,
-						repo,
-						prNumber,
-						parsedSuggestions.suggestions
-					);
-
-					const updatedSuggestions = parsedSuggestions.suggestions.map((s: any) => {
-						const result = verificationResults.find((r) => r.id === s.id);
-						return {
-							...s,
-							verified: result ? result.success : false,
-							verificationLog: result?.errorLog || undefined,
-						};
-					});
-
-					return {
-						...parsedSuggestions,
-						suggestions: updatedSuggestions,
-					};
-				} catch (sandboxError) {
-					console.error("Sandbox verification execution failed:", sandboxError);
-					return parsedSuggestions;
-				}
+				return await verifySuggestions(ctx, parsedSuggestions);
 			});
 
 			await step.run("post-comment", async () => {
-				// Post or update the main overview review comment
-				if (loadingCommentId) {
-					await updateReviewComment(token as string, owner, repo, loadingCommentId, review as string);
-				} else {
-					await postReviewComment(token as string, owner, repo, prNumber, review as string);
-				}
-
-				// Post inline file suggestions if they exist
-				if (verifiedSuggestions && verifiedSuggestions.suggestions && verifiedSuggestions.suggestions.length > 0) {
-					try {
-						const validDiffLines = getValidDiffLines(diff);
-						const inlineComments = verifiedSuggestions.suggestions
-							.map((s: any) => {
-								const severityText = s.severity === "error" 
-									? "⚠️ Potential issue | 🔴 Critical" 
-									: s.severity === "warning" 
-										? "⚠️ Potential issue | 🟡 Major" 
-										: "ℹ️ Suggestion";
-								
-								const title = s.title ? `### ${severityText}\n**${s.title}**\n\n` : `### ${severityText}\n\n`;
-								const description = s.description ? `${s.description}\n\n` : "";
-								
-								let suggestionBlock = "";
-								if (s.suggestedCode !== undefined && s.suggestedCode !== null) {
-									suggestionBlock = `\`\`\`suggestion\n${s.suggestedCode}\n\`\`\`\n\n`;
-								}
-
-								const promptBlock = `<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\nVerify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn \`@${s.filePath}\` at line ${s.startLine}, ${s.title ? `${s.title}: ` : ""}${s.description || ""}\n</details>\n\n`;
-
-								const endLine = s.endLine || s.startLine;
-								const commentObj: any = {
-									path: s.filePath,
-									line: endLine,
-									side: "RIGHT",
-									body: `${title}${description}${suggestionBlock}${promptBlock}`,
-								};
-
-								// Support multi-line suggestions
-								if (s.startLine && s.endLine && s.startLine < s.endLine) {
-									commentObj.start_line = s.startLine;
-									commentObj.start_side = "RIGHT";
-								}
-
-								return commentObj;
-							})
-							.filter((comment: any) => {
-								const filePath = comment.path;
-								const line = comment.line;
-								const startLine = comment.start_line;
-
-								const fileValidLines = validDiffLines[filePath];
-								if (!fileValidLines) {
-									console.warn(`Skipping comment for file not in diff: ${filePath}`);
-									return false;
-								}
-
-								// Check if end line is in diff
-								if (!fileValidLines.has(line)) {
-									console.warn(`Skipping comment for line not in diff: ${filePath}:${line}`);
-									return false;
-								}
-
-								// If multi-line, check start line. If start line is not in diff, degrade to single line.
-								if (startLine && !fileValidLines.has(startLine)) {
-									console.warn(`Degrading multi-line comment to single line: ${filePath}:${startLine}-${line}`);
-									delete comment.start_line;
-									delete comment.start_side;
-									// Remove the suggestion block to avoid posting an invalid multi-line suggestion on a single-line comment
-									comment.body = comment.body.replace(/```suggestion\r?\n[\s\S]*?\r?\n```\r?\n\r?\n/, "");
-								}
-
-								return true;
-							});
-
-						if (inlineComments.length > 0) {
-							await postInlineReviewComments(token as string, owner, repo, prNumber, inlineComments);
-						} else {
-							console.log("No valid inline comments within the PR diff to post.");
-						}
-					} catch (inlineError) {
-						console.error("Failed to post inline review comments:", inlineError);
-					}
-				}
+				await postComment(ctx, review as string, verifiedSuggestions);
 			});
 
 			const savedReview = await step.run("save-review", async () => {
-				const repository = await prisma.repository.findFirst({
-					where: {
-						owner,
-						name: repo,
-					},
-				});
-
-				if (repository) {
-					return await prisma.review.create({
-						data: {
-							repositoryId: repository.id,
-							prNumber,
-							prTitle: title,
-							prUrl: `https://github.com/${owner}/${repo}/pull/${prNumber}`,
-							review: review as string,
-							suggestions: verifiedSuggestions
-								? (verifiedSuggestions as any)
-								: undefined,
-							status: "completed",
-						},
-					});
-				}
+				return await saveReview(ctx, review as string, verifiedSuggestions);
 			});
 
 			await step.run("send-notification", async () => {
-				if (savedReview) {
-					await sendReviewCompletedNotification(savedReview.id);
-				}
+				await sendNotification(savedReview);
 			});
 
-			if (!checkRunId) {
+			if (!ctx.checkRunId) {
 				await step.run("update-github-status-success", async () => {
-					await updatePRCommitStatus(
-						token,
-						owner,
-						repo,
-						headSha,
-						"success",
-						"Review complete",
-						dashboardReviewsUrl
-					);
+					await updateStatusSuccess(ctx);
 				});
 			} else {
 				await step.run("update-github-check-run-success", async () => {
-					const validSuggestions = (verifiedSuggestions?.suggestions || []).filter((s: any) => {
-						if (!s) return false;
-						const startLine = Number(s.startLine);
-						if (isNaN(startLine) || startLine <= 0) {
-							return false;
-						}
-						const endLine = s.endLine !== undefined ? Number(s.endLine) : startLine;
-						if (isNaN(endLine) || endLine < startLine || endLine <= 0) {
-							return false;
-						}
-						return true;
-					});
-
-					const annotations = validSuggestions.map((s: any) => {
-						let level: "notice" | "warning" | "failure" = "notice";
-						if (s.severity === "error") level = "failure";
-						else if (s.severity === "warning") level = "warning";
-						
-						const start = Number(s.startLine);
-						const end = s.endLine !== undefined ? Number(s.endLine) : start;
-
-						return {
-							path: s.filePath,
-							start_line: start,
-							end_line: end,
-							annotation_level: level,
-							message: s.description || "Code suggestion",
-							title: s.title || "CodeSheriff Finding",
-						};
-					});
-
-					await updatePRCheckRun(
-						token,
-						owner,
-						repo,
-						checkRunId,
-						"completed",
-						"success",
-						`CodeSheriff review completed. Found ${annotations.length} findings.`,
-						annotations
-					);
+					await updateCheckRunSuccess(ctx, verifiedSuggestions);
 				});
 			}
 
 			await step.run("send-webhook-notifications", async () => {
-				const repository = await prisma.repository.findFirst({
-					where: { owner, name: repo },
-					include: {
-						user: {
-							include: {
-								organizationMemberships: {
-									include: {
-										organization: {
-											include: {
-												integrations: {
-													where: { isActive: true },
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				});
-
-				if (!repository) return;
-
-				const reviewSummary =
-					typeof review === "string"
-						? review.slice(0, 2000)
-						: "Review completed";
-
-				for (const membership of repository.user.organizationMemberships) {
-					for (const integration of membership.organization.integrations) {
-						const config = integration.config as any;
-						const webhookUrl = config?.webhookUrl;
-						if (!webhookUrl) continue;
-
-						if (integration.type === "slack") {
-							await sendSlackWebhook(webhookUrl, {
-								text: `:horse: Review completed for PR #${prNumber} in ${owner}/${repo}`,
-								blocks: [
-									{
-										type: "section",
-										text: {
-											type: "mrkdwn",
-											text: `:white_check_mark: *Review Complete*\n*PR:* <${`https://github.com/${owner}/${repo}/pull/${prNumber}`}|#${prNumber} ${title}>\n*Repo:* ${owner}/${repo}\n\n${reviewSummary.slice(0, 300)}...`,
-										},
-									},
-								],
-							});
-						} else if (integration.type === "discord") {
-							await sendDiscordWebhook(webhookUrl, {
-								content: "",
-								embeds: [
-									{
-										title: `Review Complete: #${prNumber} ${title}`,
-										description: reviewSummary.slice(0, 2000),
-										url: `https://github.com/${owner}/${repo}/pull/${prNumber}`,
-										color: 0x22c55e,
-										author: {
-											name: `${owner}/${repo}`,
-										},
-									},
-								],
-							});
-						}
-					}
-				}
+				await sendWebhookNotifications(ctx, review as string);
 			});
 
 			return { success: true };
@@ -534,58 +163,50 @@ Format the rest of your response in markdown.`;
 			try {
 				const account = await prisma.account.findFirst({
 					where: {
-						userId: userId,
+						userId,
 						providerId: "github",
 					},
 				});
 				if (account?.accessToken) {
-					if (loadingCommentId) {
+					if (ctx.loadingCommentId) {
 						await step.run("update-github-comment-failed", async () => {
-							await updateReviewCommentFailed(
+							await updateCommentFailed(
 								account.accessToken as string,
 								owner,
 								repo,
-								loadingCommentId as number,
+								ctx.loadingCommentId as number,
 								errorMessage
 							);
 						});
 					}
 
-					let sha = after;
-					if (!sha || sha === "0000000000000000000000000000000000000000") {
-						try {
-							const prData = await getPullRequestDiff(
-								account.accessToken,
-								owner,
-								repo,
-								prNumber
-							);
-							sha = prData.headSha;
-						} catch (_) {}
-					}
+					const sha = await resolveFailureSha(
+						account.accessToken,
+						owner,
+						repo,
+						prNumber,
+						after
+					);
+
 					if (sha) {
-						if (!checkRunId) {
+						if (!ctx.checkRunId) {
 							await step.run("update-github-status-failed", async () => {
-								await updatePRCommitStatus(
+								await updateStatusFailed(
 									account.accessToken as string,
 									owner,
 									repo,
 									sha,
-									"failure",
-									"Review failed: " + errorMessage.slice(0, 50),
-									dashboardReviewsUrl
+									errorMessage
 								);
 							});
 						} else {
 							await step.run("update-github-check-run-failed", async () => {
-								await updatePRCheckRun(
+								await updateCheckRunFailed(
 									account.accessToken as string,
 									owner,
 									repo,
-									checkRunId,
-									"completed",
-									"failure",
-									"CodeSheriff review failed: " + errorMessage.slice(0, 100)
+									ctx.checkRunId as number,
+									errorMessage
 								);
 							});
 						}
@@ -596,145 +217,16 @@ Format the rest of your response in markdown.`;
 			}
 
 			const failedReview = await step.run("create-failed-review", async () => {
-				const repository = await prisma.repository.findFirst({
-					where: { owner, name: repo },
-				});
-
-				if (repository) {
-					return await prisma.review.create({
-						data: {
-							repositoryId: repository.id,
-							prNumber,
-							prTitle: `${owner}/${repo} PR #${prNumber}`,
-							prUrl: `https://github.com/${owner}/${repo}/pull/${prNumber}`,
-							review: `Review failed: ${errorMessage}`,
-							status: "failed",
-						},
-					});
-				}
+				return await createFailedReview(owner, repo, prNumber, errorMessage);
 			});
 
-			if (failedReview) {
-				await step.run("send-failure-notification", async () => {
-					await sendReviewFailedNotification(failedReview.id, errorMessage);
-				});
-			}
+			await step.run("send-failure-notification", async () => {
+				await sendFailureNotification(failedReview, errorMessage);
+			});
 
 			throw error;
 		}
 	}
 );
 
-/**
- * Inngest function to handle conversational comment replies when @codesheriff is mentioned.
- *
- * Triggered by: "pr.comment.replied" event.
- */
-export const handleCommentReply = inngest.createFunction(
-	{ id: "handle-comment-reply", concurrency: 5 },
-	{ event: "pr.comment.replied" },
-	async ({ event, step }) => {
-		const { owner, repo, prNumber, commentBody, commentId, isReviewComment, userId } = event.data;
-
-		try {
-			const { diff, title, description, token } = await step.run(
-				"fetch-pr-data-for-reply",
-				async () => {
-					const account = await prisma.account.findFirst({
-						where: {
-							userId: userId,
-							providerId: "github",
-						},
-					});
-
-					if (!account?.accessToken) {
-						throw new Error("No GitHub access token found");
-					}
-
-					const data = await getPullRequestDiff(
-						account.accessToken,
-						owner,
-						repo,
-						prNumber
-					);
-
-					return {
-						...data,
-						token: account.accessToken,
-					};
-				}
-			);
-
-			const threadHistory = await step.run("fetch-thread-history", async () => {
-				if (isReviewComment && commentId) {
-					return await getReviewCommentThread(token, owner, repo, prNumber, commentId);
-				} else {
-					return await getIssueCommentThread(token, owner, repo, prNumber);
-				}
-			});
-
-			const replyContent = await step.run("generate-comment-reply", async () => {
-				const threadPrompt = threadHistory && threadHistory.length > 0
-					? `Conversation History:\n${threadHistory.map((c: any) => `${c.author}: ${c.body}`).join("\n\n")}\n\n`
-					: "";
-
-				const prompt = `You are Code Sheriff 🤠, an expert AI code reviewer. A developer has asked you a question regarding their Pull Request or a specific line of code.
-
-${threadPrompt}PR Title: ${title}
-PR Description: ${description || "No description provided"}
-
-Code Changes:
-\`\`\`diff
-${diff}
-\`\`\`
-
-User's Question:
-"${commentBody}"
-
-Please provide a helpful, clear, and constructive answer. Respond as a participant in the conversation thread. If they are asking you to suggest code improvements or fixes, specify them in inline code blocks with exact changes. Keep your response concise, polite, and technical.`;
-
-				return await generateTextWithFallback(prompt);
-			});
-
-			await step.run("post-reply-comment", async () => {
-				await postCommentReply(
-					token,
-					owner,
-					repo,
-					prNumber,
-					replyContent,
-					commentId,
-					isReviewComment
-				);
-			});
-
-			await step.run("send-reply-notification", async () => {
-				const repository = await prisma.repository.findFirst({
-					where: { owner, name: repo },
-				});
-
-				if (repository) {
-					const review = await prisma.review.findFirst({
-						where: {
-							repositoryId: repository.id,
-							prNumber,
-						},
-						orderBy: { createdAt: "desc" },
-					});
-
-					if (review) {
-						await sendCommentReplyNotification(
-							review.id,
-							replyContent as string
-						);
-					}
-				}
-			});
-
-			return { success: true };
-		} catch (error) {
-			console.error("Failed to process comment reply:", error);
-			throw error;
-		}
-	}
-);
+export { handleCommentReply } from "./review/comment-reply";
