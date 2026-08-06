@@ -1,6 +1,21 @@
-import { VCSProvider, VCSRepository, VCSFile, VCSPullRequest } from "./types";
+import {
+  VCSProvider,
+  VCSRepository,
+  VCSFile,
+  VCSPullRequest,
+  GitLabCredentials,
+} from "./types";
+import { resolveVCSAccessToken } from "./credentials";
 
 const GITLAB_API_BASE = "https://gitlab.com/api/v4";
+
+/**
+ * Resolves the stored GitLab access token for the authenticated user.
+ */
+export async function resolveGitLabCredentials(): Promise<GitLabCredentials> {
+  const token = await resolveVCSAccessToken("gitlab");
+  return { token };
+}
 
 export class GitLabProvider implements VCSProvider {
   name = "gitlab" as const;
