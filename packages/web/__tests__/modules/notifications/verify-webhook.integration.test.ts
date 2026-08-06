@@ -134,7 +134,7 @@ beforeAll(async () => {
 			config: { webhookUrl: `${BASE}/discord` },
 		},
 	});
-});
+}, 60_000);
 
 afterAll(async () => {
 	await prisma.notification.deleteMany({ where: { userId: UID } });
@@ -148,7 +148,7 @@ afterAll(async () => {
 	await prisma.organization.deleteMany({ where: { id: ORG } });
 	await prisma.user.deleteMany({ where: { id: UID } });
 	await new Promise<void>((r) => server.close(() => r()));
-});
+}, 60_000);
 
 describe("review event webhook delivery (runtime)", () => {
 	it("AC-1: completed review delivers to active Slack and Discord for the org", async () => {
