@@ -4,6 +4,7 @@ import type { CodeSuggestion } from "../suggestions";
 import type { SandboxConfig } from "./config";
 import type { VerificationResult } from "./types";
 import { buildGitCredentialHelperScript } from "./git-credential-helper";
+import { assertSafeRepoPath, UnsafeFilePathError } from "./paths";
 
 /**
  * Thrown when the E2B sandbox cannot be provisioned or the review cannot be
@@ -170,6 +171,8 @@ export async function verifyWithE2B(
 			let pristineContent = "";
 
 			try {
+				// Suggestion paths are AI-generated — never let them escape the clone.
+				assertSafeRepoPath(suggestion.filePath);
 				const filePath = `${REPO_DIR}/${suggestion.filePath}`;
 				const content = await sandbox.files.read(filePath);
 				pristineContent = content;
@@ -212,17 +215,25 @@ export async function verifyWithE2B(
 					});
 				}
 			} catch (err) {
-				// Timeout and any sandbox-level failure are sandbox errors,
-				// never a verdict on the suggestion itself.
-				record({
-					verifyStatus: "sandbox_error",
-					verifyError:
-						err instanceof TimeoutError
-							? "Sandbox timed out"
-							: err instanceof FileNotFoundError
-								? `Could not apply fix: File not found in ${suggestion.filePath}`
-								: `Sandbox error: ${err instanceof Error ? err.message : "unknown error"}`,
-				});
+				// Timeout and any sandbox-level failure are sandbox errors, never a
+				// verdict on the suggestion itself. A missing file or an unsafe path
+				// IS a verdict on the suggestion — it maps to failed, matching the
+				// exec runner's semantics for the same input.
+				if (err instanceof TimeoutError) {
+					record({ verifyStatus: "sandbox_error", verifyError: "Sandbox timed out" });
+				} else if (err instanceof UnsafeFilePathError) {
+					record({ verifyStatus: "failed", verifyError: err.message });
+				} else if (err instanceof FileNotFoundError) {
+					record({
+						verifyStatus: "failed",
+						verifyError: `Could not apply fix: File not found in ${suggestion.filePath}`,
+					});
+				} else {
+					record({
+						verifyStatus: "sandbox_error",
+						verifyError: `Sandbox error: ${err instanceof Error ? err.message : "unknown error"}`,
+					});
+				}
 			} finally {
 				// Restore the pristine file so the next suggestion is verified
 				// against the untouched clone — mirroring the exec path.

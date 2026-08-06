@@ -134,12 +134,13 @@ describe("device flow — poll", () => {
 		mockPrisma.deviceCode.findUnique.mockResolvedValue(
 			pendingCode({ expiresAt: new Date(Date.now() - 1000) })
 		);
-		mockPrisma.deviceCode.delete.mockResolvedValue({});
+		mockPrisma.deviceCode.deleteMany.mockResolvedValue({ count: 1 });
 
 		const res = await POST(makeRequest("poll", { device_code: "dev-1" }));
 		expect(res.status).toBe(400);
 		expect((await json(res)).error).toBe("expired_token");
-		expect(mockPrisma.deviceCode.delete).toHaveBeenCalledWith({ where: { id: "dev-1" } });
+		// Race-safe cleanup: deleteMany, never a bare delete (P2025-safe)
+		expect(mockPrisma.deviceCode.deleteMany).toHaveBeenCalledWith({ where: { id: "dev-1" } });
 	});
 
 	it("returns the API key + user exactly once, then removes the row", async () => {
@@ -236,6 +237,14 @@ describe("device flow — verify", () => {
 		});
 	});
 
+	it("rejects non-string user_code input instead of 500ing", async () => {
+		mockPrisma.deviceCode.findUnique.mockResolvedValue(null);
+
+		const res = await POST(makeRequest("verify", { user_code: { evil: true } }));
+		expect(res.status).toBe(400);
+		expect((await json(res)).error).toBe("Missing user_code");
+	});
+
 	it("rejects an unknown user code", async () => {
 		mockPrisma.deviceCode.findUnique.mockResolvedValue(null);
 
@@ -249,12 +258,12 @@ describe("device flow — verify", () => {
 		mockPrisma.deviceCode.findUnique.mockResolvedValue(
 			pendingCode({ expiresAt: new Date(Date.now() - 1000) })
 		);
-		mockPrisma.deviceCode.delete.mockResolvedValue({});
+		mockPrisma.deviceCode.deleteMany.mockResolvedValue({ count: 1 });
 
 		const res = await POST(makeRequest("verify", { user_code: "ABCDEFGH" }));
 		expect(res.status).toBe(400);
 		expect((await json(res)).error).toBe("Verification code expired");
-		expect(mockPrisma.deviceCode.delete).toHaveBeenCalledWith({ where: { id: "dev-1" } });
+		expect(mockPrisma.deviceCode.deleteMany).toHaveBeenCalledWith({ where: { id: "dev-1" } });
 		expect(mockPrisma.apiKey.create).not.toHaveBeenCalled();
 	});
 

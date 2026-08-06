@@ -256,6 +256,47 @@ describe("verifySuggestionsInSandbox (E2B mode)", () => {
 		expect(String(testCall![0])).toContain("npm run test");
 	});
 
+	it("rejects unsafe file paths as failed, never touching the sandbox filesystem", async () => {
+		mockRun.mockImplementation((cmd: string) =>
+			Promise.resolve(
+				cmd.includes("test -f") ? makeCommandResult(0, "yes") : makeCommandResult(0)
+			)
+		);
+		mockRead.mockResolvedValue('{"scripts":{"test":"vitest run"}}');
+
+		const results = await verifySuggestionsInSandbox("token", "owner", "repo", 1, [
+			{ ...suggestions[0], id: "evil", filePath: "../../etc/passwd" },
+		]);
+
+		expect(results[0]).toMatchObject({
+			id: "evil",
+			verifyStatus: "failed",
+			verifyError: "Unsafe file path rejected: ../../etc/passwd",
+		});
+		// No read/write happened for the traversal path
+		const evilReads = mockRead.mock.calls.filter((c) => String(c[0]).includes(".."));
+		expect(evilReads).toHaveLength(0);
+	});
+
+	it("maps a missing file to failed, matching the exec runner", async () => {
+		mockRun.mockImplementation((cmd: string) =>
+			Promise.resolve(
+				cmd.includes("test -f") ? makeCommandResult(0, "yes") : makeCommandResult(0)
+			)
+		);
+		mockRead.mockResolvedValue('const a = 1;');
+		mockRead.mockResolvedValueOnce('{"scripts":{"test":"vitest run"}}'); // package.json
+		mockRead.mockRejectedValueOnce(new MockFileNotFoundError("missing")); // suggestion file
+
+		const results = await verifySuggestionsInSandbox("token", "owner", "repo", 1, suggestions);
+
+		expect(results[0]).toMatchObject({
+			id: "s1",
+			verifyStatus: "failed",
+			verifyError: "Could not apply fix: File not found in src/a.ts",
+		});
+	});
+
 	it("restores the file between two suggestions on the same file", async () => {
 		mockRun.mockImplementation((cmd: string) => {
 			if (cmd.includes("test -f")) return Promise.resolve(makeCommandResult(0, "yes"));

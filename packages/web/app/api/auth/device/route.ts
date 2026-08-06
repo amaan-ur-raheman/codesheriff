@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 			const body = await request.json();
 			const { device_code } = body;
 
-			if (!device_code) {
+			if (typeof device_code !== "string" || !device_code) {
 				return NextResponse.json({ error: "Missing device_code" }, { status: 400 });
 			}
 
@@ -82,7 +82,9 @@ export async function POST(request: NextRequest) {
 
 			if (code.expiresAt.getTime() < Date.now()) {
 				// Lazy cleanup: expired codes are inert and removed on touch.
-				await prisma.deviceCode.delete({ where: { id: code.id } });
+				// deleteMany is race-safe — a concurrent request may have already
+				// removed the row (a bare delete would throw P2025 → 500).
+				await prisma.deviceCode.deleteMany({ where: { id: code.id } });
 				return NextResponse.json({ error: "expired_token" }, { status: 400 });
 			}
 
@@ -126,7 +128,7 @@ export async function POST(request: NextRequest) {
 			const body = await request.json();
 			const { user_code } = body;
 
-			if (!user_code) {
+			if (typeof user_code !== "string" || !user_code) {
 				return NextResponse.json({ error: "Missing user_code" }, { status: 400 });
 			}
 
@@ -139,7 +141,8 @@ export async function POST(request: NextRequest) {
 			}
 
 			if (code.expiresAt.getTime() < Date.now()) {
-				await prisma.deviceCode.delete({ where: { id: code.id } });
+				// Race-safe cleanup — see poll above.
+				await prisma.deviceCode.deleteMany({ where: { id: code.id } });
 				return NextResponse.json({ error: "Verification code expired" }, { status: 400 });
 			}
 
@@ -175,10 +178,9 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json({ error: "Invalid action" }, { status: 400 });
 	} catch (error) {
+		// Log the detail server-side; never echo internals (e.g. Prisma table
+		// names) back to the client.
 		console.error("Device flow endpoint error:", error);
-		return NextResponse.json(
-			{ error: error instanceof Error ? error.message : "Internal server error" },
-			{ status: 500 }
-		);
+		return NextResponse.json({ error: "Internal server error" }, { status: 500 });
 	}
 }

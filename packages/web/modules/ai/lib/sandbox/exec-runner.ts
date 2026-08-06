@@ -8,6 +8,7 @@ import type { CodeSuggestion } from "../suggestions";
 import type { SandboxConfig } from "./config";
 import type { VerificationResult } from "./types";
 import { buildGitCredentialHelperScript } from "./git-credential-helper";
+import { assertSafeRepoPath } from "./paths";
 
 const execAsync = promisify(exec);
 const MAX_ERROR_LENGTH = 2000;
@@ -106,9 +107,11 @@ export async function verifyInProcess(
 		// 5. Apply + verify each suggestion in the same session.
 		for (const suggestion of suggestions) {
 			const startedAt = Date.now();
-			const filePath = path.join(tempDir, suggestion.filePath);
 
 			try {
+				// Suggestion paths are AI-generated — never let them escape the clone.
+				assertSafeRepoPath(suggestion.filePath);
+				const filePath = path.join(tempDir, suggestion.filePath);
 				const content = await fs.readFile(filePath, "utf-8");
 
 				const normalizedContent = content.replace(/\r\n/g, "\n");
