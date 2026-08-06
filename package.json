@@ -14,7 +14,7 @@
         "cli:build": "bun --filter codesheriff-cli build",
         "cli:start": "bun --filter codesheriff-cli start",
         "lint": "bun --filter code-sheriff lint",
-        "typecheck": "tsc --noEmit --project packages/web/tsconfig.json && tsc --noEmit --project packages/cli/tsconfig.json",
+        "typecheck": "bun --filter code-sheriff typecheck && bun --filter codesheriff-cli typecheck",
         "test": "bun --filter code-sheriff test"
     },
     "workspaces": [
