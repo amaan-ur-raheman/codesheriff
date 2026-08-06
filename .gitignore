@@ -155,3 +155,14 @@ Icon?
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+.gstack/
+
+# Thesis / research artifacts (not part of the product)
+docs/
+proposal.pdf
+proposal.tex
+public/fig1-architecture.png
+public/fig2-methodology.png
+public/fig3-sandbox.png
+public/fig4-rag-pipeline.png
+research-findings-deploy-target-isolation.md
