@@ -33,6 +33,8 @@ const REV_NOORG = "verify-rev-noorg";
 const REV_DISABLED = "verify-rev-disabled";
 const REV_DEAD = "verify-rev-dead";
 
+// The hooks live on the root suite and run even when the describe below is
+// skipped, so they need their own guards — do not remove these as "redundant".
 beforeAll(async () => {
 	if (!RUN_INTEGRATION_TESTS) return;
 	server = http.createServer((req, res) => {
