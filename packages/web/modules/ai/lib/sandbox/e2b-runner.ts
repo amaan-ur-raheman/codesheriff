@@ -173,6 +173,22 @@ export async function verifyWithE2B(
 			}
 		}
 
+		// No-egress posture (Spec 0007 AC-4, closing Spec 0001 AC-1): clone and
+		// dependency install need outbound egress, but the test phase runs
+		// untrusted code. Lock the sandbox down to zero egress BEFORE any test
+		// command executes — deny-all, not an allow-list (nothing to maintain or
+		// leak). Fail closed: if the lockdown cannot be applied, never run the
+		// code with egress intact — the caller posts suggestions unlabeled.
+		if (hasTestScript) {
+			try {
+				await sandbox.updateNetwork({ allowInternetAccess: false });
+			} catch (err) {
+				throw new SandboxUnavailableError(
+					`E2B network lockdown failed: ${err instanceof Error ? err.message : "unknown error"}`
+				);
+			}
+		}
+
 		const results: VerificationResult[] = [];
 
 		for (const suggestion of suggestions) {
