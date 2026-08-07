@@ -4,6 +4,7 @@ vi.mock("@/lib/pinecone", () => ({
 	pineconeIndex: {
 		query: vi.fn(),
 		upsert: vi.fn(),
+		deleteMany: vi.fn(),
 	},
 }));
 
@@ -18,12 +19,13 @@ vi.mock("@ai-sdk/google", () => ({
 }));
 
 import { pineconeIndex } from "@/lib/pinecone";
-import { retrieveContext, indexCodebase } from "@/modules/ai/lib/rag";
+import { retrieveContext, indexCodebase, deleteCodebaseFiles } from "@/modules/ai/lib/rag";
 import { embed } from "ai";
 
 const mockPineconeIndex = pineconeIndex as unknown as {
 	query: ReturnType<typeof vi.fn>;
 	upsert: ReturnType<typeof vi.fn>;
+	deleteMany: ReturnType<typeof vi.fn>;
 };
 const mockEmbed = embed as unknown as ReturnType<typeof vi.fn>;
 
@@ -157,6 +159,40 @@ describe("RAG context retrieval", () => {
 
 			expect(mockPineconeIndex.upsert).not.toHaveBeenCalled();
 			consoleSpy.mockRestore();
+		});
+	});
+
+	describe("deleteCodebaseFiles", () => {
+		it("deletes vectors by the same stable id rule as indexCodebase", async () => {
+			mockPineconeIndex.deleteMany.mockResolvedValue({} as never);
+
+			await deleteCodebaseFiles("repo-1", ["src/gone.ts", "src/deep/nested.ts"]);
+
+			expect(mockPineconeIndex.deleteMany).toHaveBeenCalledWith({
+				ids: ["repo-1-src_gone.ts", "repo-1-src_deep_nested.ts"],
+			});
+		});
+
+		it("batches deletes of more than 100 ids", async () => {
+			mockPineconeIndex.deleteMany.mockResolvedValue({} as never);
+
+			const paths = Array.from({ length: 150 }, (_, i) => `src/file-${i}.ts`);
+			await deleteCodebaseFiles("repo-1", paths);
+
+			expect(mockPineconeIndex.deleteMany).toHaveBeenCalledTimes(2);
+			const firstCall = mockPineconeIndex.deleteMany.mock.calls[0][0] as {
+				ids: string[];
+			};
+			const secondCall = mockPineconeIndex.deleteMany.mock.calls[1][0] as {
+				ids: string[];
+			};
+			expect(firstCall.ids).toHaveLength(100);
+			expect(secondCall.ids).toHaveLength(50);
+		});
+
+		it("does not call deleteMany for an empty path list", async () => {
+			await deleteCodebaseFiles("repo-1", []);
+			expect(mockPineconeIndex.deleteMany).not.toHaveBeenCalled();
 		});
 	});
 });

@@ -8,6 +8,10 @@ import {
 	getReviewsOverTime,
 } from "@/modules/admin/actions";
 import {
+	getVerifyMetrics,
+	getIndexingMetrics,
+} from "@/modules/admin/actions/metrics";
+import {
 	Card,
 	CardContent,
 	CardDescription,
@@ -83,6 +87,16 @@ function AdminDashboard() {
 		queryFn: getReviewsOverTime,
 	});
 
+	const { data: verifyMetrics, isLoading: verifyLoading } = useQuery({
+		queryKey: ["admin-verify-metrics"],
+		queryFn: getVerifyMetrics,
+	});
+
+	const { data: indexingMetrics, isLoading: indexingLoading } = useQuery({
+		queryKey: ["admin-indexing-metrics"],
+		queryFn: getIndexingMetrics,
+	});
+
 	return (
 		<div className="space-y-6">
 			<div>
@@ -120,6 +134,79 @@ function AdminDashboard() {
 					loading={statsLoading}
 				/>
 			</div>
+
+			{/* Verify + indexing pipeline metrics (Spec 0006 AC-4) */}
+			<Card>
+				<CardHeader>
+					<CardTitle>Pipeline Metrics</CardTitle>
+					<CardDescription>
+						Sandbox verify and incremental indexing health over the
+						last 7 days
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					{verifyLoading || indexingLoading ? (
+						<div className="flex items-center justify-center py-8">
+							<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+						</div>
+					) : (
+						<div className="grid gap-6 md:grid-cols-2">
+							<div className="space-y-3">
+								<h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+									Sandbox Verify
+								</h3>
+								<MetricRow
+									label="Verified suggestions"
+									value={String(verifyMetrics?.sampleCount ?? 0)}
+								/>
+								<MetricRow
+									label="p50 duration"
+									value={formatMs(verifyMetrics?.p50DurationMs)}
+								/>
+								<MetricRow
+									label="p95 duration"
+									value={formatMs(verifyMetrics?.p95DurationMs)}
+								/>
+								<MetricRow
+									label="Sandbox error rate"
+									value={`${Math.round(
+										(verifyMetrics?.sandboxErrorRate ?? 0) * 100
+									)}%`}
+								/>
+							</div>
+							<div className="space-y-3">
+								<h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+									Incremental Indexing
+								</h3>
+								<MetricRow
+									label="Runs (7d)"
+									value={String(indexingMetrics?.runCount ?? 0)}
+								/>
+								<MetricRow
+									label="Avg file delta"
+									value={String(indexingMetrics?.avgFileDelta ?? "—")}
+								/>
+								<MetricRow
+									label="Max file delta"
+									value={String(indexingMetrics?.maxFileDelta ?? "—")}
+								/>
+								<MetricRow
+									label="Full re-index rate"
+									value={`${Math.round(
+										(indexingMetrics?.fallbackRate ?? 0) * 100
+									)}%`}
+								/>
+								<MetricRow
+									label="Failure rate"
+									value={`${Math.round(
+										(indexingMetrics?.failureRate ?? 0) * 100
+									)}%`}
+								/>
+							</div>
+						</div>
+					)}
+				</CardContent>
+			</Card>
 
 			<Card>
 				<CardHeader>
@@ -284,6 +371,21 @@ function AdminDashboard() {
 					</CardContent>
 				</Card>
 			</div>
+		</div>
+	);
+}
+
+function formatMs(ms: number | null | undefined): string {
+	if (ms === null || ms === undefined) return "—";
+	if (ms < 1000) return `${ms}ms`;
+	return `${(ms / 1000).toFixed(1)}s`;
+}
+
+function MetricRow({ label, value }: { label: string; value: string }) {
+	return (
+		<div className="flex items-center justify-between gap-4">
+			<span className="text-sm text-muted-foreground">{label}</span>
+			<span className="text-sm font-semibold tabular-nums">{value}</span>
 		</div>
 	);
 }

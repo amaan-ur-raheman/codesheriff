@@ -154,6 +154,43 @@ export const auth = betterAuth({
 							);
 						}
 					},
+					/**
+					 * Org billing (Spec 0003): reconcile organization subscriptions.
+					 * Subscription lifecycle events on an ORG customer update the
+					 * org's stored subscription id, so seat enforcement (AC-3) knows
+					 * whether the org is paid. Seat events are reconciliation no-ops
+					 * locally: member add/remove already keeps active count in sync.
+					 */
+					onPayload: async (payload: { type: string; data: any }) => {
+						if (!payload || typeof payload.type !== "string") return;
+
+						const type = payload.type as string;
+						const customerId: string | undefined =
+							payload.data?.customerId;
+
+						// Subscription lifecycle events on an org customer.
+						if (
+							type.startsWith("subscription.") &&
+							customerId
+						) {
+							const org = await prisma.organization.findUnique({
+								where: { polarCustomerId: customerId },
+							});
+
+							if (org) {
+								await prisma.organization.update({
+									where: { id: org.id },
+									data: {
+										polarSubscriptionId:
+											type === "subscription.revoked" ||
+											type === "subscription.canceled"
+												? null
+												: payload.data?.id ?? org.polarSubscriptionId,
+										},
+								});
+							}
+						}
+					},
 				}),
 			],
 		}),

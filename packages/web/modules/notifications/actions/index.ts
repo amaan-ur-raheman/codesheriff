@@ -4,7 +4,11 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import prisma from "@/lib/db";
 import { sendEmail } from "@/lib/email";
-import { sendSlackWebhook, sendDiscordWebhook } from "@/lib/webhooks";
+import {
+	sendSlackWebhook,
+	sendDiscordWebhook,
+	postWebhookWithTimeout,
+} from "@/lib/webhooks";
 import {
 	reviewCompletedEmail,
 	reviewFailedEmail,
@@ -42,24 +46,6 @@ interface WebhookPayload {
 
 const WEBHOOK_TIMEOUT_MS = Number(process.env.WEBHOOK_DELIVERY_TIMEOUT_MS) || 5000;
 
-async function postWithTimeout<T>(fn: () => Promise<T>): Promise<T> {
-	let lastError: unknown;
-	for (let attempt = 0; attempt < 2; attempt++) {
-		try {
-			return await Promise.race([
-				fn(),
-				new Promise<T>((_, reject) =>
-					setTimeout(() => reject(new Error("webhook delivery timed out")), WEBHOOK_TIMEOUT_MS)
-				),
-			]);
-		} catch (err) {
-			lastError = err;
-			if (attempt === 0) await new Promise((r) => setTimeout(r, 500));
-		}
-	}
-	throw lastError;
-}
-
 async function deliverToIntegrations(
 	orgId: string | null | undefined,
 	payload: WebhookPayload
@@ -79,10 +65,9 @@ async function deliverToIntegrations(
 
 	for (const cfg of configs) {
 		const webhookUrl = (cfg.config as { webhookUrl?: string } | null)?.webhookUrl;
-		if (!webhookUrl) continue;
-		try {
-			if (cfg.type === "slack") {
-				await postWithTimeout(async () => {
+		if (!webhookUrl) continue;			try {
+				if (cfg.type === "slack") {
+					await postWebhookWithTimeout(async () => {
 					const result = await sendSlackWebhook(webhookUrl, {
 						text,
 						blocks: [{ type: "section", text: { type: "mrkdwn", text } }],
@@ -92,7 +77,7 @@ async function deliverToIntegrations(
 					}
 				});
 			} else if (cfg.type === "discord") {
-				await postWithTimeout(async () => {
+				await postWebhookWithTimeout(async () => {
 					const result = await sendDiscordWebhook(webhookUrl, {
 						content: "",
 						embeds: [

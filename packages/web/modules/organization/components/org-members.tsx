@@ -55,6 +55,9 @@ export default function OrgMembers({
 }: OrgMembersProps) {
 	const [inviteEmail, setInviteEmail] = useState("");
 	const [inviteRole, setInviteRole] = useState("member");
+	const [seatCheckoutUrl, setSeatCheckoutUrl] = useState<string | null>(
+		null
+	);
 	const queryClient = useQueryClient();
 
 	const { data: org, isLoading } = useQuery({
@@ -69,12 +72,19 @@ export default function OrgMembers({
 		mutationFn: async () => {
 			return await inviteMember(orgId, inviteEmail, inviteRole);
 		},
-		onSuccess: () => {
+		onSuccess: (data) => {
 			queryClient.invalidateQueries({
 				queryKey: ["organization", orgId],
 			});
 			queryClient.invalidateQueries({ queryKey: ["organizations"] });
-			toast.success("Member invited successfully");
+			if (data?.seatCheckoutUrl) {
+				setSeatCheckoutUrl(data.seatCheckoutUrl);
+				toast.success(
+					"Invite created — complete payment to activate the seat"
+				);
+			} else {
+				toast.success("Member invited successfully");
+			}
 			setInviteEmail("");
 			setInviteRole("member");
 		},
@@ -154,6 +164,27 @@ export default function OrgMembers({
 				</div>
 			</CardHeader>
 			<CardContent className="space-y-6">
+				{/* Seat upgrade checkout (Spec 0003 AC-3) */}
+				{seatCheckoutUrl && (
+					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
+						<div className="space-y-1">
+							<p className="text-sm font-medium">
+								Additional seats require payment
+							</p>
+							<p className="text-sm text-muted-foreground">
+								The invite is saved, but the new seat activates once
+								the checkout is completed.
+							</p>
+						</div>
+						<Button
+							size="sm"
+							onClick={() => window.open(seatCheckoutUrl, "_blank")}
+						>
+							Complete payment
+						</Button>
+					</div>
+				)}
+
 				{/* Invite Form */}
 				{canManageMembers && (
 					<div className="flex items-end gap-3 p-4 bg-muted/50 rounded-lg">
@@ -212,7 +243,22 @@ export default function OrgMembers({
 
 				{/* Members List */}
 				<div className="space-y-3">
-					{org?.members.map((member) => (
+					{org?.members.map((member) => {
+						const isPending =
+							member.status === "pending" || !member.user;
+						const displayName =
+							member.user?.name ??
+							member.invitedEmail ??
+							"Pending invite";
+						const avatarFallback =
+							member.user?.name
+								?.split(" ")
+								.map((s) => s[0])
+								.join("")
+								.toUpperCase() ||
+							member.invitedEmail?.[0]?.toUpperCase() ||
+							"?";
+						return (
 						<div
 							key={member.id}
 							className="flex items-center justify-between p-3 rounded-lg border"
@@ -220,34 +266,37 @@ export default function OrgMembers({
 							<div className="flex items-center gap-3">
 								<Avatar className="h-10 w-10">
 									<AvatarImage
-										src={member.user.image || ""}
-										alt={member.user.name || ""}
+										src={member.user?.image || ""}
+										alt={displayName}
 									/>
 									<AvatarFallback>
-										{member.user.name
-											?.split(" ")
-											.map((s) => s[0])
-											.join("")
-											.toUpperCase() || "?"}
+										{avatarFallback}
 									</AvatarFallback>
 								</Avatar>
 								<div>
 									<p className="font-medium">
-										{member.user.name}
+										{displayName}
 									</p>
 									<p className="text-sm text-muted-foreground">
-										{member.user.email}
+										{member.user?.email ?? member.invitedEmail}
 									</p>
 								</div>
 							</div>
 							<div className="flex items-center gap-3">
-								<span className="text-xs text-muted-foreground">
-									Joined{" "}
-									{formatDistanceToNow(
-										new Date(member.joinedAt),
-										{ addSuffix: true }
-									)}
-								</span>
+								{isPending ? (
+									<Badge variant="secondary" className="gap-1">
+										<Loader2 className="h-3 w-3 animate-pulse" />
+										Invited
+									</Badge>
+								) : (
+									<span className="text-xs text-muted-foreground">
+										Joined{" "}
+										{formatDistanceToNow(
+											new Date(member.joinedAt),
+											{ addSuffix: true }
+										)}
+									</span>
+								)}
 								<Badge
 									variant={
 										member.role === "owner"
@@ -263,15 +312,16 @@ export default function OrgMembers({
 								</Badge>
 
 								{/* Role Change */}
-								{currentUserRole === "owner" &&
+								{!isPending &&
+									currentUserRole === "owner" &&
 									member.role !== "owner" && (
 										<Select
 											value={member.role}
 											onValueChange={(value) =>
-												roleMutation.mutate({
-													userId: member.user.id,
-													role: value,
-												})
+										roleMutation.mutate({
+											userId: member.user!.id,
+											role: value,
+										})
 											}
 											disabled={roleMutation.isPending}
 										>
@@ -290,7 +340,8 @@ export default function OrgMembers({
 									)}
 
 								{/* Remove Button */}
-								{canManageMembers &&
+								{!isPending &&
+									canManageMembers &&
 									member.role !== "owner" && (
 										<AlertDialog>
 											<AlertDialogTrigger asChild>
@@ -309,9 +360,8 @@ export default function OrgMembers({
 													</AlertDialogTitle>
 													<AlertDialogDescription>
 														Are you sure you want
-														to remove{" "}
-														{member.user.name}{" "}
-														from this
+														to remove{" "}															{member.user!.name}{" "}
+															from this
 														organization? This
 														action cannot be
 														undone.
@@ -324,8 +374,7 @@ export default function OrgMembers({
 													<AlertDialogAction
 														onClick={() =>
 															removeMutation.mutate(
-																member.user
-																	.id
+																member.user!.id
 															)
 														}
 														className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -338,7 +387,8 @@ export default function OrgMembers({
 									)}
 							</div>
 						</div>
-					))}
+						);
+					})}
 				</div>
 			</CardContent>
 		</Card>

@@ -42,6 +42,7 @@ vi.mock("@/lib/email", () => ({
 vi.mock("@/lib/webhooks", () => ({
 	sendSlackWebhook: vi.fn().mockResolvedValue({ success: true }),
 	sendDiscordWebhook: vi.fn().mockResolvedValue({ success: true }),
+	postWebhookWithTimeout: vi.fn(async (fn: () => Promise<unknown>) => fn()),
 }));
 
 // Mock email templates

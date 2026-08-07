@@ -386,6 +386,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   User: 'User',
   Repository: 'Repository',
+  IndexRun: 'IndexRun',
   Review: 'Review',
   ReviewFeedback: 'ReviewFeedback',
   ReviewConfig: 'ReviewConfig',
@@ -415,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "repository" | "review" | "reviewFeedback" | "reviewConfig" | "customReviewRule" | "userUsage" | "session" | "account" | "verification" | "organization" | "organizationMember" | "notification" | "apiKey" | "integrationConfig" | "deviceCode"
+    modelProps: "user" | "repository" | "indexRun" | "review" | "reviewFeedback" | "reviewConfig" | "customReviewRule" | "userUsage" | "session" | "account" | "verification" | "organization" | "organizationMember" | "notification" | "apiKey" | "integrationConfig" | "deviceCode"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -564,6 +565,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.RepositoryCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.RepositoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    IndexRun: {
+      payload: Prisma.$IndexRunPayload<ExtArgs>
+      fields: Prisma.IndexRunFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.IndexRunFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IndexRunPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.IndexRunFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IndexRunPayload>
+        }
+        findFirst: {
+          args: Prisma.IndexRunFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IndexRunPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.IndexRunFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IndexRunPayload>
+        }
+        findMany: {
+          args: Prisma.IndexRunFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IndexRunPayload>[]
+        }
+        create: {
+          args: Prisma.IndexRunCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IndexRunPayload>
+        }
+        createMany: {
+          args: Prisma.IndexRunCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.IndexRunCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IndexRunPayload>[]
+        }
+        delete: {
+          args: Prisma.IndexRunDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IndexRunPayload>
+        }
+        update: {
+          args: Prisma.IndexRunUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IndexRunPayload>
+        }
+        deleteMany: {
+          args: Prisma.IndexRunDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.IndexRunUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.IndexRunUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IndexRunPayload>[]
+        }
+        upsert: {
+          args: Prisma.IndexRunUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IndexRunPayload>
+        }
+        aggregate: {
+          args: Prisma.IndexRunAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateIndexRun>
+        }
+        groupBy: {
+          args: Prisma.IndexRunGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IndexRunGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.IndexRunCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IndexRunCountAggregateOutputType> | number
         }
       }
     }
@@ -1671,11 +1746,26 @@ export const RepositoryScalarFieldEnum = {
   userId: 'userId',
   orgId: 'orgId',
   provider: 'provider',
+  lastIndexedCommitSha: 'lastIndexedCommitSha',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type RepositoryScalarFieldEnum = (typeof RepositoryScalarFieldEnum)[keyof typeof RepositoryScalarFieldEnum]
+
+
+export const IndexRunScalarFieldEnum = {
+  id: 'id',
+  repositoryId: 'repositoryId',
+  runAt: 'runAt',
+  kind: 'kind',
+  status: 'status',
+  fileDelta: 'fileDelta',
+  error: 'error',
+  durationMs: 'durationMs'
+} as const
+
+export type IndexRunScalarFieldEnum = (typeof IndexRunScalarFieldEnum)[keyof typeof IndexRunScalarFieldEnum]
 
 
 export const ReviewScalarFieldEnum = {
@@ -1800,7 +1890,9 @@ export const OrganizationScalarFieldEnum = {
   description: 'description',
   ownerId: 'ownerId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  polarCustomerId: 'polarCustomerId',
+  polarSubscriptionId: 'polarSubscriptionId'
 } as const
 
 export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]
@@ -1811,6 +1903,10 @@ export const OrganizationMemberScalarFieldEnum = {
   organizationId: 'organizationId',
   userId: 'userId',
   role: 'role',
+  status: 'status',
+  invitedEmail: 'invitedEmail',
+  inviteToken: 'inviteToken',
+  invitedAt: 'invitedAt',
   joinedAt: 'joinedAt'
 } as const
 
@@ -2111,6 +2207,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   repository?: Prisma.RepositoryOmit
+  indexRun?: Prisma.IndexRunOmit
   review?: Prisma.ReviewOmit
   reviewFeedback?: Prisma.ReviewFeedbackOmit
   reviewConfig?: Prisma.ReviewConfigOmit

@@ -11,6 +11,7 @@
 		"postinstall": "prisma generate",
 		"test": "vitest run",
 		"test:watch": "vitest",
+		"webhook:resecure": "tsx scripts/re-secret-webhooks.ts",
 		"test:coverage": "vitest run --coverage"
 	},
 	"dependencies": {

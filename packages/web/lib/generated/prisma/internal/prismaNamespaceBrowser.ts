@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   Repository: 'Repository',
+  IndexRun: 'IndexRun',
   Review: 'Review',
   ReviewFeedback: 'ReviewFeedback',
   ReviewConfig: 'ReviewConfig',
@@ -114,11 +115,26 @@ export const RepositoryScalarFieldEnum = {
   userId: 'userId',
   orgId: 'orgId',
   provider: 'provider',
+  lastIndexedCommitSha: 'lastIndexedCommitSha',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type RepositoryScalarFieldEnum = (typeof RepositoryScalarFieldEnum)[keyof typeof RepositoryScalarFieldEnum]
+
+
+export const IndexRunScalarFieldEnum = {
+  id: 'id',
+  repositoryId: 'repositoryId',
+  runAt: 'runAt',
+  kind: 'kind',
+  status: 'status',
+  fileDelta: 'fileDelta',
+  error: 'error',
+  durationMs: 'durationMs'
+} as const
+
+export type IndexRunScalarFieldEnum = (typeof IndexRunScalarFieldEnum)[keyof typeof IndexRunScalarFieldEnum]
 
 
 export const ReviewScalarFieldEnum = {
@@ -243,7 +259,9 @@ export const OrganizationScalarFieldEnum = {
   description: 'description',
   ownerId: 'ownerId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  polarCustomerId: 'polarCustomerId',
+  polarSubscriptionId: 'polarSubscriptionId'
 } as const
 
 export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]
@@ -254,6 +272,10 @@ export const OrganizationMemberScalarFieldEnum = {
   organizationId: 'organizationId',
   userId: 'userId',
   role: 'role',
+  status: 'status',
+  invitedEmail: 'invitedEmail',
+  inviteToken: 'inviteToken',
+  invitedAt: 'invitedAt',
   joinedAt: 'joinedAt'
 } as const
 

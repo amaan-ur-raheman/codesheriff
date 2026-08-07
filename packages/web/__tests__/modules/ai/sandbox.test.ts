@@ -6,6 +6,7 @@ const {
 	mockRun,
 	mockRead,
 	mockWrite,
+	mockUpdateNetwork,
 	MockTimeoutError,
 	MockFileNotFoundError,
 	MockCommandExitError,
@@ -28,6 +29,7 @@ const {
 		mockRun: vi.fn(),
 		mockRead: vi.fn(),
 		mockWrite: vi.fn(),
+		mockUpdateNetwork: vi.fn(),
 		MockTimeoutError,
 		MockFileNotFoundError,
 		MockCommandExitError,
@@ -69,6 +71,7 @@ function makeSandbox() {
 	return {
 		commands: { run: mockRun },
 		files: { read: mockRead, write: mockWrite },
+		updateNetwork: mockUpdateNetwork,
 		kill: mockKill,
 	};
 }
@@ -138,6 +141,8 @@ describe("verifySuggestionsInSandbox (E2B mode)", () => {
 		mockCreate.mockResolvedValue(makeSandbox());
 		mockKill.mockResolvedValue(true);
 		mockWrite.mockResolvedValue({});
+		mockUpdateNetwork.mockReset();
+		mockUpdateNetwork.mockResolvedValue(undefined);
 		process.env.SANDBOX_MODE = "sandbox";
 		process.env.E2B_API_KEY = "test-key";
 	});
@@ -363,6 +368,67 @@ describe("verifySuggestionsInSandbox (E2B mode)", () => {
 		expect(results[1].verifyStatus).toBe("verified");
 		// Restore writes happened after each edit.
 		expect(mockWrite.mock.calls.length).toBeGreaterThanOrEqual(2);
+	});
+
+	it("denies network egress before running any tests (no-egress posture)", async () => {
+		mockRun.mockImplementation((cmd: string) =>
+			Promise.resolve(
+				cmd.includes("test -f") ? makeCommandResult(0, "yes") : makeCommandResult(0)
+			)
+		);
+		mockRead.mockResolvedValue("const a = 1;");
+		mockRead.mockResolvedValueOnce('{"scripts":{"test":"vitest run"}}');
+
+		await verifySuggestionsInSandbox("token", "owner", "repo", 1, suggestions);
+
+		// The lockdown must deny all outbound egress, not an allow-list.
+		expect(mockUpdateNetwork).toHaveBeenCalledWith({ allowInternetAccess: false });
+		// ...and it must happen BEFORE the first test command runs.
+		const updateIdx = mockUpdateNetwork.mock.invocationCallOrder[0];
+		const firstTestCall = mockRun.mock.calls.findIndex(
+			(c) =>
+				String(c[0]).includes("run test") || String(c[0]).includes("bun test")
+		);
+		expect(firstTestCall).toBeGreaterThanOrEqual(0);
+		expect(mockRun.mock.invocationCallOrder[firstTestCall]).toBeGreaterThan(updateIdx);
+	});
+
+	it("fails closed when the network lockdown cannot be applied", async () => {
+		mockRun.mockImplementation((cmd: string) =>
+			Promise.resolve(
+				cmd.includes("test -f") ? makeCommandResult(0, "yes") : makeCommandResult(0)
+			)
+		);
+		mockRead.mockResolvedValue('{"scripts":{"test":"vitest run"}}');
+		mockUpdateNetwork.mockRejectedValueOnce(new Error("network lockdown failed"));
+
+		await expect(
+			verifySuggestionsInSandbox("token", "owner", "repo", 1, suggestions)
+		).rejects.toBeInstanceOf(SandboxUnavailableError);
+		expect(mockKill).toHaveBeenCalledTimes(1);
+		// No tests ever ran with egress intact — fail closed, never degrade silently.
+		const testCalls = mockRun.mock.calls.filter(
+			(c) =>
+				String(c[0]).includes("run test") || String(c[0]).includes("bun test")
+		);
+		expect(testCalls).toHaveLength(0);
+	});
+
+	it("skips the lockdown when there is no test script (no untrusted code runs)", async () => {
+		// No test script — the apply phase only edits files; no code executes,
+		// so the egress lockdown is unnecessary and must not fire (nor fail-closed).
+		mockRun.mockImplementation((cmd: string) =>
+			Promise.resolve(
+				cmd.includes("test -f") ? makeCommandResult(0, "yes") : makeCommandResult(0)
+			)
+		);
+		mockRead.mockResolvedValue("const a = 1;");
+		mockRead.mockResolvedValueOnce('{"name":"no-tests","version":"1.0.0"}');
+
+		const results = await verifySuggestionsInSandbox("token", "owner", "repo", 1, suggestions);
+
+		expect(mockUpdateNetwork).not.toHaveBeenCalled();
+		expect(results[0]).toMatchObject({ id: "s1", verifyStatus: "verified", success: true });
 	});
 });
 

@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { headers } from "next/headers";
 
-async function requireAdmin() {
+export async function requireAdmin() {
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
@@ -61,6 +61,7 @@ export async function getAdminStats() {
 				id: true,
 				createdAt: true,
 				status: true,
+				suggestions: true,
 			},
 			orderBy: { createdAt: "desc" },
 			take: 100,
@@ -86,7 +87,24 @@ export async function getAdminStats() {
 			? (errorReviews.length / recentReviews.length) * 100
 			: 0;
 
-	const avgReviewTime = 0;
+	// Real avg sandbox verify duration (ms) across the latest reviews — replaces
+	// the hardcoded 0 placeholder (Spec 0006 AC-4). Falls back to 0 when no
+	// suggestion carries a verifyDurationMs.
+	const verifyDurations = recentReviews.flatMap((r) => {
+		const suggestions = (r.suggestions as
+			| { verifyDurationMs?: number }[]
+			| null) ?? [];
+		return suggestions
+			.map((s) => s.verifyDurationMs)
+			.filter((d): d is number => typeof d === "number" && d >= 0);
+	});
+	const avgReviewTime =
+		verifyDurations.length > 0
+			? Math.round(
+					verifyDurations.reduce((sum, d) => sum + d, 0) /
+						verifyDurations.length
+			  )
+			: 0;
 
 	return {
 		totalUsers,

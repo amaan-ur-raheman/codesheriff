@@ -12,6 +12,7 @@
  * @route POST /api/webhooks/github
  */
 import { reviewPullRequest, replyToPullRequestComment } from "@/modules/ai/actions";
+import { inngest } from "@/inngest/client";
 
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
@@ -45,6 +46,39 @@ export async function POST(request: NextRequest) {
 
 		if (event === "ping") {
 			return NextResponse.json({ message: "Pong" }, { status: 200 });
+		}
+
+		if (event === "push") {
+			const ref = body.ref;
+			const headSha = body.after;
+			const repo = body.repository.full_name;
+
+			const [owner, repoName] = repo.split("/");
+
+			// Incremental indexing (Spec 0002): emit for every push; the function
+			// applies the branch policy (default branch only) and the full re-index
+			// fallback. Skip branch deletions and empty pushes: GitHub sends the
+			// all-zeros SHA as `after` when a branch is deleted, which is not a
+			// commit and must not be indexed.
+			const nullSha = /^0+$/.test(headSha ?? "");
+			if (ref && headSha && !body.deleted && !nullSha && owner && repoName) {
+				await inngest
+					.send({
+						name: "index-repo-incremental",
+						data: {
+							owner,
+							repo: repoName,
+							ref,
+							headSha,
+						},
+					})
+					.catch((error: unknown) =>
+						console.error(
+							`Failed to trigger incremental indexing for ${repo}:`,
+							error
+						)
+					);
+			}
 		}
 
 		if (event === "pull_request") {

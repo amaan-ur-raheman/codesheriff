@@ -33,6 +33,13 @@ export const createWebhook = async (owner: string, repo: string) => {
 			config: {
 				url: webhookUrl,
 				content_type: "json",
+				// Sign deliveries with the shared secret so the webhook route's
+				// x-hub-signature-256 check (enabled whenever GITHUB_WEBHOOK_SECRET
+				// is set) accepts them. Guarded: when no secret is configured the
+				// hook is created unsigned, matching the route's lenient posture.
+				...(process.env.GITHUB_WEBHOOK_SECRET
+					? { secret: process.env.GITHUB_WEBHOOK_SECRET }
+					: {}),
 			},
 			events: ["pull_request", "issue_comment", "pull_request_review_comment"],
 		});

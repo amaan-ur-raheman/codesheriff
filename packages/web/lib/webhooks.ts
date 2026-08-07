@@ -38,6 +38,37 @@ export async function sendSlackWebhook(
 	}
 }
 
+const DEFAULT_WEBHOOK_TIMEOUT_MS = 5000;
+
+/**
+ * Runs a webhook call with a timeout and a single retry (shared by the
+ * review-notification and metrics-alert delivery paths). Throws when the
+ * call fails or times out on both attempts.
+ */
+export async function postWebhookWithTimeout<T>(
+	fn: () => Promise<T>,
+	timeoutMs: number = DEFAULT_WEBHOOK_TIMEOUT_MS
+): Promise<T> {
+	let lastError: unknown;
+	for (let attempt = 0; attempt < 2; attempt++) {
+		try {
+			return await Promise.race([
+				fn(),
+				new Promise<T>((_, reject) =>
+					setTimeout(
+						() => reject(new Error("webhook delivery timed out")),
+						timeoutMs
+					)
+				),
+			]);
+		} catch (err) {
+			lastError = err;
+			if (attempt === 0) await new Promise((r) => setTimeout(r, 500));
+		}
+	}
+	throw lastError;
+}
+
 export async function sendDiscordWebhook(
 	webhookUrl: string,
 	message: DiscordMessage
