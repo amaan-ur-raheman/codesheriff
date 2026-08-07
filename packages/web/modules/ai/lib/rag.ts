@@ -93,6 +93,37 @@ export async function indexCodebase(
  * @param topK - Number of top results to return (default: 5)
  * @returns Promise resolving to array of relevant code snippets
  */
+/**
+ * Deletes vectors for removed/renamed-away files (Spec 0002 incremental indexing).
+ *
+ * Uses the same deterministic id rule as indexCodebase:
+ * `${repoId}-${filePath.replace(/\//g, "_")}`.
+ *
+ * @param repoId - Repository identifier (e.g. "owner/repo")
+ * @param filePaths - File paths whose vectors should be removed
+ */
+export async function deleteCodebaseFiles(repoId: string, filePaths: string[]) {
+	if (filePaths.length === 0) return;
+
+	const ids = filePaths.map((path) => `${repoId}-${path.replace(/\//g, "_")}`);
+
+	const batchSize = 100;
+	for (let i = 0; i < ids.length; i += batchSize) {
+		const batch = ids.slice(i, i + batchSize);
+		await pineconeIndex.deleteMany({ ids: batch });
+	}
+
+	console.log(`Deleted ${filePaths.length} file vectors for ${repoId}`);
+}
+
+/**
+ * Retrieves relevant context from the vector database for a given query.
+ *
+ * @param query - The search query (e.g., PR title + description).
+ * @param repoId - The repository ID to filter results by.
+ * @param topK - The number of results to retrieve (default: 5).
+ * @returns An array of matching code snippets (strings).
+ */
 export async function retrieveContext(
 	query: string,
 	repoId: string,

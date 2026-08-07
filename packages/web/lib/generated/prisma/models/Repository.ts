@@ -44,6 +44,7 @@ export type RepositoryMinAggregateOutputType = {
   userId: string | null
   orgId: string | null
   provider: string | null
+  lastIndexedCommitSha: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -58,6 +59,7 @@ export type RepositoryMaxAggregateOutputType = {
   userId: string | null
   orgId: string | null
   provider: string | null
+  lastIndexedCommitSha: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -72,6 +74,7 @@ export type RepositoryCountAggregateOutputType = {
   userId: number
   orgId: number
   provider: number
+  lastIndexedCommitSha: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -96,6 +99,7 @@ export type RepositoryMinAggregateInputType = {
   userId?: true
   orgId?: true
   provider?: true
+  lastIndexedCommitSha?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -110,6 +114,7 @@ export type RepositoryMaxAggregateInputType = {
   userId?: true
   orgId?: true
   provider?: true
+  lastIndexedCommitSha?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -124,6 +129,7 @@ export type RepositoryCountAggregateInputType = {
   userId?: true
   orgId?: true
   provider?: true
+  lastIndexedCommitSha?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -225,6 +231,7 @@ export type RepositoryGroupByOutputType = {
   userId: string
   orgId: string | null
   provider: string
+  lastIndexedCommitSha: string | null
   createdAt: Date
   updatedAt: Date
   _count: RepositoryCountAggregateOutputType | null
@@ -262,6 +269,7 @@ export type RepositoryWhereInput = {
   userId?: Prisma.StringFilter<"Repository"> | string
   orgId?: Prisma.StringNullableFilter<"Repository"> | string | null
   provider?: Prisma.StringFilter<"Repository"> | string
+  lastIndexedCommitSha?: Prisma.StringNullableFilter<"Repository"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Repository"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Repository"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -280,6 +288,7 @@ export type RepositoryOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   orgId?: Prisma.SortOrderInput | Prisma.SortOrder
   provider?: Prisma.SortOrder
+  lastIndexedCommitSha?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -301,6 +310,7 @@ export type RepositoryWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringFilter<"Repository"> | string
   orgId?: Prisma.StringNullableFilter<"Repository"> | string | null
   provider?: Prisma.StringFilter<"Repository"> | string
+  lastIndexedCommitSha?: Prisma.StringNullableFilter<"Repository"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Repository"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Repository"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -319,6 +329,7 @@ export type RepositoryOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   orgId?: Prisma.SortOrderInput | Prisma.SortOrder
   provider?: Prisma.SortOrder
+  lastIndexedCommitSha?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.RepositoryCountOrderByAggregateInput
@@ -341,6 +352,7 @@ export type RepositoryScalarWhereWithAggregatesInput = {
   userId?: Prisma.StringWithAggregatesFilter<"Repository"> | string
   orgId?: Prisma.StringNullableWithAggregatesFilter<"Repository"> | string | null
   provider?: Prisma.StringWithAggregatesFilter<"Repository"> | string
+  lastIndexedCommitSha?: Prisma.StringNullableWithAggregatesFilter<"Repository"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Repository"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Repository"> | Date | string
 }
@@ -354,6 +366,7 @@ export type RepositoryCreateInput = {
   url: string
   orgId?: string | null
   provider?: string
+  lastIndexedCommitSha?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutRepositoriesInput
@@ -372,6 +385,7 @@ export type RepositoryUncheckedCreateInput = {
   userId: string
   orgId?: string | null
   provider?: string
+  lastIndexedCommitSha?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutRepositoryInput
@@ -388,6 +402,7 @@ export type RepositoryUpdateInput = {
   url?: Prisma.StringFieldUpdateOperationsInput | string
   orgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
+  lastIndexedCommitSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutRepositoriesNestedInput
@@ -406,6 +421,7 @@ export type RepositoryUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   orgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
+  lastIndexedCommitSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutRepositoryNestedInput
@@ -423,6 +439,7 @@ export type RepositoryCreateManyInput = {
   userId: string
   orgId?: string | null
   provider?: string
+  lastIndexedCommitSha?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -436,6 +453,7 @@ export type RepositoryUpdateManyMutationInput = {
   url?: Prisma.StringFieldUpdateOperationsInput | string
   orgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
+  lastIndexedCommitSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -450,6 +468,7 @@ export type RepositoryUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   orgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
+  lastIndexedCommitSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -474,6 +493,7 @@ export type RepositoryCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   orgId?: Prisma.SortOrder
   provider?: Prisma.SortOrder
+  lastIndexedCommitSha?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -492,6 +512,7 @@ export type RepositoryMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   orgId?: Prisma.SortOrder
   provider?: Prisma.SortOrder
+  lastIndexedCommitSha?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -506,6 +527,7 @@ export type RepositoryMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   orgId?: Prisma.SortOrder
   provider?: Prisma.SortOrder
+  lastIndexedCommitSha?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -620,6 +642,7 @@ export type RepositoryCreateWithoutUserInput = {
   url: string
   orgId?: string | null
   provider?: string
+  lastIndexedCommitSha?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reviews?: Prisma.ReviewCreateNestedManyWithoutRepositoryInput
@@ -636,6 +659,7 @@ export type RepositoryUncheckedCreateWithoutUserInput = {
   url: string
   orgId?: string | null
   provider?: string
+  lastIndexedCommitSha?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutRepositoryInput
@@ -682,6 +706,7 @@ export type RepositoryScalarWhereInput = {
   userId?: Prisma.StringFilter<"Repository"> | string
   orgId?: Prisma.StringNullableFilter<"Repository"> | string | null
   provider?: Prisma.StringFilter<"Repository"> | string
+  lastIndexedCommitSha?: Prisma.StringNullableFilter<"Repository"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Repository"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Repository"> | Date | string
 }
@@ -695,6 +720,7 @@ export type RepositoryCreateWithoutReviewsInput = {
   url: string
   orgId?: string | null
   provider?: string
+  lastIndexedCommitSha?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutRepositoriesInput
@@ -712,6 +738,7 @@ export type RepositoryUncheckedCreateWithoutReviewsInput = {
   userId: string
   orgId?: string | null
   provider?: string
+  lastIndexedCommitSha?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reviewConfig?: Prisma.ReviewConfigUncheckedCreateNestedOneWithoutRepositoryInput
@@ -743,6 +770,7 @@ export type RepositoryUpdateWithoutReviewsInput = {
   url?: Prisma.StringFieldUpdateOperationsInput | string
   orgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
+  lastIndexedCommitSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutRepositoriesNestedInput
@@ -760,6 +788,7 @@ export type RepositoryUncheckedUpdateWithoutReviewsInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   orgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
+  lastIndexedCommitSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewConfig?: Prisma.ReviewConfigUncheckedUpdateOneWithoutRepositoryNestedInput
@@ -775,6 +804,7 @@ export type RepositoryCreateWithoutReviewConfigInput = {
   url: string
   orgId?: string | null
   provider?: string
+  lastIndexedCommitSha?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutRepositoriesInput
@@ -792,6 +822,7 @@ export type RepositoryUncheckedCreateWithoutReviewConfigInput = {
   userId: string
   orgId?: string | null
   provider?: string
+  lastIndexedCommitSha?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutRepositoryInput
@@ -823,6 +854,7 @@ export type RepositoryUpdateWithoutReviewConfigInput = {
   url?: Prisma.StringFieldUpdateOperationsInput | string
   orgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
+  lastIndexedCommitSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutRepositoriesNestedInput
@@ -840,6 +872,7 @@ export type RepositoryUncheckedUpdateWithoutReviewConfigInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   orgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
+  lastIndexedCommitSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutRepositoryNestedInput
@@ -855,6 +888,7 @@ export type RepositoryCreateWithoutCustomRulesInput = {
   url: string
   orgId?: string | null
   provider?: string
+  lastIndexedCommitSha?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutRepositoriesInput
@@ -872,6 +906,7 @@ export type RepositoryUncheckedCreateWithoutCustomRulesInput = {
   userId: string
   orgId?: string | null
   provider?: string
+  lastIndexedCommitSha?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutRepositoryInput
@@ -903,6 +938,7 @@ export type RepositoryUpdateWithoutCustomRulesInput = {
   url?: Prisma.StringFieldUpdateOperationsInput | string
   orgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
+  lastIndexedCommitSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutRepositoriesNestedInput
@@ -920,6 +956,7 @@ export type RepositoryUncheckedUpdateWithoutCustomRulesInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   orgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
+  lastIndexedCommitSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutRepositoryNestedInput
@@ -935,6 +972,7 @@ export type RepositoryCreateManyUserInput = {
   url: string
   orgId?: string | null
   provider?: string
+  lastIndexedCommitSha?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -948,6 +986,7 @@ export type RepositoryUpdateWithoutUserInput = {
   url?: Prisma.StringFieldUpdateOperationsInput | string
   orgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
+  lastIndexedCommitSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviews?: Prisma.ReviewUpdateManyWithoutRepositoryNestedInput
@@ -964,6 +1003,7 @@ export type RepositoryUncheckedUpdateWithoutUserInput = {
   url?: Prisma.StringFieldUpdateOperationsInput | string
   orgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
+  lastIndexedCommitSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutRepositoryNestedInput
@@ -980,6 +1020,7 @@ export type RepositoryUncheckedUpdateManyWithoutUserInput = {
   url?: Prisma.StringFieldUpdateOperationsInput | string
   orgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   provider?: Prisma.StringFieldUpdateOperationsInput | string
+  lastIndexedCommitSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1034,6 +1075,7 @@ export type RepositorySelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   userId?: boolean
   orgId?: boolean
   provider?: boolean
+  lastIndexedCommitSha?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1053,6 +1095,7 @@ export type RepositorySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   userId?: boolean
   orgId?: boolean
   provider?: boolean
+  lastIndexedCommitSha?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1068,6 +1111,7 @@ export type RepositorySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   userId?: boolean
   orgId?: boolean
   provider?: boolean
+  lastIndexedCommitSha?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1083,11 +1127,12 @@ export type RepositorySelectScalar = {
   userId?: boolean
   orgId?: boolean
   provider?: boolean
+  lastIndexedCommitSha?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type RepositoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "githubId" | "name" | "owner" | "fullName" | "url" | "userId" | "orgId" | "provider" | "createdAt" | "updatedAt", ExtArgs["result"]["repository"]>
+export type RepositoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "githubId" | "name" | "owner" | "fullName" | "url" | "userId" | "orgId" | "provider" | "lastIndexedCommitSha" | "createdAt" | "updatedAt", ExtArgs["result"]["repository"]>
 export type RepositoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   reviews?: boolean | Prisma.Repository$reviewsArgs<ExtArgs>
@@ -1120,6 +1165,7 @@ export type $RepositoryPayload<ExtArgs extends runtime.Types.Extensions.Internal
     userId: string
     orgId: string | null
     provider: string
+    lastIndexedCommitSha: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["repository"]>
@@ -1558,6 +1604,7 @@ export interface RepositoryFieldRefs {
   readonly userId: Prisma.FieldRef<"Repository", 'String'>
   readonly orgId: Prisma.FieldRef<"Repository", 'String'>
   readonly provider: Prisma.FieldRef<"Repository", 'String'>
+  readonly lastIndexedCommitSha: Prisma.FieldRef<"Repository", 'String'>
   readonly createdAt: Prisma.FieldRef<"Repository", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Repository", 'DateTime'>
 }

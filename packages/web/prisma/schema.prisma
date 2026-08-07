@@ -47,6 +47,9 @@ model Repository {
 	orgId     String?
 	provider  String  @default("github")
 
+	// Incremental indexing (Spec 0002): null means full index on next run.
+	lastIndexedCommitSha String?
+
 	createdAt DateTime @default(now())
 	updatedAt DateTime @updatedAt
 

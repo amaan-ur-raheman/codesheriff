@@ -1671,6 +1671,7 @@ export const RepositoryScalarFieldEnum = {
   userId: 'userId',
   orgId: 'orgId',
   provider: 'provider',
+  lastIndexedCommitSha: 'lastIndexedCommitSha',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
