@@ -27,6 +27,11 @@ vi.mock("@/modules/vcs/resolve", () => ({
 	isReviewCapableProvider: vi.fn().mockReturnValue(true),
 }));
 
+// The real sandbox module (loaded via importOriginal) transitively imports the
+// GitHub helper barrel -> github/lib/auth -> the better-auth config, which
+// throws at load time without GitHub OAuth env vars (CI doesn't set them).
+vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: vi.fn() } } }));
+
 import { verifySuggestions } from "@/inngest/functions/review/steps/verify-suggestions";
 
 const parsed = {

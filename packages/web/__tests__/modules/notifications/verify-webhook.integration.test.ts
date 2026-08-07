@@ -18,6 +18,11 @@ const received: { path: string; body: any }[] = [];
 const logs: string[] = [];
 let server: http.Server;
 
+// This integration test seeds and queries a real database via Prisma and spins
+// up a local HTTP listener. It must not run in CI (dummy DATABASE_URL ->
+// ECONNREFUSED), so it self-skips unless explicitly enabled.
+const RUN_INTEGRATION_TESTS = process.env.RUN_INTEGRATION_TESTS === "true";
+
 const UID = "verify-user-1";
 const ORG = "verify-org-1";
 const REPO = "verify-repo-1";
@@ -29,6 +34,7 @@ const REV_DISABLED = "verify-rev-disabled";
 const REV_DEAD = "verify-rev-dead";
 
 beforeAll(async () => {
+	if (!RUN_INTEGRATION_TESTS) return;
 	server = http.createServer((req, res) => {
 		let data = "";
 		req.on("data", (c) => (data += c));
@@ -137,6 +143,7 @@ beforeAll(async () => {
 }, 60_000);
 
 afterAll(async () => {
+	if (!RUN_INTEGRATION_TESTS) return;
 	await prisma.notification.deleteMany({ where: { userId: UID } });
 	await prisma.integrationConfig.deleteMany({
 		where: { id: { in: ["verify-cfg-slack", "verify-cfg-discord"] } },
@@ -150,7 +157,7 @@ afterAll(async () => {
 	await new Promise<void>((r) => server.close(() => r()));
 }, 60_000);
 
-describe("review event webhook delivery (runtime)", () => {
+describe.skipIf(!RUN_INTEGRATION_TESTS)("review event webhook delivery (runtime)", () => {
 	it("AC-1: completed review delivers to active Slack and Discord for the org", async () => {
 		received.length = 0;
 		await sendReviewCompletedNotification(REV);

@@ -1,5 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
 
+// postComment transitively imports the GitHub helper barrel -> github/lib/auth
+// -> the better-auth config, which throws at load time without GitHub OAuth env
+// vars (CI doesn't set them). Mock the auth config out of the graph.
+vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: vi.fn() } } }));
+
 import {
 	resolveVerifyStatus,
 	verifyStatusMarkdown,
