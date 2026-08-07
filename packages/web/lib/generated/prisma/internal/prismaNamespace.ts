@@ -1801,7 +1801,9 @@ export const OrganizationScalarFieldEnum = {
   description: 'description',
   ownerId: 'ownerId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  polarCustomerId: 'polarCustomerId',
+  polarSubscriptionId: 'polarSubscriptionId'
 } as const
 
 export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]
@@ -1812,6 +1814,10 @@ export const OrganizationMemberScalarFieldEnum = {
   organizationId: 'organizationId',
   userId: 'userId',
   role: 'role',
+  status: 'status',
+  invitedEmail: 'invitedEmail',
+  inviteToken: 'inviteToken',
+  invitedAt: 'invitedAt',
   joinedAt: 'joinedAt'
 } as const
 

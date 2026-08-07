@@ -195,7 +195,12 @@ model Organization {
 	ownerId     String
 	createdAt   DateTime @default(now())
 	updatedAt   DateTime @updatedAt
-	members     OrganizationMember[]
+
+	// Org billing (Spec 0003): a Polar customer + subscription bound to the org.
+	polarCustomerId     String?  @unique
+	polarSubscriptionId String?
+
+	members      OrganizationMember[]
 	integrations IntegrationConfig[]
 
 	@@map("organization")
@@ -205,10 +210,16 @@ model OrganizationMember {
 	id             String       @id @default(cuid())
 	organizationId String
 	organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-	userId         String
-	user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+	// Nullable: a pending invite (no account yet) has no userId until accepted.
+	userId         String?
+	user           User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
 	role           String       @default("member")
-	joinedAt       DateTime     @default(now())
+	// active | pending (Spec 0003 pending email invites)
+	status       String   @default("active")
+	invitedEmail String?
+	inviteToken  String?  @unique
+	invitedAt    DateTime?
+	joinedAt     DateTime @default(now())
 
 	@@unique([organizationId, userId])
 	@@map("organization_member")
