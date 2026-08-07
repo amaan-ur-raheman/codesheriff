@@ -6,8 +6,10 @@ import {
 	canCreateReview,
 	incrementReviewCount,
 } from "@/modules/payment/lib/subscription";
-import { Octokit } from "octokit";
-import { updatePRCommitStatus, createPRCheckRun, getOctokit } from "@/modules/github/lib/github";
+import {
+	resolveProviderForRepository,
+	isReviewCapableProvider,
+} from "@/modules/vcs/resolve";
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/dashboard\/?$/, "");
 const dashboardReviewsUrl = `${appUrl}/dashboard/reviews`;
@@ -27,33 +29,14 @@ export async function reviewPullRequest(
 	after?: string
 ) {
 	try {
-		const respository = await prisma.repository.findFirst({
-			where: {
-				owner,
-				name: repo,
-			},
-			include: {
-				user: {
-					include: {
-						accounts: {
-							where: {
-								providerId: "github",
-							},
-						},
-					},
-				},
-			},
-		});
-
-		if (!respository) {
-			throw new Error(
-				`Repository ${owner}/${repo} not found in database. Please reconnect the repository.`
-			);
-		}
+		// Shared resolution: reads the repository's provider field and resolves
+		// the right credentials for that provider (same helper as the pipeline).
+		const resolved = await resolveProviderForRepository(owner, repo);
+		const repository = resolved.repository;
 
 		const canReview = await canCreateReview(
-			respository.user.id,
-			respository.id
+			repository.userId,
+			repository.id
 		);
 
 		if (!canReview) {
@@ -62,42 +45,34 @@ export async function reviewPullRequest(
 			);
 		}
 
-		const githubAccount = respository.user.accounts[0];
-
-		if (!githubAccount?.accessToken) {
-			throw new Error(
-				`No GitHub access token found for repository owner.`
-			);
-		}
-
-		const token = githubAccount.accessToken;
-
 		// Resolve head SHA
 		let headSha = after;
 		if (!headSha || headSha === "0000000000000000000000000000000000000000") {
 			try {
-				const octokit = await getOctokit({ token, owner, repo });
-				const { data: pr } = await octokit.rest.pulls.get({
+				const pr = await resolved.provider.getPullRequestDiff(
 					owner,
 					repo,
-					pull_number: prNumber,
-				});
-				headSha = pr.head.sha;
+					prNumber
+				);
+				headSha = pr.headSha;
 			} catch (prError) {
 				console.error("Failed to fetch PR details for head SHA:", prError);
 			}
 		}
 
 		let checkRunId: number | null = null;
-		if (headSha) {
+		if (headSha && isReviewCapableProvider(resolved.provider)) {
 			// Instantly create Check Run in_progress (animating loading spinner)
-			checkRunId = await createPRCheckRun(token, owner, repo, headSha);
+			checkRunId = await resolved.provider.createPRCheckRun(
+				owner,
+				repo,
+				headSha
+			);
 
 			// If Check Run creation failed (e.g. 403 Forbidden/lack of App permissions),
 			// fall back to setting commit status to pending (pulsing yellow/orange dot)
 			if (!checkRunId) {
-				await updatePRCommitStatus(
-					token,
+				await resolved.provider.updatePRCommitStatus(
 					owner,
 					repo,
 					headSha,
@@ -114,7 +89,7 @@ export async function reviewPullRequest(
 				owner,
 				repo,
 				prNumber,
-				userId: respository.user.id,
+				userId: repository.userId,
 				before,
 				after,
 				headSha,
@@ -122,7 +97,7 @@ export async function reviewPullRequest(
 			},
 		});
 
-		await incrementReviewCount(respository.user.id, respository.id);
+		await incrementReviewCount(repository.userId, repository.id);
 
 		return { success: true, message: "Review Queued" };
 	} catch (error) {
@@ -170,27 +145,9 @@ export async function replyToPullRequestComment(
 	isReviewComment: boolean
 ) {
 	try {
-		const repository = await prisma.repository.findFirst({
-			where: { owner, name: repo },
-			include: {
-				user: {
-					include: {
-						accounts: {
-							where: { providerId: "github" },
-						},
-					},
-				},
-			},
-		});
-
-		if (!repository) {
-			throw new Error(`Repository ${owner}/${repo} not found in database.`);
-		}
-
-		const githubAccount = repository.user.accounts[0];
-		if (!githubAccount?.accessToken) {
-			throw new Error(`No GitHub access token found for repository owner.`);
-		}
+		// Shared resolution: reads the repository's provider field and resolves
+		// the right credentials (same helper as the review pipeline).
+		const resolved = await resolveProviderForRepository(owner, repo);
 
 		await inngest.send({
 			name: "pr.comment.replied",
@@ -201,7 +158,7 @@ export async function replyToPullRequestComment(
 				commentBody,
 				commentId,
 				isReviewComment,
-				userId: repository.user.id,
+				userId: resolved.repository.userId,
 			},
 		});
 

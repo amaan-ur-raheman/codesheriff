@@ -1,6 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+vi.mock("next/headers", () => ({
+	headers: vi.fn().mockResolvedValue(new Headers()),
+}));
+
+vi.mock("@/lib/auth", () => ({
+	auth: {
+		api: {
+			getSession: vi.fn(),
+		},
+	},
+}));
+
+vi.mock("@/lib/db", () => ({
+	default: {
+		account: {
+			findFirst: vi.fn(),
+		},
+	},
+}));
+
 const mockOctokit = {
+	auth: vi.fn().mockResolvedValue({ type: "token", token: "github-token" }),
 	rest: {
 		repos: {
 			listForAuthenticatedUser: vi.fn(),
@@ -8,12 +29,20 @@ const mockOctokit = {
 			createWebhook: vi.fn(),
 			deleteWebhook: vi.fn(),
 			getContent: vi.fn(),
+			createCommitStatus: vi.fn().mockResolvedValue({}),
+		},
+		checks: {
+			create: vi.fn().mockResolvedValue({ data: { id: 101 } }),
+			update: vi.fn().mockResolvedValue({}),
 		},
 		pulls: {
 			get: vi.fn(),
+			getReviewComment: vi.fn(),
+			listReviewComments: vi.fn(),
 		},
 		issues: {
-			createComment: vi.fn(),
+			createComment: vi.fn().mockResolvedValue({ data: { id: 42 } }),
+			listComments: vi.fn(),
 		},
 		search: {
 			issuesAndPullRequests: vi.fn(),
@@ -26,30 +55,127 @@ vi.mock("octokit", () => ({
 	Octokit: vi.fn().mockImplementation(() => mockOctokit),
 }));
 
+vi.mock("@/modules/github/lib/auth", () => ({
+	getOctokit: vi.fn().mockImplementation(() => Promise.resolve(mockOctokit)),
+	getGithubAccessToken: vi.fn().mockImplementation(() => Promise.resolve("github-token")),
+}));
+
 import { createVCSProvider } from "@/modules/vcs/factory";
-import { GitHubProvider } from "@/modules/vcs/github-provider";
+import { GitHubProvider, resolveGitHubCredentials } from "@/modules/vcs/github-provider";
+import { GitLabProvider, resolveGitLabCredentials } from "@/modules/vcs/gitlab-provider";
+import { BitbucketProvider, resolveBitbucketCredentials } from "@/modules/vcs/bitbucket-provider";
+import { auth } from "@/lib/auth";
+import prisma from "@/lib/db";
+
+const mockGetSession = (auth.api.getSession as unknown as ReturnType<typeof vi.fn>);
+const mockPrismaAccount = (prisma as unknown as {
+	account: { findFirst: ReturnType<typeof vi.fn> };
+}).account.findFirst;
 
 describe("VCS Providers", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockGetSession.mockResolvedValue({ user: { id: "user-123" } });
 	});
 
 	describe("createVCSProvider factory", () => {
-		it("creates a GitHubProvider", () => {
-			const provider = createVCSProvider("github", "token");
+		it("creates a GitHubProvider from an authenticated Octokit client", () => {
+			const provider = createVCSProvider("github", { octokit: mockOctokit as never });
 			expect(provider).toBeInstanceOf(GitHubProvider);
 			expect(provider.name).toBe("github");
 		});
 
+		it("creates a GitLabProvider from a token string", () => {
+			const provider = createVCSProvider("gitlab", { token: "gl-token" });
+			expect(provider).toBeInstanceOf(GitLabProvider);
+			expect(provider.name).toBe("gitlab");
+		});
+
+		it("creates a BitbucketProvider from a token string", () => {
+			const provider = createVCSProvider("bitbucket", { token: "bb-token" });
+			expect(provider).toBeInstanceOf(BitbucketProvider);
+			expect(provider.name).toBe("bitbucket");
+		});
+
 		it("throws for unknown provider", () => {
-			expect(() => createVCSProvider("invalid" as any, "token")).toThrow(
-				"Unknown VCS provider: invalid"
+			expect(() =>
+				createVCSProvider("invalid" as never, { token: "x" })
+			).toThrow("Unknown VCS provider: invalid");
+		});
+	});
+
+	describe("capability split", () => {
+		it("GitHubProvider is ReviewCapable (implements advanced review methods)", () => {
+			const provider = createVCSProvider("github", { octokit: mockOctokit as never });
+
+			// Check runs
+			expect(provider.createPRCheckRun).toBeTypeOf("function");
+			expect(provider.updatePRCheckRun).toBeTypeOf("function");
+			// Commit statuses
+			expect(provider.updatePRCommitStatus).toBeTypeOf("function");
+			// Inline comments
+			expect(provider.postInlineReviewComments).toBeTypeOf("function");
+			// Comment lifecycle
+			expect(provider.postLoadingReviewComment).toBeTypeOf("function");
+			expect(provider.updateReviewComment).toBeTypeOf("function");
+			expect(provider.updateReviewCommentFailed).toBeTypeOf("function");
+			expect(provider.postCommentReply).toBeTypeOf("function");
+			// Thread history
+			expect(provider.getReviewCommentThread).toBeTypeOf("function");
+			expect(provider.getIssueCommentThread).toBeTypeOf("function");
+			// Incremental diff
+			expect(provider.getCompareDiff).toBeTypeOf("function");
+		});
+
+		it("GitLab and Bitbucket stay base-only (no advanced review methods)", () => {
+			const gitlab = createVCSProvider("gitlab", { token: "gl-token" });
+			const bitbucket = createVCSProvider("bitbucket", { token: "bb-token" });
+
+			expect((gitlab as any).createPRCheckRun).toBeUndefined();
+			expect((gitlab as any).postInlineReviewComments).toBeUndefined();
+			expect((gitlab as any).getCompareDiff).toBeUndefined();
+			expect((bitbucket as any).createPRCheckRun).toBeUndefined();
+			expect((bitbucket as any).getReviewCommentThread).toBeUndefined();
+		});
+	});
+
+	describe("credential resolvers", () => {
+		it("resolveGitHubCredentials returns an authenticated Octokit client", async () => {
+			const credentials = await resolveGitHubCredentials();
+			expect(credentials.octokit).toBe(mockOctokit);
+		});
+
+		it("resolveGitLabCredentials returns the stored GitLab token", async () => {
+			mockPrismaAccount.mockResolvedValue({ accessToken: "gl-token-123" });
+
+			const credentials = await resolveGitLabCredentials();
+			expect(credentials).toEqual({ token: "gl-token-123" });
+			expect(mockPrismaAccount).toHaveBeenCalledWith({
+				where: { userId: "user-123", providerId: "gitlab" },
+			});
+		});
+
+		it("resolveBitbucketCredentials returns the stored Bitbucket token", async () => {
+			mockPrismaAccount.mockResolvedValue({ accessToken: "bb-token-123" });
+
+			const credentials = await resolveBitbucketCredentials();
+			expect(credentials).toEqual({ token: "bb-token-123" });
+			expect(mockPrismaAccount).toHaveBeenCalledWith({
+				where: { userId: "user-123", providerId: "bitbucket" },
+			});
+		});
+
+		it("throws when the provider is not connected", async () => {
+			mockPrismaAccount.mockResolvedValue(null);
+
+			await expect(resolveGitLabCredentials()).rejects.toThrow(
+				"No gitlab access token found"
 			);
 		});
 	});
 
 	describe("GitHubProvider integration helper methods", () => {
-		const provider = new GitHubProvider("github-token");
+		const provider = new GitHubProvider(mockOctokit as never);
 
 		describe("listRepositories", () => {
 			it("maps github repositories to VCSRepository schema", async () => {
@@ -286,6 +412,56 @@ describe("VCS Providers", () => {
 					state: "open",
 					repository: "repoUrl1",
 				});
+			});
+		});
+
+		describe("ReviewCapableProvider advanced methods", () => {
+			it("creates a check run via the shared github helper", async () => {
+				const id = await provider.createPRCheckRun("owner", "repo", "sha-123");
+				expect(id).toBe(101);
+				expect(mockOctokit.rest.checks.create).toHaveBeenCalledWith(
+					expect.objectContaining({
+						owner: "owner",
+						repo: "repo",
+						head_sha: "sha-123",
+						name: "CodeSheriff Review",
+						status: "in_progress",
+					})
+				);
+			});
+
+			it("updates commit status with the provider's client token", async () => {
+				await provider.updatePRCommitStatus(
+					"owner",
+					"repo",
+					"sha-123",
+					"pending",
+					"Review in progress",
+					"http://target.url"
+				);
+
+				expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith({
+					owner: "owner",
+					repo: "repo",
+					sha: "sha-123",
+					state: "pending",
+					description: "Review in progress",
+					context: "CodeSheriff",
+					target_url: "http://target.url",
+				});
+			});
+
+			it("posts a loading comment and returns its id", async () => {
+				const id = await provider.postLoadingReviewComment("owner", "repo", 5);
+				expect(id).toBe(42);
+				expect(mockOctokit.rest.issues.createComment).toHaveBeenCalledWith(
+					expect.objectContaining({
+						owner: "owner",
+						repo: "repo",
+						issue_number: 5,
+						body: expect.stringContaining("Review in progress"),
+					})
+				);
 			});
 		});
 	});

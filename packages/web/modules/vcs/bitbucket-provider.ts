@@ -1,6 +1,21 @@
-import { VCSProvider, VCSRepository, VCSFile, VCSPullRequest } from "./types";
+import {
+  VCSProvider,
+  VCSRepository,
+  VCSFile,
+  VCSPullRequest,
+  BitbucketCredentials,
+} from "./types";
+import { resolveVCSAccessToken } from "./credentials";
 
 const BITBUCKET_API_BASE = "https://api.bitbucket.org/2.0";
+
+/**
+ * Resolves the stored Bitbucket access token for the authenticated user.
+ */
+export async function resolveBitbucketCredentials(): Promise<BitbucketCredentials> {
+  const token = await resolveVCSAccessToken("bitbucket");
+  return { token };
+}
 
 export class BitbucketProvider implements VCSProvider {
   name = "bitbucket" as const;
@@ -85,6 +100,7 @@ export class BitbucketProvider implements VCSProvider {
       diff,
       url: pr.links.html.href,
       state: pr.state === "MERGED" ? "merged" : pr.state === "CLOSED" ? "closed" : "open",
+      headSha: pr.source?.commit?.hash,
     };
   }
 

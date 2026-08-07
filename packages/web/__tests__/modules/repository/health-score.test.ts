@@ -198,16 +198,36 @@ describe("Repository Health Score Actions", () => {
 		it("generates correct monthly historical trend data", async () => {
 			mockPrisma.repository.findUnique.mockResolvedValueOnce({ userId: "user-123" });
 
-			// Setup reviews matching mock historical months
+			// Fixture months are relative to today so the test never goes stale:
+			// the 3-month window always covers [two months ago .. current month].
+			const monthNames = [
+				"Jan",
+				"Feb",
+				"Mar",
+				"Apr",
+				"May",
+				"Jun",
+				"Jul",
+				"Aug",
+				"Sep",
+				"Oct",
+				"Nov",
+				"Dec",
+			];
+			const now = new Date();
+			const currentMonth = `${now.getFullYear()}-${monthNames[now.getMonth()]}`;
+			const previous = new Date(now.getFullYear(), now.getMonth() - 1, 15);
+			const previousMonth = `${previous.getFullYear()}-${monthNames[previous.getMonth()]}`;
+
 			const mockReviews = [
 				{
-					createdAt: new Date("2026-06-20T10:00:00Z"),
+					createdAt: new Date(now.getFullYear(), now.getMonth(), 20, 10),
 					healthScore: 80,
 					suggestions: [],
 					feedbacks: [],
 				},
 				{
-					createdAt: new Date("2026-05-15T10:00:00Z"),
+					createdAt: previous,
 					healthScore: 90,
 					suggestions: [],
 					feedbacks: [],
@@ -220,15 +240,15 @@ describe("Repository Health Score Actions", () => {
 
 			// Expect 3 months of trend data
 			expect(trend).toHaveLength(3);
-			// The latest month (June 2026) should have score 80
-			const june = trend.find((t) => t.month.endsWith("Jun"));
-			expect(june).toBeDefined();
-			expect(june?.healthScore).toBe(80);
+			// The current month should carry score 80
+			const current = trend.find((t) => t.month === currentMonth);
+			expect(current).toBeDefined();
+			expect(current?.healthScore).toBe(80);
 
-			// The previous month (May 2026) should have score 90
-			const may = trend.find((t) => t.month.endsWith("May"));
-			expect(may).toBeDefined();
-			expect(may?.healthScore).toBe(90);
+			// The previous month should carry score 90
+			const previousBucket = trend.find((t) => t.month === previousMonth);
+			expect(previousBucket).toBeDefined();
+			expect(previousBucket?.healthScore).toBe(90);
 		});
 	});
 });

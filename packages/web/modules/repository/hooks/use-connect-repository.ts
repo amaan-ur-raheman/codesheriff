@@ -13,12 +13,14 @@ export const useConnectRepository = () => {
 			owner,
 			repo,
 			githubId,
+			orgId,
 		}: {
 			owner: string;
 			repo: string;
 			githubId: number;
+			orgId?: string;
 		}) => {
-			return await connectRepository(owner, repo, githubId);
+			return await connectRepository(owner, repo, githubId, orgId);
 		},
 		onSuccess: () => {
 			toast.success("Repository connected successfully!");

@@ -3,23 +3,31 @@
  *
  * Suggestions are embedded as a JSON block in the review markdown
  * inside an HTML comment: <!-- SUGGESTIONS_JSON { ... } -->
- */
+ */	export type VerifyStatus = "verified" | "failed" | "sandbox_error";
 
-export interface CodeSuggestion {
-	id: string;
-	filePath: string;
-	startLine: number;
-	endLine: number;
-	severity: "error" | "warning" | "info" | "suggestion";
-	title: string;
-	description: string;
-	originalCode: string;
-	suggestedCode: string;
-	category: string;
-	verified?: boolean;
-	verificationLog?: string;
-	applied?: boolean;
-}
+	export interface CodeSuggestion {
+		id: string;
+		filePath: string;
+		startLine: number;
+		endLine: number;
+		severity: "error" | "warning" | "info" | "suggestion";
+		title: string;
+		description: string;
+		originalCode: string;
+		suggestedCode: string;
+		category: string;
+		/** @deprecated use verifyStatus — kept for existing UI rendering */
+		verified?: boolean;
+		/** @deprecated use verifyError — kept for existing UI rendering */
+		verificationLog?: string;
+		/** Outcome of sandbox verification: verified | failed | sandbox_error. */
+		verifyStatus?: VerifyStatus;
+		/** Human-readable error/log when not verified. */
+		verifyError?: string;
+		/** Milliseconds the sandbox spent verifying this suggestion. */
+		verifyDurationMs?: number;
+		applied?: boolean;
+	}
 
 export interface ReviewSuggestions {
 	suggestions: CodeSuggestion[];

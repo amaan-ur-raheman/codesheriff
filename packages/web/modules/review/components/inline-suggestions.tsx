@@ -38,6 +38,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { applySuggestion, applySuggestionsBatch } from "@/modules/review/actions";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
+import { VerifyStatusBadge } from "@/modules/review/components/verify-status-badge";
+import { resolveVerifyStatus } from "@/modules/review/lib/verify-status";
 
 const SEVERITY_CONFIG: Record<
 	CodeSuggestion["severity"],
@@ -164,18 +166,7 @@ function SuggestionCard({
 					<div className="flex-1 min-w-0 space-y-1.5">
 						<div className="flex items-center gap-2 flex-wrap">
 							<SeverityBadge severity={suggestion.severity} />
-							{suggestion.verified === true && (
-								<Badge variant="outline" className="border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 gap-1 text-[10px] py-0 h-5">
-									<Check className="h-3 w-3" />
-									Verified Fix
-								</Badge>
-							)}
-							{suggestion.verified === false && (
-								<Badge variant="outline" className="border-red-500/50 bg-red-500/10 text-red-700 dark:text-red-400 gap-1 text-[10px] py-0 h-5">
-									<AlertCircle className="h-3 w-3" />
-									Test Failed
-								</Badge>
-							)}
+							<VerifyStatusBadge suggestion={suggestion} />
 							{suggestion.applied && (
 								<Badge variant="outline" className="border-emerald-500/50 bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 gap-1 text-[10px] font-semibold py-0 h-5">
 									<Check className="h-3 w-3 stroke-[2.5]" />
@@ -218,16 +209,44 @@ function SuggestionCard({
 								original={suggestion.originalCode}
 								suggested={suggestion.suggestedCode}
 							/>
-							{suggestion.verified === false && suggestion.verificationLog && (
-								<div className="rounded-md border border-red-500/20 bg-red-500/5 p-3 overflow-x-auto mt-2">
-									<div className="text-[10px] uppercase tracking-wider text-red-500/70 mb-1.5 font-sans font-medium">
-										Verification Logs (Test Failures)
+							{(() => {
+								const status = resolveVerifyStatus(suggestion);
+								if (status === "neutral" || status === "verified") return null;
+								const details = suggestion.verifyError || suggestion.verificationLog;
+								if (!details) return null;
+								const isSandboxError = status === "sandbox_error";
+								return (
+									<div
+										className={cn(
+											"rounded-md border p-3 overflow-x-auto mt-2",
+											isSandboxError
+												? "border-amber-500/20 bg-amber-500/5"
+												: "border-red-500/20 bg-red-500/5"
+										)}
+									>
+										<div
+											className={cn(
+												"text-[10px] uppercase tracking-wider mb-1.5 font-sans font-medium",
+												isSandboxError
+													? "text-amber-500/70"
+													: "text-red-500/70"
+											)}
+										>
+											Verification Details
+										</div>
+										<pre
+											className={cn(
+												"whitespace-pre-wrap text-xs font-mono",
+												isSandboxError
+													? "text-amber-600 dark:text-amber-400"
+													: "text-red-600 dark:text-red-400"
+											)}
+										>
+											{details}
+										</pre>
 									</div>
-									<pre className="whitespace-pre-wrap text-xs text-red-600 dark:text-red-400 font-mono">
-										{suggestion.verificationLog}
-									</pre>
-								</div>
-							)}
+								);
+							})()}
 							
 							{/* Apply Suggestion Button Row */}
 							{suggestion.suggestedCode && (
