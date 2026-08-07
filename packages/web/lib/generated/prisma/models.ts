@@ -10,6 +10,7 @@
  */
 export type * from './models/User'
 export type * from './models/Repository'
+export type * from './models/IndexRun'
 export type * from './models/Review'
 export type * from './models/ReviewFeedback'
 export type * from './models/ReviewConfig'

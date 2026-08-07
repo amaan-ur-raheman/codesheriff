@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   Repository: 'Repository',
+  IndexRun: 'IndexRun',
   Review: 'Review',
   ReviewFeedback: 'ReviewFeedback',
   ReviewConfig: 'ReviewConfig',
@@ -120,6 +121,20 @@ export const RepositoryScalarFieldEnum = {
 } as const
 
 export type RepositoryScalarFieldEnum = (typeof RepositoryScalarFieldEnum)[keyof typeof RepositoryScalarFieldEnum]
+
+
+export const IndexRunScalarFieldEnum = {
+  id: 'id',
+  repositoryId: 'repositoryId',
+  runAt: 'runAt',
+  kind: 'kind',
+  status: 'status',
+  fileDelta: 'fileDelta',
+  error: 'error',
+  durationMs: 'durationMs'
+} as const
+
+export type IndexRunScalarFieldEnum = (typeof IndexRunScalarFieldEnum)[keyof typeof IndexRunScalarFieldEnum]
 
 
 export const ReviewScalarFieldEnum = {

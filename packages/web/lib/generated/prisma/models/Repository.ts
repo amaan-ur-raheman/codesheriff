@@ -276,6 +276,7 @@ export type RepositoryWhereInput = {
   reviews?: Prisma.ReviewListRelationFilter
   reviewConfig?: Prisma.XOR<Prisma.ReviewConfigNullableScalarRelationFilter, Prisma.ReviewConfigWhereInput> | null
   customRules?: Prisma.CustomReviewRuleListRelationFilter
+  indexRuns?: Prisma.IndexRunListRelationFilter
 }
 
 export type RepositoryOrderByWithRelationInput = {
@@ -295,6 +296,7 @@ export type RepositoryOrderByWithRelationInput = {
   reviews?: Prisma.ReviewOrderByRelationAggregateInput
   reviewConfig?: Prisma.ReviewConfigOrderByWithRelationInput
   customRules?: Prisma.CustomReviewRuleOrderByRelationAggregateInput
+  indexRuns?: Prisma.IndexRunOrderByRelationAggregateInput
 }
 
 export type RepositoryWhereUniqueInput = Prisma.AtLeast<{
@@ -317,6 +319,7 @@ export type RepositoryWhereUniqueInput = Prisma.AtLeast<{
   reviews?: Prisma.ReviewListRelationFilter
   reviewConfig?: Prisma.XOR<Prisma.ReviewConfigNullableScalarRelationFilter, Prisma.ReviewConfigWhereInput> | null
   customRules?: Prisma.CustomReviewRuleListRelationFilter
+  indexRuns?: Prisma.IndexRunListRelationFilter
 }, "id" | "githubId">
 
 export type RepositoryOrderByWithAggregationInput = {
@@ -373,6 +376,7 @@ export type RepositoryCreateInput = {
   reviews?: Prisma.ReviewCreateNestedManyWithoutRepositoryInput
   reviewConfig?: Prisma.ReviewConfigCreateNestedOneWithoutRepositoryInput
   customRules?: Prisma.CustomReviewRuleCreateNestedManyWithoutRepositoryInput
+  indexRuns?: Prisma.IndexRunCreateNestedManyWithoutRepositoryInput
 }
 
 export type RepositoryUncheckedCreateInput = {
@@ -391,6 +395,7 @@ export type RepositoryUncheckedCreateInput = {
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutRepositoryInput
   reviewConfig?: Prisma.ReviewConfigUncheckedCreateNestedOneWithoutRepositoryInput
   customRules?: Prisma.CustomReviewRuleUncheckedCreateNestedManyWithoutRepositoryInput
+  indexRuns?: Prisma.IndexRunUncheckedCreateNestedManyWithoutRepositoryInput
 }
 
 export type RepositoryUpdateInput = {
@@ -409,6 +414,7 @@ export type RepositoryUpdateInput = {
   reviews?: Prisma.ReviewUpdateManyWithoutRepositoryNestedInput
   reviewConfig?: Prisma.ReviewConfigUpdateOneWithoutRepositoryNestedInput
   customRules?: Prisma.CustomReviewRuleUpdateManyWithoutRepositoryNestedInput
+  indexRuns?: Prisma.IndexRunUpdateManyWithoutRepositoryNestedInput
 }
 
 export type RepositoryUncheckedUpdateInput = {
@@ -427,6 +433,7 @@ export type RepositoryUncheckedUpdateInput = {
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutRepositoryNestedInput
   reviewConfig?: Prisma.ReviewConfigUncheckedUpdateOneWithoutRepositoryNestedInput
   customRules?: Prisma.CustomReviewRuleUncheckedUpdateManyWithoutRepositoryNestedInput
+  indexRuns?: Prisma.IndexRunUncheckedUpdateManyWithoutRepositoryNestedInput
 }
 
 export type RepositoryCreateManyInput = {
@@ -591,6 +598,20 @@ export type BigIntFieldUpdateOperationsInput = {
   divide?: bigint | number
 }
 
+export type RepositoryCreateNestedOneWithoutIndexRunsInput = {
+  create?: Prisma.XOR<Prisma.RepositoryCreateWithoutIndexRunsInput, Prisma.RepositoryUncheckedCreateWithoutIndexRunsInput>
+  connectOrCreate?: Prisma.RepositoryCreateOrConnectWithoutIndexRunsInput
+  connect?: Prisma.RepositoryWhereUniqueInput
+}
+
+export type RepositoryUpdateOneRequiredWithoutIndexRunsNestedInput = {
+  create?: Prisma.XOR<Prisma.RepositoryCreateWithoutIndexRunsInput, Prisma.RepositoryUncheckedCreateWithoutIndexRunsInput>
+  connectOrCreate?: Prisma.RepositoryCreateOrConnectWithoutIndexRunsInput
+  upsert?: Prisma.RepositoryUpsertWithoutIndexRunsInput
+  connect?: Prisma.RepositoryWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.RepositoryUpdateToOneWithWhereWithoutIndexRunsInput, Prisma.RepositoryUpdateWithoutIndexRunsInput>, Prisma.RepositoryUncheckedUpdateWithoutIndexRunsInput>
+}
+
 export type RepositoryCreateNestedOneWithoutReviewsInput = {
   create?: Prisma.XOR<Prisma.RepositoryCreateWithoutReviewsInput, Prisma.RepositoryUncheckedCreateWithoutReviewsInput>
   connectOrCreate?: Prisma.RepositoryCreateOrConnectWithoutReviewsInput
@@ -648,6 +669,7 @@ export type RepositoryCreateWithoutUserInput = {
   reviews?: Prisma.ReviewCreateNestedManyWithoutRepositoryInput
   reviewConfig?: Prisma.ReviewConfigCreateNestedOneWithoutRepositoryInput
   customRules?: Prisma.CustomReviewRuleCreateNestedManyWithoutRepositoryInput
+  indexRuns?: Prisma.IndexRunCreateNestedManyWithoutRepositoryInput
 }
 
 export type RepositoryUncheckedCreateWithoutUserInput = {
@@ -665,6 +687,7 @@ export type RepositoryUncheckedCreateWithoutUserInput = {
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutRepositoryInput
   reviewConfig?: Prisma.ReviewConfigUncheckedCreateNestedOneWithoutRepositoryInput
   customRules?: Prisma.CustomReviewRuleUncheckedCreateNestedManyWithoutRepositoryInput
+  indexRuns?: Prisma.IndexRunUncheckedCreateNestedManyWithoutRepositoryInput
 }
 
 export type RepositoryCreateOrConnectWithoutUserInput = {
@@ -711,6 +734,94 @@ export type RepositoryScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Repository"> | Date | string
 }
 
+export type RepositoryCreateWithoutIndexRunsInput = {
+  id?: string
+  githubId: bigint | number
+  name: string
+  owner: string
+  fullName: string
+  url: string
+  orgId?: string | null
+  provider?: string
+  lastIndexedCommitSha?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutRepositoriesInput
+  reviews?: Prisma.ReviewCreateNestedManyWithoutRepositoryInput
+  reviewConfig?: Prisma.ReviewConfigCreateNestedOneWithoutRepositoryInput
+  customRules?: Prisma.CustomReviewRuleCreateNestedManyWithoutRepositoryInput
+}
+
+export type RepositoryUncheckedCreateWithoutIndexRunsInput = {
+  id?: string
+  githubId: bigint | number
+  name: string
+  owner: string
+  fullName: string
+  url: string
+  userId: string
+  orgId?: string | null
+  provider?: string
+  lastIndexedCommitSha?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutRepositoryInput
+  reviewConfig?: Prisma.ReviewConfigUncheckedCreateNestedOneWithoutRepositoryInput
+  customRules?: Prisma.CustomReviewRuleUncheckedCreateNestedManyWithoutRepositoryInput
+}
+
+export type RepositoryCreateOrConnectWithoutIndexRunsInput = {
+  where: Prisma.RepositoryWhereUniqueInput
+  create: Prisma.XOR<Prisma.RepositoryCreateWithoutIndexRunsInput, Prisma.RepositoryUncheckedCreateWithoutIndexRunsInput>
+}
+
+export type RepositoryUpsertWithoutIndexRunsInput = {
+  update: Prisma.XOR<Prisma.RepositoryUpdateWithoutIndexRunsInput, Prisma.RepositoryUncheckedUpdateWithoutIndexRunsInput>
+  create: Prisma.XOR<Prisma.RepositoryCreateWithoutIndexRunsInput, Prisma.RepositoryUncheckedCreateWithoutIndexRunsInput>
+  where?: Prisma.RepositoryWhereInput
+}
+
+export type RepositoryUpdateToOneWithWhereWithoutIndexRunsInput = {
+  where?: Prisma.RepositoryWhereInput
+  data: Prisma.XOR<Prisma.RepositoryUpdateWithoutIndexRunsInput, Prisma.RepositoryUncheckedUpdateWithoutIndexRunsInput>
+}
+
+export type RepositoryUpdateWithoutIndexRunsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  githubId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  owner?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.StringFieldUpdateOperationsInput | string
+  orgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  lastIndexedCommitSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutRepositoriesNestedInput
+  reviews?: Prisma.ReviewUpdateManyWithoutRepositoryNestedInput
+  reviewConfig?: Prisma.ReviewConfigUpdateOneWithoutRepositoryNestedInput
+  customRules?: Prisma.CustomReviewRuleUpdateManyWithoutRepositoryNestedInput
+}
+
+export type RepositoryUncheckedUpdateWithoutIndexRunsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  githubId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  owner?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  url?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  orgId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  lastIndexedCommitSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  reviews?: Prisma.ReviewUncheckedUpdateManyWithoutRepositoryNestedInput
+  reviewConfig?: Prisma.ReviewConfigUncheckedUpdateOneWithoutRepositoryNestedInput
+  customRules?: Prisma.CustomReviewRuleUncheckedUpdateManyWithoutRepositoryNestedInput
+}
+
 export type RepositoryCreateWithoutReviewsInput = {
   id?: string
   githubId: bigint | number
@@ -726,6 +837,7 @@ export type RepositoryCreateWithoutReviewsInput = {
   user: Prisma.UserCreateNestedOneWithoutRepositoriesInput
   reviewConfig?: Prisma.ReviewConfigCreateNestedOneWithoutRepositoryInput
   customRules?: Prisma.CustomReviewRuleCreateNestedManyWithoutRepositoryInput
+  indexRuns?: Prisma.IndexRunCreateNestedManyWithoutRepositoryInput
 }
 
 export type RepositoryUncheckedCreateWithoutReviewsInput = {
@@ -743,6 +855,7 @@ export type RepositoryUncheckedCreateWithoutReviewsInput = {
   updatedAt?: Date | string
   reviewConfig?: Prisma.ReviewConfigUncheckedCreateNestedOneWithoutRepositoryInput
   customRules?: Prisma.CustomReviewRuleUncheckedCreateNestedManyWithoutRepositoryInput
+  indexRuns?: Prisma.IndexRunUncheckedCreateNestedManyWithoutRepositoryInput
 }
 
 export type RepositoryCreateOrConnectWithoutReviewsInput = {
@@ -776,6 +889,7 @@ export type RepositoryUpdateWithoutReviewsInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutRepositoriesNestedInput
   reviewConfig?: Prisma.ReviewConfigUpdateOneWithoutRepositoryNestedInput
   customRules?: Prisma.CustomReviewRuleUpdateManyWithoutRepositoryNestedInput
+  indexRuns?: Prisma.IndexRunUpdateManyWithoutRepositoryNestedInput
 }
 
 export type RepositoryUncheckedUpdateWithoutReviewsInput = {
@@ -793,6 +907,7 @@ export type RepositoryUncheckedUpdateWithoutReviewsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewConfig?: Prisma.ReviewConfigUncheckedUpdateOneWithoutRepositoryNestedInput
   customRules?: Prisma.CustomReviewRuleUncheckedUpdateManyWithoutRepositoryNestedInput
+  indexRuns?: Prisma.IndexRunUncheckedUpdateManyWithoutRepositoryNestedInput
 }
 
 export type RepositoryCreateWithoutReviewConfigInput = {
@@ -810,6 +925,7 @@ export type RepositoryCreateWithoutReviewConfigInput = {
   user: Prisma.UserCreateNestedOneWithoutRepositoriesInput
   reviews?: Prisma.ReviewCreateNestedManyWithoutRepositoryInput
   customRules?: Prisma.CustomReviewRuleCreateNestedManyWithoutRepositoryInput
+  indexRuns?: Prisma.IndexRunCreateNestedManyWithoutRepositoryInput
 }
 
 export type RepositoryUncheckedCreateWithoutReviewConfigInput = {
@@ -827,6 +943,7 @@ export type RepositoryUncheckedCreateWithoutReviewConfigInput = {
   updatedAt?: Date | string
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutRepositoryInput
   customRules?: Prisma.CustomReviewRuleUncheckedCreateNestedManyWithoutRepositoryInput
+  indexRuns?: Prisma.IndexRunUncheckedCreateNestedManyWithoutRepositoryInput
 }
 
 export type RepositoryCreateOrConnectWithoutReviewConfigInput = {
@@ -860,6 +977,7 @@ export type RepositoryUpdateWithoutReviewConfigInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutRepositoriesNestedInput
   reviews?: Prisma.ReviewUpdateManyWithoutRepositoryNestedInput
   customRules?: Prisma.CustomReviewRuleUpdateManyWithoutRepositoryNestedInput
+  indexRuns?: Prisma.IndexRunUpdateManyWithoutRepositoryNestedInput
 }
 
 export type RepositoryUncheckedUpdateWithoutReviewConfigInput = {
@@ -877,6 +995,7 @@ export type RepositoryUncheckedUpdateWithoutReviewConfigInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutRepositoryNestedInput
   customRules?: Prisma.CustomReviewRuleUncheckedUpdateManyWithoutRepositoryNestedInput
+  indexRuns?: Prisma.IndexRunUncheckedUpdateManyWithoutRepositoryNestedInput
 }
 
 export type RepositoryCreateWithoutCustomRulesInput = {
@@ -894,6 +1013,7 @@ export type RepositoryCreateWithoutCustomRulesInput = {
   user: Prisma.UserCreateNestedOneWithoutRepositoriesInput
   reviews?: Prisma.ReviewCreateNestedManyWithoutRepositoryInput
   reviewConfig?: Prisma.ReviewConfigCreateNestedOneWithoutRepositoryInput
+  indexRuns?: Prisma.IndexRunCreateNestedManyWithoutRepositoryInput
 }
 
 export type RepositoryUncheckedCreateWithoutCustomRulesInput = {
@@ -911,6 +1031,7 @@ export type RepositoryUncheckedCreateWithoutCustomRulesInput = {
   updatedAt?: Date | string
   reviews?: Prisma.ReviewUncheckedCreateNestedManyWithoutRepositoryInput
   reviewConfig?: Prisma.ReviewConfigUncheckedCreateNestedOneWithoutRepositoryInput
+  indexRuns?: Prisma.IndexRunUncheckedCreateNestedManyWithoutRepositoryInput
 }
 
 export type RepositoryCreateOrConnectWithoutCustomRulesInput = {
@@ -944,6 +1065,7 @@ export type RepositoryUpdateWithoutCustomRulesInput = {
   user?: Prisma.UserUpdateOneRequiredWithoutRepositoriesNestedInput
   reviews?: Prisma.ReviewUpdateManyWithoutRepositoryNestedInput
   reviewConfig?: Prisma.ReviewConfigUpdateOneWithoutRepositoryNestedInput
+  indexRuns?: Prisma.IndexRunUpdateManyWithoutRepositoryNestedInput
 }
 
 export type RepositoryUncheckedUpdateWithoutCustomRulesInput = {
@@ -961,6 +1083,7 @@ export type RepositoryUncheckedUpdateWithoutCustomRulesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutRepositoryNestedInput
   reviewConfig?: Prisma.ReviewConfigUncheckedUpdateOneWithoutRepositoryNestedInput
+  indexRuns?: Prisma.IndexRunUncheckedUpdateManyWithoutRepositoryNestedInput
 }
 
 export type RepositoryCreateManyUserInput = {
@@ -992,6 +1115,7 @@ export type RepositoryUpdateWithoutUserInput = {
   reviews?: Prisma.ReviewUpdateManyWithoutRepositoryNestedInput
   reviewConfig?: Prisma.ReviewConfigUpdateOneWithoutRepositoryNestedInput
   customRules?: Prisma.CustomReviewRuleUpdateManyWithoutRepositoryNestedInput
+  indexRuns?: Prisma.IndexRunUpdateManyWithoutRepositoryNestedInput
 }
 
 export type RepositoryUncheckedUpdateWithoutUserInput = {
@@ -1009,6 +1133,7 @@ export type RepositoryUncheckedUpdateWithoutUserInput = {
   reviews?: Prisma.ReviewUncheckedUpdateManyWithoutRepositoryNestedInput
   reviewConfig?: Prisma.ReviewConfigUncheckedUpdateOneWithoutRepositoryNestedInput
   customRules?: Prisma.CustomReviewRuleUncheckedUpdateManyWithoutRepositoryNestedInput
+  indexRuns?: Prisma.IndexRunUncheckedUpdateManyWithoutRepositoryNestedInput
 }
 
 export type RepositoryUncheckedUpdateManyWithoutUserInput = {
@@ -1033,11 +1158,13 @@ export type RepositoryUncheckedUpdateManyWithoutUserInput = {
 export type RepositoryCountOutputType = {
   reviews: number
   customRules: number
+  indexRuns: number
 }
 
 export type RepositoryCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   reviews?: boolean | RepositoryCountOutputTypeCountReviewsArgs
   customRules?: boolean | RepositoryCountOutputTypeCountCustomRulesArgs
+  indexRuns?: boolean | RepositoryCountOutputTypeCountIndexRunsArgs
 }
 
 /**
@@ -1064,6 +1191,13 @@ export type RepositoryCountOutputTypeCountCustomRulesArgs<ExtArgs extends runtim
   where?: Prisma.CustomReviewRuleWhereInput
 }
 
+/**
+ * RepositoryCountOutputType without action
+ */
+export type RepositoryCountOutputTypeCountIndexRunsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.IndexRunWhereInput
+}
+
 
 export type RepositorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1082,6 +1216,7 @@ export type RepositorySelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   reviews?: boolean | Prisma.Repository$reviewsArgs<ExtArgs>
   reviewConfig?: boolean | Prisma.Repository$reviewConfigArgs<ExtArgs>
   customRules?: boolean | Prisma.Repository$customRulesArgs<ExtArgs>
+  indexRuns?: boolean | Prisma.Repository$indexRunsArgs<ExtArgs>
   _count?: boolean | Prisma.RepositoryCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["repository"]>
 
@@ -1138,6 +1273,7 @@ export type RepositoryInclude<ExtArgs extends runtime.Types.Extensions.InternalA
   reviews?: boolean | Prisma.Repository$reviewsArgs<ExtArgs>
   reviewConfig?: boolean | Prisma.Repository$reviewConfigArgs<ExtArgs>
   customRules?: boolean | Prisma.Repository$customRulesArgs<ExtArgs>
+  indexRuns?: boolean | Prisma.Repository$indexRunsArgs<ExtArgs>
   _count?: boolean | Prisma.RepositoryCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type RepositoryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1154,6 +1290,7 @@ export type $RepositoryPayload<ExtArgs extends runtime.Types.Extensions.Internal
     reviews: Prisma.$ReviewPayload<ExtArgs>[]
     reviewConfig: Prisma.$ReviewConfigPayload<ExtArgs> | null
     customRules: Prisma.$CustomReviewRulePayload<ExtArgs>[]
+    indexRuns: Prisma.$IndexRunPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1566,6 +1703,7 @@ export interface Prisma__RepositoryClient<T, Null = never, ExtArgs extends runti
   reviews<T extends Prisma.Repository$reviewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Repository$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reviewConfig<T extends Prisma.Repository$reviewConfigArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Repository$reviewConfigArgs<ExtArgs>>): Prisma.Prisma__ReviewConfigClient<runtime.Types.Result.GetResult<Prisma.$ReviewConfigPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   customRules<T extends Prisma.Repository$customRulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Repository$customRulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CustomReviewRulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  indexRuns<T extends Prisma.Repository$indexRunsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Repository$indexRunsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$IndexRunPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2067,6 +2205,30 @@ export type Repository$customRulesArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.CustomReviewRuleScalarFieldEnum | Prisma.CustomReviewRuleScalarFieldEnum[]
+}
+
+/**
+ * Repository.indexRuns
+ */
+export type Repository$indexRunsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the IndexRun
+   */
+  select?: Prisma.IndexRunSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the IndexRun
+   */
+  omit?: Prisma.IndexRunOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.IndexRunInclude<ExtArgs> | null
+  where?: Prisma.IndexRunWhereInput
+  orderBy?: Prisma.IndexRunOrderByWithRelationInput | Prisma.IndexRunOrderByWithRelationInput[]
+  cursor?: Prisma.IndexRunWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.IndexRunScalarFieldEnum | Prisma.IndexRunScalarFieldEnum[]
 }
 
 /**

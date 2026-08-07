@@ -28,6 +28,11 @@ export type User = Prisma.UserModel
  */
 export type Repository = Prisma.RepositoryModel
 /**
+ * Model IndexRun
+ * 
+ */
+export type IndexRun = Prisma.IndexRunModel
+/**
  * Model Review
  * 
  */

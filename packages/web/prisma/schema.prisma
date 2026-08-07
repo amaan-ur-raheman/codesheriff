@@ -56,10 +56,32 @@ model Repository {
 	reviews         Review[]
 	reviewConfig    ReviewConfig?
 	customRules     CustomReviewRule[]
+	indexRuns       IndexRun[]
 
 	@@index([userId])
 	@@index([orgId])
 	@@map("repository")
+}
+
+// One row per incremental/full indexing run (Spec 0006 AC-2). Written by the
+// indexing function per run; feeds dashboard metrics and alert thresholds.
+model IndexRun {
+	id           String     @id @default(cuid())
+	repositoryId String
+	repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+	runAt        DateTime   @default(now())
+	// "incremental" | "full"
+	kind         String
+	// "success" | "failed"
+	status       String
+	// Number of vectors upserted+deleted; null for full re-indexes (Spec 0006).
+	fileDelta    Int?
+	error        String?
+	durationMs   Int?
+
+	@@index([repositoryId])
+	@@index([runAt])
+	@@map("index_run")
 }
 
 model Review {
