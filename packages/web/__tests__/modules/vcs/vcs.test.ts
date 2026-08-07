@@ -76,6 +76,10 @@ describe("VCS Providers", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockGetSession.mockResolvedValue({ user: { id: "user-123" } });
+		// vitest loads the repo's real .env, so pin the webhook secret to a
+		// known state: absent by default, set explicitly by the one test
+		// that exercises the signed-webhook path.
+		delete process.env.GITHUB_WEBHOOK_SECRET;
 	});
 
 	describe("createVCSProvider factory", () => {
@@ -315,6 +319,31 @@ describe("VCS Providers", () => {
 					owner: "owner",
 					repo: "repo",
 					config: { url: "https://callback.com", content_type: "json" },
+					events: ["pull_request", "issue_comment", "pull_request_review_comment"],
+				});
+			});
+
+			it("createWebhook signs new hooks with the shared secret when GITHUB_WEBHOOK_SECRET is set", async () => {
+				// beforeEach pins the env to absent, so set it explicitly here.
+				process.env.GITHUB_WEBHOOK_SECRET = "test-secret";
+
+				mockOctokit.rest.repos.listWebhooks.mockResolvedValueOnce({
+					data: [],
+				});
+				mockOctokit.rest.repos.createWebhook.mockResolvedValueOnce({
+					data: { id: 100, config: { url: "https://callback.com" } },
+				});
+
+				const hook = await provider.createWebhook("owner", "repo", "https://callback.com");
+				expect(hook.id).toBe(100);
+				expect(mockOctokit.rest.repos.createWebhook).toHaveBeenCalledWith({
+					owner: "owner",
+					repo: "repo",
+					config: {
+						url: "https://callback.com",
+						content_type: "json",
+						secret: "test-secret",
+					},
 					events: ["pull_request", "issue_comment", "pull_request_review_comment"],
 				});
 			});
