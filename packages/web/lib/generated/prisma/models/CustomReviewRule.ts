@@ -179,7 +179,7 @@ export type CustomReviewRuleGroupByOutputType = {
   _max: CustomReviewRuleMaxAggregateOutputType | null
 }
 
-type GetCustomReviewRuleGroupByPayload<T extends CustomReviewRuleGroupByArgs> = Prisma.PrismaPromise<
+export type GetCustomReviewRuleGroupByPayload<T extends CustomReviewRuleGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<CustomReviewRuleGroupByOutputType, T['by']> &
       {
@@ -1227,6 +1227,11 @@ export type CustomReviewRuleFindManyArgs<ExtArgs extends runtime.Types.Extension
    * Skip the first `n` CustomReviewRules.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of CustomReviewRules.
+   */
   distinct?: Prisma.CustomReviewRuleScalarFieldEnum | Prisma.CustomReviewRuleScalarFieldEnum[]
 }
 

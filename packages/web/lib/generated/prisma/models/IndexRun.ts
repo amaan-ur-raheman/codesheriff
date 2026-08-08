@@ -217,7 +217,7 @@ export type IndexRunGroupByOutputType = {
   _max: IndexRunMaxAggregateOutputType | null
 }
 
-type GetIndexRunGroupByPayload<T extends IndexRunGroupByArgs> = Prisma.PrismaPromise<
+export type GetIndexRunGroupByPayload<T extends IndexRunGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<IndexRunGroupByOutputType, T['by']> &
       {
@@ -1285,6 +1285,11 @@ export type IndexRunFindManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Skip the first `n` IndexRuns.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of IndexRuns.
+   */
   distinct?: Prisma.IndexRunScalarFieldEnum | Prisma.IndexRunScalarFieldEnum[]
 }
 
