@@ -1,149 +1,115 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, CheckCircle2, GitPullRequest, ShieldCheck } from "lucide-react";
 
 export function HeroSection() {
+	const reduce = useReducedMotion();
+
 	return (
-		<section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-			<div className="absolute inset-0">
-				<div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/5 rounded-full blur-[128px]" />
-				<div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-			</div>
-
-			<div className="relative max-w-7xl mx-auto px-6 py-24 grid lg:grid-cols-2 gap-16 items-center">
+		<section className="relative min-h-[100dvh] flex items-center overflow-hidden pt-16">
+			<div className="mx-auto w-full max-w-7xl px-6 py-12 grid lg:grid-cols-2 gap-16 items-center">
 				<motion.div
-					initial={{ opacity: 0, y: 30 }}
+					initial={reduce ? false : { opacity: 0, y: 24 }}
 					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+					transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
 				>
-					<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-medium mb-8">
-						<span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-						Powered by Advanced AI
-					</div>
+					<p className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground mb-6">
+						<ShieldCheck className="w-4 h-4 text-primary" />
+						AI code review on every pull request
+					</p>
 
-					<h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] text-balance mb-6">
-						Ship better code,{" "}
-						<span className="text-primary">faster.</span>
+					<h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.04em] leading-[1.02] text-balance mb-6">
+						Your code,{" "}
+						<span className="text-primary">under review.</span>
 					</h1>
 
-					<p className="text-lg text-muted-foreground max-w-lg leading-relaxed mb-10">
-						AI-powered code reviews on every pull request. Catch bugs,
-						enforce best practices, and ship with confidence — before
-						it hits production.
+					<p className="text-lg text-muted-foreground max-w-md leading-relaxed mb-10">
+						Automated reviews that catch bugs and enforce your
+						standards before code hits production.
 					</p>
 
 					<div className="flex flex-wrap gap-4">
-						<Button
-							size="lg"
-							className="px-8"
-							asChild
-						>
+						<Button size="lg" className="px-8" asChild>
 							<a href="/login">
 								Get Started Free
 								<ArrowRight className="ml-2 w-4 h-4" />
 							</a>
 						</Button>
-						<Button
-							size="lg"
-							variant="outline"
-						>
-							<Play className="mr-2 w-4 h-4" />
-							See it in action
+						<Button size="lg" variant="outline" asChild>
+							<a href="#how-it-works">See how it works</a>
 						</Button>
-					</div>
-
-					<div className="mt-12 flex items-center gap-6 text-sm text-muted-foreground">
-						<div className="flex items-center gap-2">
-							<div className="flex -space-x-2">
-								{[...Array(4)].map((_, i) => (
-									<div
-										key={i}
-										className="w-7 h-7 rounded-full border-2 border-background bg-gradient-to-br from-primary/40 to-primary/10"
-										style={{ zIndex: 4 - i }}
-									/>
-								))}
-							</div>
-							<span>2,400+ developers</span>
-						</div>
-						<div className="w-px h-4 bg-border" />
-						<span>No credit card required</span>
 					</div>
 				</motion.div>
 
 				<motion.div
-					initial={{ opacity: 0, y: 40, scale: 0.95 }}
-					animate={{ opacity: 1, y: 0, scale: 1 }}
-					transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+					initial={reduce ? false : { opacity: 0, y: 32 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
 					className="relative"
 				>
-					<div className="absolute -inset-4 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 rounded-2xl blur-xl opacity-50" />
-					<div className="relative rounded-2xl border border-border bg-card overflow-hidden shadow-xl">
-						<div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
-							<div className="flex gap-1.5">
-								<div className="w-3 h-3 rounded-full bg-muted-foreground/20" />
-								<div className="w-3 h-3 rounded-full bg-muted-foreground/20" />
-								<div className="w-3 h-3 rounded-full bg-muted-foreground/20" />
-							</div>
-							<span className="text-xs text-muted-foreground ml-2 font-mono">
-								pull-request #347
-							</span>
-							<span className="ml-auto text-xs text-primary font-medium">
-								AI Review
-							</span>
-						</div>
-
-						<div className="p-5 font-mono text-sm space-y-3">
-							<div className="flex items-center gap-3">
-								<span className="text-muted-foreground/30 w-5">+</span>
-								<span className="text-green-600 dark:text-green-400">
-									const validateInput = (data: UserInput) =&gt; &#123;
-								</span>
-							</div>
-							<div className="flex items-center gap-3">
-								<span className="text-muted-foreground/30 w-5">+</span>
-								<span className="text-green-600 dark:text-green-400">
-									{"  "}if (!data.email) &#123;
-								</span>
-							</div>
-							<div className="flex items-center gap-3">
-								<span className="text-muted-foreground/30 w-5">+</span>
-								<span className="text-green-600 dark:text-green-400">
-									{"    "}throw new ValidationError(&quot;Email required&quot;);
-								</span>
-							</div>
-							<div className="flex items-center gap-3">
-								<span className="text-muted-foreground/30 w-5">+</span>
-								<span className="text-green-600 dark:text-green-400">{"  "}&#125;</span>
-							</div>
-							<div className="flex items-center gap-3">
-								<span className="text-muted-foreground/30 w-5">+</span>
-								<span className="text-green-600 dark:text-green-400">{"  "}return sanitize(data);</span>
-							</div>
-							<div className="flex items-center gap-3">
-								<span className="text-muted-foreground/30 w-5">+</span>
-								<span className="text-green-600 dark:text-green-400">&#125;</span>
-							</div>
-						</div>
-
-						<div className="mx-5 mb-5 p-3 rounded-lg border border-primary/20 bg-primary/5">
-							<div className="flex items-center gap-2 mb-2">
-								<div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
-									<span className="text-[10px] font-bold text-primary">AI</span>
+					{/* Real component preview: a review-result card */}
+					<div className="rounded-xl border border-border bg-card shadow-lg overflow-hidden">
+						<div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
+							<div className="flex items-center gap-2.5 min-w-0">
+								<div className="w-7 h-7 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+									<GitPullRequest className="w-4 h-4" />
 								</div>
-								<span className="text-xs font-medium text-primary">
-									Review Suggestion
+								<div className="min-w-0">
+									<p className="text-sm font-medium leading-tight truncate">
+										acme/web-app
+									</p>
+									<p className="text-xs text-muted-foreground">
+										pull request #347
+									</p>
+								</div>
+							</div>
+							<Badge
+								variant="outline"
+								className="text-primary border-primary/40 bg-primary/5 shrink-0"
+							>
+								AI Review
+							</Badge>
+						</div>
+
+						<div className="px-4 py-3 font-mono text-[13px] leading-relaxed space-y-0.5">
+							<div className="flex gap-3">
+								<span className="text-muted-foreground/40 w-4 shrink-0 select-none">+</span>
+								<span className="text-verified">
+									const validateInput = (data: UserInput) =&gt; {"{"}
+								</span>
+							</div>
+							<div className="flex gap-3">
+								<span className="text-muted-foreground/40 w-4 shrink-0 select-none">+</span>
+								<span className="text-verified">
+									{"  "}if (!data.email) throw new ValidationError();
+								</span>
+							</div>
+							<div className="flex gap-3">
+								<span className="text-muted-foreground/40 w-4 shrink-0 select-none">+</span>
+								<span className="text-verified">
+									{"  "}return sanitize(data);
+								</span>
+							</div>
+							<div className="flex gap-3">
+								<span className="text-muted-foreground/40 w-4 shrink-0 select-none">+</span>
+								<span className="text-verified">{"}"}</span>
+							</div>
+						</div>
+
+						<div className="mx-4 mb-4 rounded-lg border border-border bg-muted/40 p-3.5">
+							<div className="flex items-center justify-between gap-2 mb-2">
+								<p className="text-xs font-medium">Input validation missing</p>
+								<span className="inline-flex items-center gap-1 text-[11px] font-medium text-verified shrink-0">
+									<CheckCircle2 className="w-3 h-3" />
+									Sandbox verified
 								</span>
 							</div>
 							<p className="text-xs text-muted-foreground leading-relaxed">
-								Consider adding{" "}
-								<code className="px-1 py-0.5 rounded bg-muted text-primary text-[11px]">
-									isEmail()
-								</code>{" "}
-								validation from <code className="px-1 py-0.5 rounded bg-muted text-primary text-[11px]">zod</code>{" "}
-								to prevent invalid email formats from reaching the
-								database layer.
+								Add <code className="px-1 py-0.5 rounded bg-muted font-mono text-[11px] text-foreground">isEmail()</code>{" "}
+								validation before data reaches the database layer.
 							</p>
 						</div>
 					</div>

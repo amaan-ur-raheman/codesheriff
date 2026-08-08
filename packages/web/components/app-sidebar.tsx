@@ -153,12 +153,6 @@ export const AppSidebar = () => {
 			</SidebarHeader>
 
 			<SidebarContent className="px-3 py-6 flex-col gap-1">
-				<div className="mb-2">
-					<p className="text-xs font-semibold text-sidebar-foreground/60 px-3 mb-3 uppercase tracking-widest">
-						Menu
-					</p>
-				</div>
-
 				<SidebarMenu className="gap-2">
 					{navigationItems.map((item) => (
 						<SidebarMenuItem key={item.title}>
@@ -167,8 +161,8 @@ export const AppSidebar = () => {
 								tooltip={item.title}
 								className={`h-11 px-4 rounded-lg transition-all duration-200 ${
 									isActive(item.url)
-										? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground font-semibold"
-										: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sidebar-accent-foreground"
+										? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold hover:bg-sidebar-accent"
+										: "hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground text-sidebar-foreground"
 								}`}
 							>
 								<Link
