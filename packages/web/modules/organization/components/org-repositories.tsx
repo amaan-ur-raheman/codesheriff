@@ -10,8 +10,9 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { GitFork, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useRepositories } from "@/modules/repository/hooks/use-repositories";
 import { useConnectRepository } from "@/modules/repository/hooks/use-connect-repository";
 import { RepositoryListSkeleton } from "@/modules/repository/components/repository-skeleton";
@@ -94,10 +95,11 @@ export default function OrgRepositories({
 				{isLoading ? (
 					<RepositoryListSkeleton />
 				) : filteredRepositories.length === 0 ? (
-					<div className="text-center py-8 text-muted-foreground">
-						<GitFork className="h-8 w-8 mx-auto mb-2" />
-						<p>No repositories found</p>
-					</div>
+					<EmptyState
+						kicker="Repositories"
+						title="No repositories found"
+						description="Connect your GitHub account to browse repositories for this organization."
+					/>
 				) : (
 					<div className="space-y-3">
 						{filteredRepositories.map((repo: any) => (

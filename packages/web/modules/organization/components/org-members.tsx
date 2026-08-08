@@ -31,7 +31,10 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { UserPlus, Trash2, Crown, Shield, User, Loader2 } from "lucide-react";
+import { UserPlus, Trash2, Crown, Shield, User, Loader2, Clock } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -60,7 +63,12 @@ export default function OrgMembers({
 	);
 	const queryClient = useQueryClient();
 
-	const { data: org, isLoading } = useQuery({
+	const {
+		data: org,
+		isLoading,
+		isError,
+		refetch,
+	} = useQuery({
 		queryKey: ["organization", orgId],
 		queryFn: async () => {
 			return await getOrganization(orgId);
@@ -138,13 +146,39 @@ export default function OrgMembers({
 	const canManageMembers =
 		currentUserRole === "owner" || currentUserRole === "admin";
 
+	if (isError) {
+		return (
+			<Card>
+				<CardContent className="pt-6">
+					<ErrorState
+						title="Couldn't load members"
+						description="Organization members couldn't be fetched."
+						onRetry={() => refetch()}
+					/>
+				</CardContent>
+			</Card>
+		);
+	}
+
 	if (isLoading) {
 		return (
 			<Card>
 				<CardContent className="pt-6">
-					<div className="animate-pulse space-y-4">
-						<div className="h-10 bg-muted rounded" />
-						<div className="h-10 bg-muted rounded" />
+					<div className="space-y-3">
+						<div className="flex items-center gap-3 p-3 border border-border">
+							<Skeleton className="h-10 w-10 shrink-0" />
+							<div className="flex-1 space-y-2">
+								<Skeleton className="h-4 w-40" />
+								<Skeleton className="h-3 w-28" />
+							</div>
+						</div>
+						<div className="flex items-center gap-3 p-3 border border-border">
+							<Skeleton className="h-10 w-10 shrink-0" />
+							<div className="flex-1 space-y-2">
+								<Skeleton className="h-4 w-32" />
+								<Skeleton className="h-3 w-24" />
+							</div>
+						</div>
 					</div>
 				</CardContent>
 			</Card>
@@ -242,6 +276,13 @@ export default function OrgMembers({
 				)}
 
 				{/* Members List */}
+				{!org?.members.length ? (
+					<EmptyState
+						kicker="Members"
+						title="No members yet"
+						description="Invite your first teammate to collaborate on reviews."
+					/>
+				) : (
 				<div className="space-y-3">
 					{org?.members.map((member) => {
 						const isPending =
@@ -285,7 +326,7 @@ export default function OrgMembers({
 							<div className="flex items-center gap-3">
 								{isPending ? (
 									<Badge variant="secondary" className="gap-1">
-										<Loader2 className="h-3 w-3 animate-pulse" />
+										<Clock className="h-3 w-3" />
 										Invited
 									</Badge>
 								) : (
@@ -390,6 +431,7 @@ export default function OrgMembers({
 						);
 					})}
 				</div>
+				)}
 			</CardContent>
 		</Card>
 	);

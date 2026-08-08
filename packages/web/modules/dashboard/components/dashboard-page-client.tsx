@@ -35,7 +35,9 @@ import {
 	GitBranch,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
 
 import {
 	getDashboardStats,
@@ -45,13 +47,22 @@ import ContributionGraph from "@/modules/dashboard/components/contribution-graph
 import { HealthScoreCard } from "@/modules/dashboard/components/health-score-card";
 
 const DashboardPageClient = () => {
-	const { data: stats, isLoading } = useQuery({
+	const {
+		data: stats,
+		isLoading,
+		isError: isStatsError,
+	} = useQuery({
 		queryKey: ["dashboard-stats"],
 		queryFn: async () => await getDashboardStats(),
 		refetchOnWindowFocus: false,
 	});
 
-	const { data: monthlyActivity, isLoading: isLoadingActivity } = useQuery({
+	const {
+		data: monthlyActivity,
+		isLoading: isLoadingActivity,
+		isError: isActivityError,
+		refetch: refetchActivity,
+	} = useQuery({
 		queryKey: ["monthly-activity"],
 		queryFn: async () => await getMonthlyActivity(),
 		refetchOnWindowFocus: false,
@@ -81,7 +92,13 @@ const DashboardPageClient = () => {
 					</CardHeader>
 					<CardContent>
 						<div className="font-display text-3xl tracking-tight">
-							{isLoading ? "..." : stats?.totalRepos || 0}
+							{isLoading ? (
+								<Skeleton className="h-8 w-14" />
+							) : isStatsError ? (
+								"—"
+							) : (
+								stats?.totalRepos || 0
+							)}
 						</div>
 						<p className="text-xs text-muted-foreground">
 							Connected Repositories
@@ -97,9 +114,13 @@ const DashboardPageClient = () => {
 					</CardHeader>
 					<CardContent>
 						<div className="font-display text-3xl tracking-tight">
-							{isLoading
-								? "..."
-								: (stats?.totalCommits || 0).toLocaleString()}
+							{isLoading ? (
+								<Skeleton className="h-8 w-20" />
+							) : isStatsError ? (
+								"—"
+							) : (
+								(stats?.totalCommits || 0).toLocaleString()
+							)}
 						</div>
 						<p className="text-xs text-muted-foreground">
 							In the last year
@@ -115,7 +136,13 @@ const DashboardPageClient = () => {
 					</CardHeader>
 					<CardContent>
 						<div className="font-display text-3xl tracking-tight">
-							{isLoading ? "..." : stats?.totalPrs || 0}
+							{isLoading ? (
+								<Skeleton className="h-8 w-14" />
+							) : isStatsError ? (
+								"—"
+							) : (
+								stats?.totalPrs || 0
+							)}
 						</div>
 						<p className="text-xs text-muted-foreground">
 							All Time
@@ -131,7 +158,13 @@ const DashboardPageClient = () => {
 					</CardHeader>
 					<CardContent>
 						<div className="font-display text-3xl tracking-tight">
-							{isLoading ? "..." : stats?.totalReviews || 0}
+							{isLoading ? (
+								<Skeleton className="h-8 w-14" />
+							) : isStatsError ? (
+								"—"
+							) : (
+								stats?.totalReviews || 0
+							)}
 						</div>
 						<p className="text-xs text-muted-foreground">
 							Generated Reviews
@@ -177,8 +210,34 @@ const DashboardPageClient = () => {
 					</CardHeader>
 					<CardContent>
 						{isLoadingActivity ? (
-							<div className="h-80 w-full flex items-center justify-center">
-								<Spinner />
+							<div className="flex h-80 w-full items-end gap-2 px-2 pb-1">
+								{Array.from({ length: 12 }).map((_, i) => (
+									<Skeleton
+										key={i}
+										className="flex-1"
+										style={{
+												height: `${32 + ((i * 37) % 56)}%`,
+											}}
+									/>
+								))}
+							</div>
+						) : isActivityError ? (
+							<div className="h-80 w-full">
+								<ErrorState
+									title="Couldn't load activity"
+									description="Your contribution activity couldn't be fetched right now."
+									onRetry={() => refetchActivity()}
+									className="h-full"
+								/>
+							</div>
+						) : !monthlyActivity || monthlyActivity.length === 0 ? (
+							<div className="h-80 w-full">
+								<EmptyState
+									kicker="Activity"
+									title="No activity yet"
+									description="Once reviews start running, your monthly activity will appear here."
+									className="h-full"
+								/>
 							</div>
 						) : (
 							<div className="h-80 w-full">

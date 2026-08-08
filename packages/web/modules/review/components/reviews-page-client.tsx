@@ -39,6 +39,8 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 import { getReviews } from "@/modules/review/actions";
 import InlineSuggestions from "@/modules/review/components/inline-suggestions";
@@ -208,11 +210,27 @@ export default function ReviewsPageClient() {
 						View all AI code reviews
 					</p>
 				</div>
-				<div>
-					<div className="animate-pulse space-y-4">
-						<div className="h-10 bg-muted rounded" />
-						<div className="h-10 bg-muted rounded" />
-					</div>
+				<div className="grid gap-4">
+					<Card>
+						<CardHeader className="space-y-2">
+							<Skeleton className="h-6 w-2/3" />
+							<Skeleton className="h-4 w-40" />
+						</CardHeader>
+						<CardContent className="space-y-3">
+							<Skeleton className="h-4 w-24" />
+							<Skeleton className="h-24 w-full" />
+						</CardContent>
+					</Card>
+					<Card>
+						<CardHeader className="space-y-2">
+							<Skeleton className="h-6 w-1/2" />
+							<Skeleton className="h-4 w-32" />
+						</CardHeader>
+						<CardContent className="space-y-3">
+							<Skeleton className="h-4 w-28" />
+							<Skeleton className="h-24 w-full" />
+						</CardContent>
+					</Card>
 				</div>
 			</div>
 		);
@@ -234,13 +252,19 @@ export default function ReviewsPageClient() {
 
 			{reviews?.length === 0 ? (
 				<Card>
-					<CardContent className="pt-6">
-						<div className="text-center py-12">
-							<p className="text-muted-foreground">
-								No reviews yet. Connect a repository and open a
-								PR to get started.
-							</p>
-						</div>
+					<CardContent>
+						<EmptyState
+							kicker="Reviews"
+							title="No reviews yet"
+							description="Connect a repository and open a pull request to get your first AI review."
+							action={
+								<Button variant="outline" size="sm" asChild>
+									<a href="/dashboard/repository">
+										Connect a repository
+									</a>
+								</Button>
+							}
+						/>
 					</CardContent>
 				</Card>
 			) : (
