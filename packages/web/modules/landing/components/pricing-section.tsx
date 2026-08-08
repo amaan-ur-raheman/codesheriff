@@ -105,14 +105,12 @@ export function PricingSection() {
 		<section id="pricing" ref={rootRef} className="relative py-32">
 			<div className="mx-auto max-w-7xl px-6">
 				<div className="pricing-head mb-16 max-w-2xl">
-					<p className="mb-3 font-mono text-xs font-medium uppercase tracking-[0.2em] text-primary">
-						Pricing
-					</p>
 					<h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-balance">
-						Simple, transparent pricing
+						Pricing that scales with your team
 					</h2>
 					<p className="mt-4 text-lg text-muted-foreground">
-						Start free, scale as you grow. No hidden fees.
+						Start free, upgrade when you need more. No hidden fees, cancel
+						anytime.
 					</p>
 				</div>
 
@@ -127,7 +125,7 @@ export function PricingSection() {
 							}`}
 						>
 							{plan.badge && (
-								<div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 font-mono text-[11px] font-semibold text-primary-foreground">
+								<div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 font-mono text-[11px] font-semibold text-primary-foreground shadow-md">
 									{plan.badge}
 								</div>
 							)}
@@ -157,7 +155,7 @@ export function PricingSection() {
 										key={feature}
 										className="flex items-start gap-3 text-sm"
 									>
-										<Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+										<Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" strokeWidth={2.5} />
 										<span className="text-muted-foreground">
 											{feature}
 										</span>

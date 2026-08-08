@@ -3,7 +3,7 @@
 import { Navbar } from "./navbar";
 import { HeroSection } from "./hero-section";
 import { FeaturesSection } from "./features-section";
-import { HowItWorks } from "./how-it-works";
+import { PipelineSection } from "./pipeline-section";
 import { PricingSection } from "./pricing-section";
 import { CTASection } from "./cta-section";
 import { Footer } from "./footer";
@@ -14,7 +14,7 @@ export function LandingPage() {
 			<Navbar />
 			<HeroSection />
 			<FeaturesSection />
-			<HowItWorks />
+			<PipelineSection />
 			<PricingSection />
 			<CTASection />
 			<Footer />

@@ -35,10 +35,10 @@ export function CTASection() {
 		<section ref={rootRef} className="relative py-32">
 			<div className="mx-auto max-w-7xl px-6">
 				<div className="cta-inner relative overflow-hidden rounded-3xl border border-border bg-card px-6 py-20 text-center">
-					{/* faint emerald radial, well under any text */}
+					{/* faint magenta bloom, well under any text */}
 					<div
 						aria-hidden="true"
-						className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl"
+						className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-neon/10 blur-3xl"
 					/>
 
 					<div className="relative">
@@ -47,19 +47,19 @@ export function CTASection() {
 						</h2>
 						<p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
 							Join developers catching bugs before they reach
-							production. Get started in minutes — no credit card
+							production. Get started in minutes, no credit card
 							required.
 						</p>
 						<div className="mt-10 flex flex-wrap justify-center gap-4">
 							<Button size="lg" className="px-8" asChild>
-								<a href="/login">
-									Get Started Free
-									<ArrowRight className="ml-2 h-4 w-4" />
-								</a>
+							<a href="/login">
+								Get Started
+								<ArrowRight className="ml-2 h-4 w-4" />
+							</a>
 							</Button>
 						</div>
 						<p className="mt-6 font-mono text-xs text-muted-foreground">
-							Connect a repo · review lands in minutes
+							Connect a repo, review lands in minutes
 						</p>
 					</div>
 				</div>

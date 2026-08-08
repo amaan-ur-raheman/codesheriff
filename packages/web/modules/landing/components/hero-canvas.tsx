@@ -5,9 +5,10 @@ import { useEffect, useRef } from "react";
 /**
  * Three.js hero background — a slow-rotating 8-point sheriff-star wireframe
  * inside a drifting shell of particles. Colors are read live from the CSS
- * token layer (--primary / --foreground) so it follows the Dispatch palette
- * and theme switches. Cheap by design: no post-processing, DPR clamped,
- * paused when hidden, static when reduced motion is preferred.
+ * token layer (--neon for the star, --foreground for particles) so it follows
+ * the Cyber Noir palette and theme switches. Cheap by design: no
+ * post-processing, DPR clamped, paused when hidden, static when reduced
+ * motion is preferred.
  */
 export function HeroCanvas() {
 	const mountRef = useRef<HTMLDivElement>(null);
@@ -57,9 +58,9 @@ export function HeroCanvas() {
 				shape.getPoints(96),
 			);
 			const starMat = new THREE.LineBasicMaterial({
-				color: 0x3ecf8e,
+				color: 0xfe00c7,
 				transparent: true,
-				opacity: 0.75,
+				opacity: 0.85,
 			});
 			const star = new THREE.LineLoop(starGeo, starMat);
 			scene.add(star);
@@ -78,18 +79,18 @@ export function HeroCanvas() {
 			const pGeo = new THREE.BufferGeometry();
 			pGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
 			const pMat = new THREE.PointsMaterial({
-				color: 0xe8ecea,
+				color: 0xe9e9f5,
 				size: 0.028,
 				transparent: true,
-				opacity: 0.55,
+				opacity: 0.5,
 				sizeAttenuation: true,
 			});
 			const particles = new THREE.Points(pGeo, pMat);
 			scene.add(particles);
 
 			const applyColors = () => {
-				starMat.color.set(cssVar("--primary") || "#3ecf8e");
-				pMat.color.set(cssVar("--foreground") || "#e8ecea");
+				starMat.color.set(cssVar("--neon") || "#fe00c7");
+				pMat.color.set(cssVar("--foreground") || "#e9e9f5");
 			};
 			applyColors();
 			const observer = new MutationObserver(applyColors);

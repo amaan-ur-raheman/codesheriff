@@ -9,7 +9,6 @@ const languages = ["TypeScript", "Python", "Go", "Rust", "Java", "Ruby"];
 const features = [
 	{
 		icon: Bot,
-		index: "01",
 		title: "AI Code Review",
 		description:
 			"Deep analysis of every pull request. Catches bugs, security issues, and code smells before they reach production.",
@@ -33,26 +32,23 @@ const features = [
 	},
 	{
 		icon: MessageSquare,
-		index: "02",
 		title: "Auto PR Comments",
 		description:
-			"Inline suggestions posted directly on your pull requests — actionable feedback without leaving GitHub.",
+			"Inline suggestions posted directly on your pull requests, actionable feedback without leaving GitHub.",
 		span: "md:col-span-2",
 	},
 	{
 		icon: Activity,
-		index: "03",
 		title: "Health Scores",
 		description:
-			"Track code quality trends over time. Completion rates, issue density, and team performance at a glance.",
+			"Track code quality trends over time: completion rates, issue density, and team performance at a glance.",
 		span: "md:col-span-2",
 	},
 	{
 		icon: Globe,
-		index: "04",
 		title: "Multi-language Support",
 		description:
-			"Works across your entire stack — one AI reviewing JavaScript, TypeScript, Python, Go, Rust, and more.",
+			"One AI reviewing JavaScript, TypeScript, Python, Go, Rust, and more across your entire stack.",
 		span: "md:col-span-4",
 		preview: (
 			<div className="mt-6 flex flex-wrap gap-2">
@@ -113,16 +109,9 @@ export function FeaturesSection() {
 	}, []);
 
 	return (
-		<section
-			id="features"
-			ref={rootRef}
-			className="relative py-32"
-		>
+		<section id="features" ref={rootRef} className="relative py-32">
 			<div className="mx-auto max-w-7xl px-6">
 				<div className="features-head mb-16 max-w-2xl">
-					<p className="mb-3 font-mono text-xs font-medium uppercase tracking-[0.2em] text-primary">
-						Capabilities
-					</p>
 					<h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-balance">
 						Everything you need to review smarter
 					</h2>
@@ -137,14 +126,31 @@ export function FeaturesSection() {
 						<div
 							key={feature.title}
 							className={`feature-card group relative rounded-2xl border border-border bg-card p-8 transition-all duration-300 hover:-translate-y-1 hover:border-primary/35 hover:shadow-lg ${feature.span}`}
+							onMouseMove={(e) => {
+								// Spotlight border: track the cursor into CSS vars
+								// (no re-render, transform/opacity only).
+								const rect = e.currentTarget.getBoundingClientRect();
+								e.currentTarget.style.setProperty(
+									"--spot-x",
+									`${e.clientX - rect.left}px`,
+								);
+								e.currentTarget.style.setProperty(
+									"--spot-y",
+									`${e.clientY - rect.top}px`,
+								);
+							}}
 						>
-							<div className="mb-6 flex items-start justify-between">
-								<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 transition-colors duration-300 group-hover:bg-primary/20">
-									<feature.icon className="h-5 w-5 text-primary" />
-								</div>
-								<span className="font-mono text-xs text-muted-foreground">
-									{feature.index}
-								</span>
+							{/* cursor-following highlight, clipped to the card */}
+							<div
+								aria-hidden="true"
+								className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+								style={{
+									background:
+										"radial-gradient(240px circle at var(--spot-x, 50%) var(--spot-y, 50%), color-mix(in srgb, var(--primary) 9%, transparent), transparent 60%)",
+								}}
+							/>
+							<div className="mb-6 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 transition-colors duration-300 group-hover:bg-primary/20">
+								<feature.icon className="h-5 w-5 text-primary" />
 							</div>
 							<h3 className="mb-2 text-lg font-semibold">
 								{feature.title}
