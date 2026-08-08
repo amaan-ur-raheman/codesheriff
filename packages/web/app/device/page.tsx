@@ -41,36 +41,39 @@ export default function DeviceVerificationPage() {
 	};
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
-			<Card className="w-full max-w-md border-border/80 shadow-xl bg-card">
-				<CardHeader className="text-center space-y-2">
-					<div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2">
+		<div className="min-h-screen bg-background flex items-center justify-center p-4">
+			<Card className="w-full max-w-md border-border bg-card">
+				<CardHeader className="text-center space-y-3 pt-10 pb-2">
+					<div className="mx-auto w-12 h-12 border border-border bg-accent flex items-center justify-center text-foreground">
 						<ShieldCheck className="w-6 h-6" />
 					</div>
-					<CardTitle className="text-2xl font-bold tracking-tight">
-						Connect a Device
+					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text">
+						Device authorization
+					</p>
+					<CardTitle className="font-display text-2xl tracking-tight">
+						Connect a device
 					</CardTitle>
 					<CardDescription>
 						Enter the code shown on your terminal to authorize the Code Sheriff CLI.
 					</CardDescription>
 				</CardHeader>
-				<CardContent>
+				<CardContent className="pb-10">
 					{status === "success" ? (
 						<div className="text-center py-6 space-y-4">
-							<div className="mx-auto w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 animate-bounce">
-								<CheckCircle2 className="w-10 h-10" />
+							<div className="mx-auto w-14 h-14 bg-brand-soft flex items-center justify-center text-brand-text">
+								<CheckCircle2 className="w-8 h-8" />
 							</div>
 							<div className="space-y-1">
-								<h3 className="text-lg font-semibold text-foreground">
-									Device Authorized!
+								<h3 className="font-display text-xl text-foreground">
+									Device authorized
 								</h3>
 								<p className="text-sm text-muted-foreground">
 									You can close this tab now and return to your terminal.
 								</p>
 							</div>
-							<div className="flex items-center justify-center gap-1.5 text-xs text-primary/70 font-medium">
+							<div className="flex items-center justify-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.16em] text-brand-text">
 								<Sparkles className="w-3.5 h-3.5" />
-								Happy reviewing!
+								Happy reviewing
 							</div>
 						</div>
 					) : (
@@ -88,7 +91,7 @@ export default function DeviceVerificationPage() {
 							</div>
 
 							{status === "error" && (
-								<div className="flex items-center gap-2 text-sm text-red-600 bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+								<div className="flex items-center gap-2 text-sm text-destructive bg-destructive/5 border border-destructive/30 p-3">
 									<AlertCircle className="w-4 h-4 shrink-0" />
 									<span>{errorMsg}</span>
 								</div>
@@ -96,7 +99,7 @@ export default function DeviceVerificationPage() {
 
 							<Button
 								type="submit"
-								className="w-full h-11 text-base font-semibold"
+								className="w-full h-11 text-sm font-medium"
 								disabled={status === "loading" || !code.trim()}
 							>
 								{status === "loading" ? "Authorizing..." : "Authorize Device"}

@@ -1,13 +1,9 @@
 /**
  * Main application sidebar component providing navigation and user controls
- * 
- * Features:
- * - Navigation menu with active state indicators
- * - User profile display with avatar and subscription tier
- * - Theme toggle (light/dark mode)
- * - Logout functionality
- * - Responsive design with collapsible sidebar
- * 
+ *
+ * Editorial Paper treatment: serif wordmark, mono connected-account row,
+ * hairline brand rule for the active item, quiet footer.
+ *
  * @component
  */
 "use client";
@@ -36,6 +32,8 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	SidebarGroup,
+	SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -128,84 +126,88 @@ export const AppSidebar = () => {
 
 	return (
 		<Sidebar>
-			<SidebarHeader className="border-b border-border">
-				<div className="flex flex-col gap-4 px-2 py-6">
-					<div className="flex items-center gap-2.5 px-3 font-bold text-lg text-foreground">
+			<SidebarHeader className="border-b border-sidebar-border">
+				<div className="flex flex-col gap-5 px-4 py-6">
+					<div className="flex items-center gap-2.5 font-display text-lg tracking-tight text-sidebar-foreground">
 						<div className="relative w-7 h-7 flex items-center justify-center shrink-0">
 							<Image src="/logo-32.png" alt="Code Sheriff Logo" width={32} height={32} className="object-contain w-full h-full" />
 						</div>
 						<span>CodeSheriff</span>
-					</div>
-					<div className="flex items-center gap-4 px-3 py-4 rounded-lg bg-sidebar-accent/50 hover:bg-sidebar-accent/70 transition-colors">
-						<div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary text-primary-foreground shrink-0">
-							<Github className="w-6 h-6" />
+					</div>						<div className="flex items-center gap-3 border-t border-sidebar-border pt-4">
+							<div className="flex items-center justify-center w-9 h-9 border border-sidebar-border bg-sidebar-accent text-sidebar-foreground shrink-0">
+								<Github className="w-4 h-4" />
+							</div>
+							<div className="flex-1 min-w-0">
+								<p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+									Connected account
+								</p>
+								<p className="font-mono text-xs text-sidebar-foreground truncate mt-0.5">
+									@{userName}
+								</p>
+							</div>
 						</div>
-						<div className="flex-1 min-w-0">
-							<p className="text-xs font-semibold text-sidebar-foreground tracking-wide">
-								Connected Account
-							</p>
-							<p className="text-sm font-medium text-sidebar-foreground/90 truncate">
-								@{userName}
-							</p>
-						</div>
-					</div>
 				</div>
 			</SidebarHeader>
 
-			<SidebarContent className="px-3 py-6 flex-col gap-1">
-				<SidebarMenu className="gap-2">
-					{navigationItems.map((item) => (
-						<SidebarMenuItem key={item.title}>
-							<SidebarMenuButton
-								asChild
-								tooltip={item.title}
-								className={`h-11 px-4 rounded-lg transition-all duration-200 ${
-									isActive(item.url)
-										? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold hover:bg-sidebar-accent"
-										: "hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground text-sidebar-foreground"
-								}`}
-							>
-								<Link
-									href={item.url}
-									className="flex items-center gap-3"
+			<SidebarContent className="px-3 py-6">
+				<SidebarGroup>
+					<SidebarGroupLabel className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground h-6 px-4">
+						Navigate
+					</SidebarGroupLabel>
+					<SidebarMenu className="gap-1 mt-2">
+						{navigationItems.map((item) => (
+							<SidebarMenuItem key={item.title}>
+								<SidebarMenuButton
+									asChild
+									tooltip={item.title}
+									isActive={isActive(item.url)}
+									className={`h-10 px-4 border-l-2 group-data-[collapsible=icon]:border-l-0 transition-colors duration-150 ${
+										isActive(item.url)
+											? "border-brand bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+											: "border-transparent text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+									}`}
 								>
-									<item.icon className="w-5 h-5 flex shrink-0" />
-									<span className="text-sm font-medium">
-										{item.title}
-									</span>
-								</Link>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-					))}
-				</SidebarMenu>
+									<Link
+										href={item.url}
+										className="flex items-center gap-3"
+									>
+										<item.icon className="w-5 h-5 flex shrink-0" />
+										<span className="text-sm">
+											{item.title}
+										</span>
+									</Link>
+								</SidebarMenuButton>
+							</SidebarMenuItem>
+						))}
+					</SidebarMenu>
+				</SidebarGroup>
 			</SidebarContent>
 
-			<SidebarFooter className="border-t border-border px-3 py-4">
+			<SidebarFooter className="border-t border-sidebar-border px-3 py-4">
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<SidebarMenuButton
 									size={"lg"}
-									className="h-12 rounded-lg data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground 
-hover:bg-sidebar-accent/50 transition-colors"
+									className="h-12 px-3 hover:bg-sidebar-accent/50 data-[state=open]:bg-sidebar-accent/60 transition-colors"
 								>
-									<Avatar className="w-10 h-10 rounded-lg shrink-0">
+									<Avatar className="w-10 h-10 shrink-0">
 										<AvatarImage
 											src={
 												userAvatar || "/placeholder.svg"
 											}
 											alt={userName}
 										/>
-										<AvatarFallback className="rounded-lg">
+										<AvatarFallback>
 											{userInitials}
 										</AvatarFallback>
 									</Avatar>
-									<div className="grid flex-1 text-left text-sm leading-relaxed min-w-0">
-										<span className="truncate font-semibold text-base">
+									<div className="grid flex-1 text-left text-sm min-w-0">
+										<span className="truncate font-medium text-sidebar-foreground">
 											{userName}
 										</span>
-										<span className="truncate text-xs text-sidebar-foreground/70">
+										<span className="truncate font-mono text-[11px] text-muted-foreground">
 											{userEmail}
 										</span>
 									</div>
@@ -213,34 +215,34 @@ hover:bg-sidebar-accent/50 transition-colors"
 							</DropdownMenuTrigger>
 
 							<DropdownMenuContent
-								className="w-80 rounded-lg"
+								className="w-80"
 								align="end"
 								side="right"
 								sideOffset={8}
 							>
-								<div className="flex items-center gap-3 px-4 py-4 bg-sidebar-accent/30 rounded-t-lg">
-									<Avatar className="w-12 h-12 rounded-lg shrink-0">
+								<div className="flex items-center gap-3 px-4 py-4 border-b border-border">
+									<Avatar className="w-12 h-12 shrink-0">
 										<AvatarImage
 											src={
 												userAvatar || "/placeholder.svg"
 											}
 											alt={userName}
 										/>
-										<AvatarFallback className="rounded-lg">
+										<AvatarFallback>
 											{userInitials}
 										</AvatarFallback>
 									</Avatar>
 									<div className="flex-1 min-w-0">
-										<p className="font-semibold text-sm">
+										<p className="font-medium text-sm">
 											{userName}
 										</p>
-										<p className="text-xs text-muted-foreground truncate">
+										<p className="font-mono text-xs text-muted-foreground truncate">
 											{userEmail}
 										</p>
 									</div>
 								</div>
 
-								<div className="px-2 py-3 border-t border-b border-border">
+								<div className="px-2 py-3">
 									<DropdownMenuItem asChild>
 										<button
 											onClick={() =>
@@ -250,7 +252,7 @@ hover:bg-sidebar-accent/50 transition-colors"
 														: "dark"
 												)
 											}
-											className="w-full px-3 py-3 flex items-center gap-3 cursor-pointer rounded-md hover:bg-sidebar-accent/50 transition-colors text-sm font-medium"
+											className="w-full px-3 py-3 flex items-center gap-3 cursor-pointer hover:bg-sidebar-accent/50 transition-colors text-sm font-medium"
 										>
 											{theme === "dark" ? (
 												<>
@@ -265,7 +267,7 @@ hover:bg-sidebar-accent/50 transition-colors"
 											)}
 										</button>
 									</DropdownMenuItem>
-									<DropdownMenuItem className="cursor-pointer px-3 py-3 my-1 rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors font-medium">
+									<DropdownMenuItem className="cursor-pointer px-3 py-3 my-1 hover:bg-destructive/10 hover:text-destructive transition-colors font-medium">
 										<LogOut className="w-5 h-5 mr-3 shrink-0" />
 										<Logout>
 											Sign Out
