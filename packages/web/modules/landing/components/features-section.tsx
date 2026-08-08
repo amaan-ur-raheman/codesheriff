@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { ArrowUpRight } from "lucide-react";
-import { gsap, EASE, REVEAL_TRIGGER, ScrollTrigger } from "../lib/gsap";
+import { gsap, EASE, REVEAL_TRIGGER, DURATION, MOTION_PREFERRED_QUERY, ScrollTrigger } from "../lib/gsap";
 
 const features = [
 	{
@@ -33,11 +33,11 @@ export function FeaturesSection() {
 	useEffect(() => {
 		const ctx = gsap.context(() => {
 			const mm = gsap.matchMedia();
-			mm.add("(prefers-reduced-motion: no-preference)", () => {
+			mm.add(MOTION_PREFERRED_QUERY, () => {
 				gsap.from(".features-head", {
 					opacity: 0,
 					y: 20,
-					duration: 0.7,
+					duration: DURATION.section,
 					ease: EASE,
 					scrollTrigger: { trigger: ".features-head", ...REVEAL_TRIGGER },
 				});
@@ -49,7 +49,7 @@ export function FeaturesSection() {
 						gsap.from(row, {
 							opacity: 0,
 							y: 18,
-							duration: 0.6,
+							duration: DURATION.base,
 							ease: EASE,
 							// Drop GSAP's inline transform on complete so the
 							// hover shift keeps working.
