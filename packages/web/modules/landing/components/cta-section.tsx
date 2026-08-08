@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { gsap, EASE } from "../lib/gsap";
+import { gsap, EASE, REVEAL_TRIGGER, ScrollTrigger } from "../lib/gsap";
 
 export function CTASection() {
 	const rootRef = useRef<HTMLElement>(null);
@@ -17,11 +17,18 @@ export function CTASection() {
 					y: 30,
 					duration: 0.8,
 					ease: EASE,
-					scrollTrigger: { trigger: ".cta-inner", start: "top 80%" },
+					scrollTrigger: {
+						trigger: ".cta-inner",
+						...REVEAL_TRIGGER,
+					},
 				});
 			});
 		}, rootRef);
-		return () => ctx.revert();
+		const raf = requestAnimationFrame(() => ScrollTrigger.refresh());
+		return () => {
+			cancelAnimationFrame(raf);
+			ctx.revert();
+		};
 	}, []);
 
 	return (

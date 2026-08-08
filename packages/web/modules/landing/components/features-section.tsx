@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { Bot, MessageSquare, Activity, Globe } from "lucide-react";
-import { gsap, EASE } from "../lib/gsap";
+import { gsap, EASE, REVEAL_TRIGGER, ScrollTrigger } from "../lib/gsap";
 
 const languages = ["TypeScript", "Python", "Go", "Rust", "Java", "Ruby"];
 
@@ -81,25 +81,35 @@ export function FeaturesSection() {
 					y: 24,
 					duration: 0.7,
 					ease: EASE,
-					scrollTrigger: { trigger: ".features-head", start: "top 80%" },
-				});
-				gsap.from(".feature-card", {
-					opacity: 0,
-					y: 32,
-					duration: 0.7,
-					stagger: 0.1,
-					ease: EASE,
-					// Drop GSAP's inline transform when done so the Tailwind
-					// hover lift keeps working.
-					clearProps: "transform",
 					scrollTrigger: {
-						trigger: ".features-grid",
-						start: "top 80%",
+						trigger: ".features-head",
+						...REVEAL_TRIGGER,
 					},
+				});
+				// Per-card triggers so a stale grid position can never leave
+				// individual cards hidden.
+				gsap.utils.toArray<HTMLElement>(".feature-card").forEach((card) => {
+					gsap.from(card, {
+						opacity: 0,
+						y: 32,
+						duration: 0.7,
+						ease: EASE,
+						// Drop GSAP's inline transform when done so the Tailwind
+						// hover lift keeps working.
+						clearProps: "transform",
+						scrollTrigger: {
+							trigger: card,
+							...REVEAL_TRIGGER,
+						},
+					});
 				});
 			});
 		}, rootRef);
-		return () => ctx.revert();
+		const raf = requestAnimationFrame(() => ScrollTrigger.refresh());
+		return () => {
+			cancelAnimationFrame(raf);
+			ctx.revert();
+		};
 	}, []);
 
 	return (

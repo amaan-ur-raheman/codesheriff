@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
-import { gsap, EASE } from "../lib/gsap";
+import { gsap, EASE, REVEAL_TRIGGER, ScrollTrigger } from "../lib/gsap";
 
 const plans = [
 	{
@@ -70,25 +70,35 @@ export function PricingSection() {
 					y: 24,
 					duration: 0.7,
 					ease: EASE,
-					scrollTrigger: { trigger: ".pricing-head", start: "top 80%" },
-				});
-				gsap.from(".pricing-card", {
-					opacity: 0,
-					y: 36,
-					duration: 0.7,
-					stagger: 0.12,
-					ease: EASE,
-					// Drop GSAP's inline transform on complete so the Pro card's
-					// scale/lift and the hover lifts survive.
-					clearProps: "transform",
 					scrollTrigger: {
-						trigger: ".pricing-grid",
-						start: "top 80%",
+						trigger: ".pricing-head",
+						...REVEAL_TRIGGER,
 					},
+				});
+				// Per-card triggers so a stale grid position can never leave
+				// individual cards hidden.
+				gsap.utils.toArray<HTMLElement>(".pricing-card").forEach((card) => {
+					gsap.from(card, {
+						opacity: 0,
+						y: 36,
+						duration: 0.7,
+						ease: EASE,
+						// Drop GSAP's inline transform on complete so the Pro card's
+						// scale/lift and the hover lifts survive.
+						clearProps: "transform",
+						scrollTrigger: {
+							trigger: card,
+							...REVEAL_TRIGGER,
+						},
+					});
 				});
 			});
 		}, rootRef);
-		return () => ctx.revert();
+		const raf = requestAnimationFrame(() => ScrollTrigger.refresh());
+		return () => {
+			cancelAnimationFrame(raf);
+			ctx.revert();
+		};
 	}, []);
 
 	return (

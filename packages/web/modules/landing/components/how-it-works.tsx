@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { GitBranch, Sparkles, Rocket } from "lucide-react";
-import { gsap, EASE } from "../lib/gsap";
+import { gsap, EASE, REVEAL_TRIGGER, ScrollTrigger } from "../lib/gsap";
 
 const steps = [
 	{
@@ -40,7 +40,10 @@ export function HowItWorks() {
 					y: 24,
 					duration: 0.7,
 					ease: EASE,
-					scrollTrigger: { trigger: ".hiw-head", start: "top 80%" },
+					scrollTrigger: {
+						trigger: ".hiw-head",
+						...REVEAL_TRIGGER,
+					},
 				});
 				gsap.fromTo(
 					".hiw-line",
@@ -54,23 +57,31 @@ export function HowItWorks() {
 							start: "top 75%",
 							end: "bottom 65%",
 							scrub: 0.6,
+							once: true,
 						},
 					},
 				);
-				gsap.from(".hiw-step", {
-					opacity: 0,
-					y: 32,
-					duration: 0.7,
-					stagger: 0.15,
-					ease: EASE,
-					scrollTrigger: {
-						trigger: ".hiw-grid",
-						start: "top 75%",
-					},
+				// Per-step triggers so a stale grid position can never leave
+				// individual steps hidden.
+				gsap.utils.toArray<HTMLElement>(".hiw-step").forEach((step) => {
+					gsap.from(step, {
+						opacity: 0,
+						y: 32,
+						duration: 0.7,
+						ease: EASE,
+						scrollTrigger: {
+							trigger: step,
+							...REVEAL_TRIGGER,
+						},
+					});
 				});
 			});
 		}, rootRef);
-		return () => ctx.revert();
+		const raf = requestAnimationFrame(() => ScrollTrigger.refresh());
+		return () => {
+			cancelAnimationFrame(raf);
+			ctx.revert();
+		};
 	}, []);
 
 	return (
