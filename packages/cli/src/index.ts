@@ -3,10 +3,10 @@
 import React from "react";
 import { render } from "ink";
 import { Command } from "commander";
-import chalk from "chalk";
 import { App } from "./app.js";
 import { login, logout } from "./lib/auth.js";
 import { getToken } from "./lib/config.js";
+import { brand, destructive, bold } from "./theme.js";
 
 const program = new Command();
 
@@ -21,8 +21,8 @@ program
 		const token = getToken();
 
 		if (!token) {
-			console.log(chalk.yellow("\n⚠️  You are not logged in."));
-			console.log(`Run ${chalk.green.bold("codesheriff login")} to connect your account first.\n`);
+			console.log(destructive("\n! You are not logged in."));
+			console.log(`Run ${brand(bold("codesheriff login"))} to connect your account first.\n`);
 			process.exit(1);
 		}
 
