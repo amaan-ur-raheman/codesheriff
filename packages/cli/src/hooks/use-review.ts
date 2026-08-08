@@ -22,8 +22,6 @@ export function useReview(owner: string, repo: string, prNumber: number) {
 	useEffect(() => {
 		if (status !== "pending") return;
 
-		let intervalId: NodeJS.Timeout;
-
 		const poll = async () => {
 			try {
 				const latestReview = await fetchLatestReview(owner, repo, prNumber);
@@ -39,13 +37,15 @@ export function useReview(owner: string, repo: string, prNumber: number) {
 						clearInterval(intervalId);
 					}
 				}
-			} catch (err: any) {
+			} catch {
 				// Ignore transient polling fetch errors
 			}
 		};
 
+		// `intervalId` is only referenced inside `poll` after an await, so the
+		// const is fully initialized before any clearInterval runs.
 		poll();
-		intervalId = setInterval(poll, 3000);
+		const intervalId = setInterval(poll, 3000);
 
 		return () => clearInterval(intervalId);
 	}, [status, owner, repo, prNumber]);

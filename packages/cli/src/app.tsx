@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Text } from "ink";
+import { Box } from "ink";
 import { Landing } from "./components/landing.js";
 import { RepoList } from "./components/repo-list.js";
 import { PRList } from "./components/pr-list.js";

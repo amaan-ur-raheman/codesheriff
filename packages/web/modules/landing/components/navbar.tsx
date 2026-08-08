@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 
@@ -33,7 +34,7 @@ export function Navbar() {
 			<div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 				<a href="/" className="flex items-center gap-2.5 font-bold text-lg text-foreground">
 					<div className="relative w-7 h-7 flex items-center justify-center shrink-0">
-						<img src="/logo-32.png" alt="Code Sheriff Logo" className="object-contain w-full h-full" />
+						<Image src="/logo-32.png" alt="Code Sheriff Logo" width={32} height={32} className="object-contain w-full h-full" />
 					</div>
 					CodeSheriff
 				</a>

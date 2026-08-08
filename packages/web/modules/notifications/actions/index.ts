@@ -74,9 +74,8 @@ async function deliverToIntegrations(
 					});
 					if (!result.success) {
 						throw new Error(result.error || "Slack webhook delivery failed");
-					}
-				});
-			} else if (cfg.type === "discord") {
+					}					}, WEBHOOK_TIMEOUT_MS);
+				} else if (cfg.type === "discord") {
 				await postWebhookWithTimeout(async () => {
 					const result = await sendDiscordWebhook(webhookUrl, {
 						content: "",
@@ -91,7 +90,7 @@ async function deliverToIntegrations(
 					if (!result.success) {
 						throw new Error(result.error || "Discord webhook delivery failed");
 					}
-				});
+				}, WEBHOOK_TIMEOUT_MS);
 			}
 		} catch (err) {
 			console.error(`Webhook delivery failed (${cfg.type}, org ${orgId}):`, err);

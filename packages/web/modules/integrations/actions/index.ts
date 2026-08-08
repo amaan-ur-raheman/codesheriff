@@ -61,8 +61,6 @@ export async function createIntegrationConfig(
 }
 
 export async function updateIntegrationConfig(id: string, config: any) {
-	const session = await getSession();
-
 	const integration = await prisma.integrationConfig.findUnique({
 		where: { id },
 		select: { organizationId: true },
@@ -78,8 +76,6 @@ export async function updateIntegrationConfig(id: string, config: any) {
 }
 
 export async function toggleIntegrationActive(id: string, isActive: boolean) {
-	const session = await getSession();
-
 	const integration = await prisma.integrationConfig.findUnique({
 		where: { id },
 		select: { organizationId: true },
@@ -95,8 +91,6 @@ export async function toggleIntegrationActive(id: string, isActive: boolean) {
 }
 
 export async function deleteIntegrationConfig(id: string) {
-	const session = await getSession();
-
 	const integration = await prisma.integrationConfig.findUnique({
 		where: { id },
 		select: { organizationId: true },

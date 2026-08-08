@@ -22,7 +22,10 @@ export async function applyFixLocally(
 	try {
 		let repoRoot = process.cwd();
 		try {
-			repoRoot = execSync("git rev-parse --show-toplevel", { encoding: "utf-8" }).trim();
+			repoRoot = execSync("git rev-parse --show-toplevel", {
+				encoding: "utf-8",
+				stdio: ["ignore", "pipe", "ignore"],
+			}).trim();
 		} catch {
 			// fallback to process.cwd()
 		}

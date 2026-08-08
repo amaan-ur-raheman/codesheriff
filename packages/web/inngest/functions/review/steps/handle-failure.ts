@@ -38,7 +38,7 @@ export async function resolveFailureSha(
 				ctx.prNumber
 			);
 			sha = pr.headSha;
-		} catch (_) {}
+		} catch {}
 	}
 	return sha;
 }

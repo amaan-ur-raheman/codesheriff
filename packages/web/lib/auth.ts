@@ -110,13 +110,13 @@ export const auth = betterAuth({
 							},
 						});
 
-						if (user) {
-							await updateUserTier(
-								user.id,
-								user.subscriptionStatus as SubscriptionTier,
-								"CANCELLED"
-							);
-						}
+					if (user) {
+						await updateUserTier(
+							user.id,
+							user.subscriptionTier as SubscriptionTier,
+							"CANCELLED"
+						);
+					}
 					},
 					/**
 					 * Handles the 'subscription.revoked' event from Polar.
