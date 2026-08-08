@@ -40,14 +40,44 @@ export function HeroSection() {
 						0.9,
 					)
 					.to(".hero-stats", { opacity: 1, y: 0, duration: 0.55 }, 1.0)
-					.to(".hero-sheet", { opacity: 1, y: 0, duration: 0.9 }, 0.5)
-					.eventCallback("onComplete", () => {
-						// Entrance done — leave zero inline styles behind.
-						gsap.set(targets, { clearProps: "all" });
-					});
+					.to(".hero-sheet", { opacity: 1, y: 0, duration: 0.9 }, 0.5);
+
+				// Count-up the stat numerals once the stats row settles.
+				gsap.utils.toArray<HTMLElement>(".hero-stat-num").forEach((el) => {
+					const target = Number(el.dataset.count || "0");
+					const obj = { v: 0 };
+					tl.to(
+						obj,
+						{
+							v: target,
+							duration: 1.3,
+							ease: "power3.out",
+							onUpdate: () => {
+								el.textContent =
+									target >= 1000
+										? Math.round(obj.v).toLocaleString("en-US")
+										: String(Math.round(obj.v));
+							},
+						},
+						1.05,
+					);
+				});
+
+				tl.eventCallback("onComplete", () => {
+					// Entrance done — leave zero inline styles behind.
+					gsap.set(targets, { clearProps: "all" });
+				});
 			});
 		}, rootRef);
-		return () => ctx.revert();
+		return () => {
+			// Restore the static numerals — the count-up mutates textContent,
+			// which a context revert won't restore (StrictMode/HMR remount
+			// safety: a mid-count teardown leaves the markup value intact).
+			gsap.utils.toArray<HTMLElement>(".hero-stat-num").forEach((el) => {
+				el.textContent = el.dataset.static || "";
+			});
+			ctx.revert();
+		};
 	}, []);
 
 	return (
@@ -102,16 +132,23 @@ export function HeroSection() {
 
 					<div className="hero-stats mt-14 flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-6">
 						{[
-							["12,400+", "PRs reviewed"],
-							["14s", "median review"],
-							["100%", "fixes sandboxed"],
-						].map(([value, label]) => (
-							<div key={label}>
-								<p className="font-display text-2xl font-semibold tracking-tight">
-									{value}
+							{ value: 12400, display: "12,400", suffix: "+", label: "PRs reviewed" },
+							{ value: 14, display: "14", suffix: "s", label: "median review" },
+							{ value: 100, display: "100", suffix: "%", label: "fixes sandboxed" },
+						].map((stat) => (
+							<div key={stat.label}>
+								<p className="font-display text-2xl font-semibold tracking-tight tabular-nums">
+									<span
+										className="hero-stat-num"
+										data-count={stat.value}
+										data-static={stat.display}
+									>
+										{stat.display}
+									</span>
+									{stat.suffix}
 								</p>
 								<p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-									{label}
+									{stat.label}
 								</p>
 							</div>
 						))}
