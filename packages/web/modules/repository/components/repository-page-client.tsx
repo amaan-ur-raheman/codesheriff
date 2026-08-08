@@ -101,10 +101,13 @@ const RepositoryPageClient = () => {
 		return (
 			<div className="space-y-4">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tighter">
+					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
+						Source control
+					</p>
+					<h1 className="font-display text-3xl tracking-tight text-foreground">
 						Repositories
 					</h1>
-					<p className="text-muted-foreground">
+					<p className="mt-2 text-sm text-muted-foreground">
 						Manage and view all your GitHub repositories
 					</p>
 				</div>
@@ -117,10 +120,13 @@ const RepositoryPageClient = () => {
 		return (
 			<div className="space-y-4">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tighter">
+					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
+						Source control
+					</p>
+					<h1 className="font-display text-3xl tracking-tight text-foreground">
 						Repositories
 					</h1>
-					<p className="text-muted-foreground">
+					<p className="mt-2 text-sm text-muted-foreground">
 						Manage and view all your GitHub repositories
 					</p>
 				</div>
@@ -134,10 +140,13 @@ const RepositoryPageClient = () => {
 	return (
 		<div className="space-y-4">
 			<div>
-				<h1 className="text-3xl font-bold tracking-tighter">
+				<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
+					Source control
+				</p>
+				<h1 className="font-display text-3xl tracking-tight text-foreground">
 					Repositories
 				</h1>
-				<p className="text-muted-foreground">
+				<p className="mt-2 text-sm text-muted-foreground">
 					Manage and view all your GitHub repositories
 				</p>
 			</div>
@@ -156,7 +165,7 @@ const RepositoryPageClient = () => {
 				{filteredRepositories.map((repo: any) => (
 					<Card
 						key={repo.id}
-						className="hover:shadow-md transition-shadow"
+						className="hover:border-brand/50 transition-colors"
 					>
 						<CardHeader>
 							<div className="flex items-center justify-between">
@@ -214,7 +223,7 @@ const RepositoryPageClient = () => {
 								<div className="flex items-center gap-1">
 									<Star
 										className="h-4 w-4 text-primary"
-										fill="#ffe0c2"
+										fill="var(--brand-soft)"
 									/>
 									<p>{repo.stargazers_count}</p>
 								</div>

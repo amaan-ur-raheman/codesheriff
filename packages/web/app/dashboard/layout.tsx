@@ -20,17 +20,17 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
 			<SidebarInset>
 				<CommandPalette />
 				<ReviewStatusTracker />
-				<header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+				<header className="flex h-16 shrink-0 items-center gap-2 border-b border-border px-4 md:px-6">
 					<SidebarTrigger className="-ml-1" />
 					<Separator orientation="vertical" className="mx-2 h-4" />
-					<h1 className="text-xl font-semibold text-foreground">
+					<h1 className="font-display text-lg tracking-tight text-foreground">
 						Dashboard
 					</h1>
 					<div className="ml-auto">
 						<NotificationBell />
 					</div>
 				</header>
-				<main className="flex-1 overflow-auto p-4 md:p-6">
+				<main className="flex-1 overflow-auto p-6 md:p-8">
 					{children}
 				</main>
 			</SidebarInset>

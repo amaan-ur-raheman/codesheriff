@@ -1,40 +1,62 @@
 "use client";
 
-import { motion } from "motion/react";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { gsap, EASE, REVEAL_TRIGGER, ScrollTrigger } from "../lib/gsap";
 
 export function CTASection() {
-	return (
-		<section className="relative py-32 overflow-hidden">
-			<div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-primary/10 to-primary/5" />
-			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/10 rounded-full blur-[100px]" />
+	const rootRef = useRef<HTMLElement>(null);
 
-			<div className="relative max-w-4xl mx-auto px-6 text-center">
-				<motion.div
-					initial={{ opacity: 0, y: 30 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					viewport={{ once: true, margin: "-100px" }}
-					transition={{ duration: 0.7 }}
-				>
-					<h2 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6 text-balance">
-						Ready to ship better{" "}
-						<span className="text-primary">code?</span>
-					</h2>
-					<p className="text-lg text-muted-foreground max-w-xl mx-auto mb-10">
-						Join thousands of developers catching bugs before they
-						reach production. Get started in minutes — no credit
-						card required.
+	useEffect(() => {
+		const ctx = gsap.context(() => {
+			const mm = gsap.matchMedia();
+			mm.add("(prefers-reduced-motion: no-preference)", () => {
+				gsap.from(".cta-inner", {
+					opacity: 0,
+					y: 24,
+					duration: 0.8,
+					ease: EASE,
+					scrollTrigger: { trigger: ".cta-inner", ...REVEAL_TRIGGER },
+				});
+			});
+		}, rootRef);
+		const raf = requestAnimationFrame(() => ScrollTrigger.refresh());
+		return () => {
+			cancelAnimationFrame(raf);
+			ctx.revert();
+		};
+	}, []);
+
+	return (
+		<section ref={rootRef} className="relative border-t border-border py-28">
+			<div className="mx-auto max-w-7xl px-6">
+				<div className="cta-inner mx-auto max-w-3xl text-center">
+					<p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-text">
+						Final word
 					</p>
-					<div className="flex flex-wrap justify-center gap-4">
-						<Button size="lg" className="px-8" asChild>
+					<h2 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.02em] text-balance sm:text-6xl">
+						Ready to ship{" "}
+						<span className="font-medium italic text-brand">
+							better code?
+						</span>
+					</h2>
+					<p className="mx-auto mt-7 max-w-lg leading-relaxed text-muted-foreground">
+						Connect a repository and the first review lands in
+						minutes. No credit card required.
+					</p>
+					<div className="mt-10 flex flex-wrap items-center justify-center gap-8">
+						<Button size="lg" className="rounded-none px-8" asChild>
 							<a href="/login">
-								Get Started Free
-								<ArrowRight className="ml-2 w-4 h-4" />
+								Get started
+								<ArrowRight className="ml-2 h-4 w-4" />
 							</a>
 						</Button>
 					</div>
-				</motion.div>
+					<p className="mt-8 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+						Setup takes about four minutes
+					</p>
+				</div>
 			</div>
 		</section>
 	);

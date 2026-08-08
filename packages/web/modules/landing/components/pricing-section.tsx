@@ -1,15 +1,16 @@
 "use client";
 
-import { motion } from "motion/react";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { gsap, EASE, REVEAL_TRIGGER, ScrollTrigger } from "../lib/gsap";
 
 const plans = [
 	{
 		name: "Free",
 		price: "$0",
 		period: "forever",
-		description: "Perfect for individual developers.",
+		description: "For individual developers getting started.",
 		features: [
 			"3 repositories",
 			"50 reviews / month",
@@ -17,7 +18,7 @@ const plans = [
 			"Email notifications",
 			"Community support",
 		],
-		cta: "Start Free",
+		cta: "Start free",
 		highlight: false,
 	},
 	{
@@ -36,7 +37,7 @@ const plans = [
 		],
 		cta: "Get Pro",
 		highlight: true,
-		badge: "Most Popular",
+		badge: "Most popular",
 	},
 	{
 		name: "Enterprise",
@@ -52,90 +53,111 @@ const plans = [
 			"Custom integrations",
 			"SLA guarantee",
 		],
-		cta: "Contact Sales",
+		cta: "Contact sales",
 		highlight: false,
 	},
 ];
 
-const container = {
-	hidden: {},
-	show: { transition: { staggerChildren: 0.1 } },
-};
-
-const item = {
-	hidden: { opacity: 0, y: 24 },
-	show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const } },
-};
-
 export function PricingSection() {
-	return (
-		<section id="pricing" className="relative py-32">
-			<div className="max-w-7xl mx-auto px-6">
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					viewport={{ once: true, margin: "-100px" }}
-					transition={{ duration: 0.6 }}
-					className="text-center mb-16"
-				>
-					<h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-						Simple, transparent{" "}
-						<span className="text-primary">pricing</span>
-					</h2>
-					<p className="text-muted-foreground max-w-xl mx-auto text-lg">
-						Start free, scale as you grow. No hidden fees.
-					</p>
-				</motion.div>
+	const rootRef = useRef<HTMLElement>(null);
 
-				<motion.div
-					variants={container}
-					initial="hidden"
-					whileInView="show"
-					viewport={{ once: true, margin: "-100px" }}
-					className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto"
-				>
+	useEffect(() => {
+		const ctx = gsap.context(() => {
+			const mm = gsap.matchMedia();
+			mm.add("(prefers-reduced-motion: no-preference)", () => {
+				gsap.from(".pricing-head", {
+					opacity: 0,
+					y: 20,
+					duration: 0.7,
+					ease: EASE,
+					scrollTrigger: { trigger: ".pricing-head", ...REVEAL_TRIGGER },
+				});
+				gsap.utils
+					.toArray<HTMLElement>(".pricing-cell")
+					.forEach((cell) => {
+						gsap.from(cell, {
+							opacity: 0,
+							y: 24,
+							duration: 0.65,
+							ease: EASE,
+							clearProps: "transform",
+							scrollTrigger: { trigger: cell, ...REVEAL_TRIGGER },
+						});
+					});
+			});
+		}, rootRef);
+		const raf = requestAnimationFrame(() => ScrollTrigger.refresh());
+		return () => {
+			cancelAnimationFrame(raf);
+			ctx.revert();
+		};
+	}, []);
+
+	return (
+		<section id="pricing" ref={rootRef} className="relative py-28">
+			<div className="mx-auto max-w-7xl px-6">
+				<div className="pricing-head max-w-2xl">
+					<p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-text">
+						Pricing
+					</p>
+					<h2 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.02em] text-balance sm:text-5xl">
+						Start free. Upgrade when the team grows.
+					</h2>
+					<p className="mt-6 max-w-lg leading-relaxed text-muted-foreground">
+						No hidden fees, no per-seat surprises, cancel anytime.
+					</p>
+				</div>
+
+				<div className="mt-16 grid border border-border divide-y md:divide-y-0 md:divide-x divide-border md:grid-cols-3">
 					{plans.map((plan) => (
-						<motion.div
+						<div
 							key={plan.name}
-							variants={item}
-							className={`relative p-8 rounded-2xl border transition-all duration-500 ${
-								plan.highlight
-									? "border-primary/30 bg-primary/5 shadow-lg shadow-primary/5"
-									: "border-border bg-card hover:border-primary/20"
+							className={`pricing-cell relative p-8 sm:p-10 ${
+								plan.highlight ? "bg-card" : "bg-background"
 							}`}
 						>
-							{plan.badge && (
-								<div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
-									{plan.badge}
-								</div>
+							{plan.highlight && (
+								<div
+									aria-hidden="true"
+									className="absolute top-0 left-0 right-0 h-[3px] bg-brand"
+								/>
 							)}
 
-							<div className="mb-8">
-								<h3 className="text-lg font-semibold mb-2">
+							<div className="flex items-baseline justify-between gap-3">
+								<h3 className="text-base font-semibold">
 									{plan.name}
 								</h3>
-								<div className="flex items-baseline gap-1 mb-3">
-									<span className="text-4xl font-bold">
-										{plan.price}
+								{plan.badge && (
+									<span className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand-text">
+										{plan.badge}
 									</span>
-									{plan.period && (
-										<span className="text-muted-foreground text-sm">
-											{plan.period}
-										</span>
-									)}
-								</div>
-								<p className="text-sm text-muted-foreground">
-									{plan.description}
-								</p>
+								)}
 							</div>
 
-							<ul className="space-y-3 mb-8">
+							<div className="mt-6 flex items-baseline gap-1.5">
+								<span className="font-display text-5xl font-semibold tracking-tight">
+									{plan.price}
+								</span>
+								{plan.period && (
+									<span className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+										{plan.period}
+									</span>
+								)}
+							</div>
+							<p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+								{plan.description}
+							</p>
+
+							<ul className="mt-8 space-y-2.5 border-t border-border pt-8">
 								{plan.features.map((feature) => (
 									<li
 										key={feature}
-										className="flex items-start gap-3 text-sm"
+										className="flex items-start gap-2.5 text-sm"
 									>
-										<Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+										<Check
+											className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand"
+											strokeWidth={2.5}
+										/>
 										<span className="text-muted-foreground">
 											{feature}
 										</span>
@@ -145,14 +167,14 @@ export function PricingSection() {
 
 							<Button
 								variant={plan.highlight ? "default" : "outline"}
-								className="w-full"
+								className="mt-8 w-full rounded-none"
 								asChild
 							>
 								<a href="/login">{plan.cta}</a>
 							</Button>
-						</motion.div>
+						</div>
 					))}
-				</motion.div>
+				</div>
 			</div>
 		</section>
 	);

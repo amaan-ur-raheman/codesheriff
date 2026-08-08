@@ -10,7 +10,7 @@ import { FileCode2, Check, AlertCircle, AlertTriangle } from "lucide-react";
 
 // PR Node Component
 const PRNode = ({ data }: any) => (
-	<div className="p-4 rounded-xl border-2 border-primary/50 bg-card/90 shadow-lg min-w-[200px] text-center backdrop-blur-md">
+	<div className="p-4 border-2 border-primary bg-card shadow-sm min-w-[200px] text-center">
 		<Handle type="source" position={Position.Bottom} className="w-2.5 h-2.5 bg-primary" />
 		<div className="text-[10px] uppercase font-bold text-primary tracking-widest mb-1">Pull Request</div>
 		<div className="font-semibold text-sm max-w-[180px] truncate mx-auto">{data.title}</div>
@@ -20,7 +20,7 @@ const PRNode = ({ data }: any) => (
 
 // File Node Component
 const FileNode = ({ data }: any) => (
-	<div className="p-3 rounded-lg border border-border bg-card/90 shadow-sm min-w-[220px] text-left">
+	<div className="p-3 border border-border bg-card min-w-[220px] text-left">
 		<Handle type="target" position={Position.Top} className="w-2 h-2" />
 		<Handle type="source" position={Position.Bottom} className="w-2 h-2 bg-muted-foreground" />
 		<div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1">Modified File</div>
@@ -39,31 +39,31 @@ const FileNode = ({ data }: any) => (
 // Suggestion Node Component
 const SuggestionNode = ({ data }: any) => {
 	const severityColors: any = {
-		error: "border-red-500/50 bg-red-500/5 text-red-700 dark:text-red-400",
-		warning: "border-yellow-500/50 bg-yellow-500/5 text-yellow-700 dark:text-yellow-400",
-		info: "border-blue-500/50 bg-blue-500/5 text-blue-700 dark:text-blue-400",
-		suggestion: "border-emerald-500/50 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400",
+		error: "border-destructive/40 bg-destructive/5 text-destructive",
+		warning: "border-chart-2/40 bg-chart-2/5 text-chart-2",
+		info: "border-chart-4/40 bg-chart-4/5 text-chart-4",
+		suggestion: "border-verified/40 bg-verified/5 text-verified",
 	};
 
 	return (
-		<div className={`p-3 rounded-lg border-2 shadow-md min-w-[260px] text-left max-w-xs ${severityColors[data.severity] || "border-border bg-card"}`}>
+		<div className={`p-3 border-2 shadow-sm min-w-[260px] text-left max-w-xs ${severityColors[data.severity] || "border-border bg-card"}`}>
 			<Handle type="target" position={Position.Top} className="w-2 h-2" />
 			<div className="flex items-center justify-between gap-2 mb-1.5">
 				<Badge variant="outline" className="text-[9px] uppercase tracking-widest py-0 font-bold px-1.5 bg-background">
 					{data.severity}
 				</Badge>
 				{data.verifyStatus === "verified" && (
-					<Badge variant="outline" className="text-[8px] bg-emerald-500/10 border-emerald-500/50 text-emerald-600 font-semibold py-0 gap-0.5">
+					<Badge variant="outline" className="text-[8px] bg-verified/10 border-verified/50 text-verified font-semibold py-0 gap-0.5">
 						<Check className="h-2 w-2" /> Verified
 					</Badge>
 				)}
 				{data.verifyStatus === "failed" && (
-					<Badge variant="outline" className="text-[8px] bg-red-500/10 border-red-500/50 text-red-600 font-semibold py-0 gap-0.5">
+					<Badge variant="outline" className="text-[8px] bg-destructive/10 border-destructive/50 text-destructive font-semibold py-0 gap-0.5">
 						<AlertCircle className="h-2 w-2" /> Failed
 					</Badge>
 				)}
 				{data.verifyStatus === "sandbox_error" && (
-					<Badge variant="outline" className="text-[8px] bg-amber-500/10 border-amber-500/50 text-amber-600 font-semibold py-0 gap-0.5">
+					<Badge variant="outline" className="text-[8px] bg-chart-2/10 border-chart-2/50 text-chart-2 font-semibold py-0 gap-0.5">
 						<AlertTriangle className="h-2 w-2" /> Sandbox Error
 					</Badge>
 				)}
@@ -186,14 +186,14 @@ export default function ReviewFlowCanvas({ review }: ReviewFlowCanvasProps) {
 
 	if (nodes.length === 0) {
 		return (
-			<div className="h-[250px] flex items-center justify-center text-xs text-muted-foreground italic border rounded-lg bg-muted/20">
+			<div className="h-[250px] flex items-center justify-center text-xs text-muted-foreground italic border border-border bg-muted/20">
 				No suggestions found to visualize.
 			</div>
 		);
 	}
 
 	return (
-		<div className="h-[450px] w-full border rounded-lg overflow-hidden bg-muted/5 relative">
+		<div className="h-[450px] w-full border border-border overflow-hidden bg-muted/5 relative">
 			<Canvas
 				nodes={nodes}
 				edges={edges}

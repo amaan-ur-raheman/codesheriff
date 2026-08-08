@@ -71,7 +71,7 @@ export default function OrgRepositories({
 			<CardHeader>
 				<div className="flex items-center justify-between">
 					<div>
-						<CardTitle>Repositories - {orgName}</CardTitle>
+						<CardTitle className="font-display text-lg tracking-tight">Repositories — {orgName}</CardTitle>
 						<CardDescription>
 							Connect repositories to this organization so review
 							events are delivered to its Slack and Discord
@@ -103,7 +103,7 @@ export default function OrgRepositories({
 						{filteredRepositories.map((repo: any) => (
 							<div
 								key={repo.id}
-								className="flex items-center justify-between p-3 rounded-lg border"
+								className="flex items-center justify-between p-3 border border-border"
 							>
 								<div className="flex-1 min-w-0">
 									<div className="flex items-center gap-2">

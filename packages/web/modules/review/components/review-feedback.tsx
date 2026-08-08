@@ -114,7 +114,7 @@ export default function ReviewFeedback({ reviewId }: ReviewFeedbackProps) {
 							{totalFeedback} {totalFeedback === 1 ? "rating" : "ratings"}
 						</span>
 						<span>·</span>
-						<span className="text-green-600 dark:text-green-400">
+						<span className="text-verified">
 							{positivePercent}% positive
 						</span>
 					</div>

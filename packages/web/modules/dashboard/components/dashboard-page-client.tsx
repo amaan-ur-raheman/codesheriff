@@ -60,9 +60,14 @@ const DashboardPageClient = () => {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-				<p className="text-muted-foreground">
-					Overview of your coding activity and AI reviews
+				<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
+					Overview
+				</p>
+				<h1 className="font-display text-3xl tracking-tight text-foreground">
+					Dashboard
+				</h1>
+				<p className="mt-2 text-sm text-muted-foreground">
+					Your coding activity and AI reviews at a glance
 				</p>
 			</div>
 
@@ -75,7 +80,7 @@ const DashboardPageClient = () => {
 						<GitBranch className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">
+						<div className="font-display text-3xl tracking-tight">
 							{isLoading ? "..." : stats?.totalRepos || 0}
 						</div>
 						<p className="text-xs text-muted-foreground">
@@ -91,7 +96,7 @@ const DashboardPageClient = () => {
 						<GitCommit className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">
+						<div className="font-display text-3xl tracking-tight">
 							{isLoading
 								? "..."
 								: (stats?.totalCommits || 0).toLocaleString()}
@@ -109,7 +114,7 @@ const DashboardPageClient = () => {
 						<GitPullRequest className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">
+						<div className="font-display text-3xl tracking-tight">
 							{isLoading ? "..." : stats?.totalPrs || 0}
 						</div>
 						<p className="text-xs text-muted-foreground">
@@ -125,7 +130,7 @@ const DashboardPageClient = () => {
 						<MessageSquare className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">
+						<div className="font-display text-3xl tracking-tight">
 							{isLoading ? "..." : stats?.totalReviews || 0}
 						</div>
 						<p className="text-xs text-muted-foreground">
@@ -139,7 +144,7 @@ const DashboardPageClient = () => {
 				<HealthScoreCard />
 				<Card className="flex flex-col">
 					<CardHeader>
-						<CardTitle>Quick Actions</CardTitle>
+						<CardTitle className="font-display text-lg tracking-tight">Quick Actions</CardTitle>
 						<CardDescription>Manage your repositories</CardDescription>
 					</CardHeader>
 					<CardContent className="flex-1 flex items-center">
@@ -151,8 +156,7 @@ const DashboardPageClient = () => {
 			</div>
 
 			<Card>
-				<CardHeader>
-					<CardTitle>Contribution Activity</CardTitle>
+				<CardHeader>						<CardTitle className="font-display text-lg tracking-tight">Contribution Activity</CardTitle>
 					<CardDescription>
 						Visualizing your coding frequency over the last year
 					</CardDescription>
@@ -165,7 +169,7 @@ const DashboardPageClient = () => {
 			<div className="grid gap-4 md:grid-cols-2">
 				<Card className="col-span-2">
 					<CardHeader>
-						<CardTitle>Activity Overview</CardTitle>
+						<CardTitle className="font-display text-lg tracking-tight">Activity Overview</CardTitle>
 						<CardDescription>
 							Monthly breakdown of commits, PRs and reviews (last
 							6 months)
@@ -197,24 +201,24 @@ const DashboardPageClient = () => {
 											}}
 										/>
 										<Legend />
-										<Bar
-											dataKey="commits"
-											name="Commits"
-											fill="var(--primary)"
-											radius={[4, 4, 0, 0]}
-										/>
-										<Bar
-											dataKey="prs"
-											name="Pull Requests"
-											fill="var(--chart-2)"
-											radius={[4, 4, 0, 0]}
-										/>
-										<Bar
-											dataKey="reviews"
-											name="AI Reviews"
-											fill="var(--chart-4)"
-											radius={[4, 4, 0, 0]}
-										/>
+									<Bar
+										dataKey="commits"
+										name="Commits"
+										fill="var(--primary)"
+										radius={[0, 0, 0, 0]}
+									/>
+									<Bar
+										dataKey="prs"
+										name="Pull Requests"
+										fill="var(--chart-2)"
+										radius={[0, 0, 0, 0]}
+									/>
+									<Bar
+										dataKey="reviews"
+										name="AI Reviews"
+										fill="var(--chart-4)"
+										radius={[0, 0, 0, 0]}
+									/>
 									</BarChart>
 								</ResponsiveContainer>
 							</div>

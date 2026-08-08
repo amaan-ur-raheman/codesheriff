@@ -68,7 +68,7 @@ export function NotificationBell() {
 					{unreadCount > 0 && (
 						<Badge
 							variant="destructive"
-							className="absolute -top-1 -right-1 h-5 min-w-5 px-1 text-[10px] font-bold rounded-full"
+							className="absolute -top-1 -right-1 h-5 min-w-5 px-1 text-[10px] font-bold"
 						>
 							{unreadCount > 99 ? "99+" : unreadCount}
 						</Badge>
@@ -77,7 +77,7 @@ export function NotificationBell() {
 			</PopoverTrigger>
 			<PopoverContent className="w-80 p-0" align="end">
 				<div className="flex items-center justify-between border-b px-4 py-3">
-					<h4 className="font-semibold text-sm">Notifications</h4>
+					<h4 className="font-display text-base tracking-tight">Notifications</h4>
 					{unreadCount > 0 && (
 						<Button
 							variant="ghost"
@@ -120,7 +120,7 @@ export function NotificationBell() {
 								>
 									<div className="flex items-start gap-3">
 										{!n.read && (
-											<span className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
+											<span className="mt-1.5 h-2 w-2 bg-primary shrink-0" />
 										)}
 										<div className="flex-1 min-w-0">
 											<p className="text-sm font-medium leading-none">

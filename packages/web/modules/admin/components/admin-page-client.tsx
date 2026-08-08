@@ -54,7 +54,7 @@ export default function AdminPageClient() {
 		return (
 			<div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
 				<Shield className="w-16 h-16 text-muted-foreground" />
-				<h1 className="text-2xl font-bold">Access Denied</h1>
+				<h1 className="font-display text-2xl tracking-tight">Access Denied</h1>
 				<p className="text-muted-foreground">
 					You do not have permission to access the admin dashboard.
 				</p>
@@ -99,10 +99,13 @@ function AdminDashboard() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold tracking-tight">
+				<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
+					System
+				</p>
+				<h1 className="font-display text-3xl tracking-tight text-foreground">
 					Admin Dashboard
 				</h1>
-				<p className="text-muted-foreground">
+				<p className="mt-2 text-sm text-muted-foreground">
 					System overview and management.
 				</p>
 			</div>
@@ -137,7 +140,7 @@ function AdminDashboard() {
 			{/* Verify + indexing pipeline metrics (Spec 0006 AC-4) */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Pipeline Metrics</CardTitle>
+					<CardTitle className="font-display text-lg tracking-tight">Pipeline Metrics</CardTitle>
 					<CardDescription>
 						Sandbox verify and incremental indexing health over the
 						last 7 days
@@ -151,9 +154,9 @@ function AdminDashboard() {
 					) : (
 						<div className="grid gap-6 md:grid-cols-2">
 							<div className="space-y-3">
-								<h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-									Sandbox Verify
-								</h3>
+							<h3 className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+								Sandbox Verify
+							</h3>
 								<MetricRow
 									label="Verified suggestions"
 									value={String(verifyMetrics?.sampleCount ?? 0)}
@@ -174,9 +177,9 @@ function AdminDashboard() {
 								/>
 							</div>
 							<div className="space-y-3">
-								<h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-									Incremental Indexing
-								</h3>
+							<h3 className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+								Incremental Indexing
+							</h3>
 								<MetricRow
 									label="Runs (7d)"
 									value={String(indexingMetrics?.runCount ?? 0)}
@@ -209,7 +212,7 @@ function AdminDashboard() {
 
 			<Card>
 				<CardHeader>
-					<CardTitle>Reviews Over Time</CardTitle>
+					<CardTitle className="font-display text-lg tracking-tight">Reviews Over Time</CardTitle>
 					<CardDescription>
 						Daily review count for the last 30 days
 					</CardDescription>
@@ -256,7 +259,7 @@ function AdminDashboard() {
 			<div className="grid gap-6 lg:grid-cols-2">
 				<Card>
 					<CardHeader>
-						<CardTitle>Recent Users</CardTitle>
+						<CardTitle className="font-display text-lg tracking-tight">Recent Users</CardTitle>
 						<CardDescription>Latest registered users</CardDescription>
 					</CardHeader>
 					<CardContent>
@@ -309,7 +312,7 @@ function AdminDashboard() {
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Recent Reviews</CardTitle>
+						<CardTitle className="font-display text-lg tracking-tight">Recent Reviews</CardTitle>
 						<CardDescription>Latest code reviews</CardDescription>
 					</CardHeader>
 					<CardContent>
@@ -410,7 +413,7 @@ function StatCard({
 				{loading ? (
 					<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
 				) : (
-					<div className="text-2xl font-bold">{value}</div>
+					<div className="font-display text-2xl tracking-tight">{value}</div>
 				)}
 			</CardContent>
 		</Card>

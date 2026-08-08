@@ -111,7 +111,7 @@ export function RepositoryList() {
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle>Connected Repositories</CardTitle>
+					<CardTitle className="font-display text-lg tracking-tight">Connected Repositories</CardTitle>
 					<CardDescription>
 						Manage your connected GitHub repositories
 					</CardDescription>
@@ -131,7 +131,7 @@ export function RepositoryList() {
 			<CardHeader>
 				<div className="flex items-center justify-between">
 					<div>
-						<CardTitle>Connected Repositories</CardTitle>
+						<CardTitle className="font-display text-lg tracking-tight">Connected Repositories</CardTitle>
 						<CardDescription>
 							Manage your connected GitHub repositories
 						</CardDescription>
@@ -197,7 +197,7 @@ export function RepositoryList() {
 						{repositories.map((repo) => (
 							<div
 								key={repo.id}
-								className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+								className="flex items-center justify-between p-4 border border-border hover:bg-muted/50 transition-colors"
 							>
 								<div className="flex-1 min-w-0">
 									<div className="flex items-center gap-2">

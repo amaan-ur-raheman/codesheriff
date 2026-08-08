@@ -87,10 +87,13 @@ export default function SubscriptionPageClient() {
 		return (
 			<div className="space-y-6">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">
+					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
+						Billing
+					</p>
+					<h1 className="font-display text-3xl tracking-tight text-foreground">
 						Subscription Plans
 					</h1>
-					<p className="text-muted-foreground">
+					<p className="mt-2 text-sm text-muted-foreground">
 						Failed to load subscription data. Please try again.
 					</p>
 				</div>
@@ -116,10 +119,13 @@ export default function SubscriptionPageClient() {
 		return (
 			<div className="space-y-8">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">
+					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
+						Billing
+					</p>
+					<h1 className="font-display text-3xl tracking-tight text-foreground">
 						Subscription Plans
 					</h1>
-					<p className="text-muted-foreground">
+					<p className="mt-2 text-sm text-muted-foreground">
 						Please sign in to view subscription options.
 					</p>
 				</div>
@@ -178,11 +184,14 @@ export default function SubscriptionPageClient() {
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">
+					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
+						Billing
+					</p>
+					<h1 className="font-display text-3xl tracking-tight text-foreground">
 						Subscription Plans
 					</h1>
-					<p className="text-muted-foreground">
-						Choose perfect plan for your needs
+					<p className="mt-2 text-sm text-muted-foreground">
+						Choose the right plan for your needs
 					</p>
 				</div>
 
@@ -202,8 +211,8 @@ export default function SubscriptionPageClient() {
 			</div>
 
 			{success === "true" && (
-				<Alert className="border-green-500 bg-green-50 dark:bg-green-950">
-					<Check className="h-4 w-4 text-green-600" />
+				<Alert className="border-verified/40 bg-verified/10">
+					<Check className="h-4 w-4 text-verified" />
 					<AlertTitle>Success!</AlertTitle>
 					<AlertDescription>
 						Your subscription status has been updated successfully.
@@ -216,7 +225,7 @@ export default function SubscriptionPageClient() {
 			{data.limits && (
 				<Card>
 					<CardHeader>
-						<CardTitle>Current Usage</CardTitle>
+						<CardTitle className="font-display text-lg tracking-tight">Current Usage</CardTitle>
 						<CardDescription>
 							Your current plan limits and usage
 						</CardDescription>
@@ -239,7 +248,7 @@ export default function SubscriptionPageClient() {
 										{data.limits.repositories.limit ?? "∞"}
 									</Badge>
 								</div>
-								<div className="h-2 bg-muted rounded-full overflow-hidden">
+								<div className="h-2 bg-muted overflow-hidden">
 									<div
 										className={`h-full ${
 											data.limits.repositories.canAdd
@@ -293,7 +302,7 @@ export default function SubscriptionPageClient() {
 					<CardHeader>
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle>Free Plan</CardTitle>
+								<CardTitle className="font-display text-lg tracking-tight">Free Plan</CardTitle>
 								<CardDescription>
 									Perfect for getting started
 								</CardDescription>
@@ -303,7 +312,7 @@ export default function SubscriptionPageClient() {
 							)}
 						</div>
 						<div className="mt-2">
-							<span className="text-3xl font-bold">$0</span>
+							<span className="font-display text-3xl tracking-tight">$0</span>
 							<span className="text-muted-foreground">
 								/month
 							</span>
@@ -344,7 +353,7 @@ export default function SubscriptionPageClient() {
 					<CardHeader>
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle>Pro Plan</CardTitle>
+								<CardTitle className="font-display text-lg tracking-tight">Pro Plan</CardTitle>
 								<CardDescription>
 									For professional developers
 								</CardDescription>
@@ -354,7 +363,7 @@ export default function SubscriptionPageClient() {
 							)}
 						</div>
 						<div className="mt-2">
-							<span className="text-3xl font-bold">$29.99</span>
+							<span className="font-display text-3xl tracking-tight">$29.99</span>
 							<span className="text-muted-foreground">
 								/month
 							</span>

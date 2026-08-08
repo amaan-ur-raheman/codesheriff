@@ -1,81 +1,74 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "motion/react";
+import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 
 const navLinks = [
 	{ label: "Features", href: "#features" },
-	{ label: "How It Works", href: "#how-it-works" },
+	{ label: "How it works", href: "#how-it-works" },
 	{ label: "Pricing", href: "#pricing" },
 ];
 
 export function Navbar() {
 	const [isOpen, setIsOpen] = useState(false);
-	const [isScrolled, setIsScrolled] = useState(false);
-
-	useEffect(() => {
-		const handleScroll = () => setIsScrolled(window.scrollY > 20);
-		window.addEventListener("scroll", handleScroll, { passive: true });
-		return () => window.removeEventListener("scroll", handleScroll);
-	}, []);
 
 	return (
-		<motion.nav
-			style={{
-				backgroundColor: isScrolled
-					? "color-mix(in srgb, var(--background) 95%, transparent)"
-					: "transparent",
-			}}
-			className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 backdrop-blur-xl transition-colors duration-300"
-		>
-			<div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-				<a href="/" className="flex items-center gap-2.5 font-bold text-lg text-foreground">
-					<div className="relative w-7 h-7 flex items-center justify-center shrink-0">
-						<Image src="/logo-32.png" alt="Code Sheriff Logo" width={32} height={32} className="object-contain w-full h-full" />
-					</div>
+		<header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background">
+			<div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+				<a
+					href="/"
+					className="flex items-center gap-2.5 font-display text-xl font-semibold tracking-tight text-foreground"
+				>
+					<Image
+						src="/logo-32.png"
+						alt="CodeSheriff"
+						width={26}
+						height={26}
+						className="object-contain"
+					/>
 					CodeSheriff
 				</a>
 
-				<div className="hidden md:flex items-center gap-8">
+				<nav className="hidden md:flex items-center gap-9">
 					{navLinks.map((link) => (
 						<a
 							key={link.href}
 							href={link.href}
-							className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+							className="text-sm text-muted-foreground underline-offset-[6px] decoration-border transition-colors duration-200 hover:text-foreground hover:decoration-brand"
 						>
-							{link.label}
+							<span className="underline decoration-inherit">
+								{link.label}
+							</span>
 						</a>
 					))}
-				</div>
+				</nav>
 
-				<div className="hidden md:flex items-center gap-3">
-					<Button variant="ghost" size="sm" asChild>
-						<a href="/login">Log in</a>
-					</Button>
-					<Button size="sm" asChild>
-						<a href="/login">Get Started</a>
+				<div className="hidden md:flex items-center gap-6">
+					<a
+						href="/login"
+						className="text-sm text-muted-foreground underline-offset-[6px] decoration-border transition-colors duration-200 hover:text-foreground hover:decoration-brand"
+					>
+						<span className="underline decoration-inherit">Log in</span>
+					</a>
+					<Button size="sm" className="rounded-none px-5" asChild>
+						<a href="/login">Get started</a>
 					</Button>
 				</div>
 
 				<button
 					onClick={() => setIsOpen(!isOpen)}
 					className="md:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
+					aria-label="Toggle menu"
 				>
 					{isOpen ? <X size={20} /> : <Menu size={20} />}
 				</button>
 			</div>
 
 			{isOpen && (
-				<motion.div
-					initial={{ opacity: 0, height: 0 }}
-					animate={{ opacity: 1, height: "auto" }}
-					exit={{ opacity: 0, height: 0 }}
-					className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl"
-				>
-					<div className="px-6 py-4 space-y-3">
+				<div className="md:hidden border-t border-border bg-background">
+					<div className="px-6 py-4 space-y-4">
 						{navLinks.map((link) => (
 							<a
 								key={link.href}
@@ -86,17 +79,21 @@ export function Navbar() {
 								{link.label}
 							</a>
 						))}
-						<div className="pt-3 border-t border-border flex flex-col gap-2">
-							<Button variant="ghost" size="sm" asChild>
-								<a href="/login">Log in</a>
-							</Button>
-							<Button size="sm" asChild>
-								<a href="/login">Get Started</a>
+						<div className="flex items-center justify-between border-t border-border pt-4">
+							<a
+								href="/login"
+								onClick={() => setIsOpen(false)}
+								className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+							>
+								Log in
+							</a>
+							<Button size="sm" className="rounded-none" asChild>
+								<a href="/login">Get started</a>
 							</Button>
 						</div>
 					</div>
-				</motion.div>
+				</div>
 			)}
-		</motion.nav>
+		</header>
 	);
 }

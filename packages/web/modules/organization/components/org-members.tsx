@@ -156,7 +156,7 @@ export default function OrgMembers({
 			<CardHeader>
 				<div className="flex items-center justify-between">
 					<div>
-						<CardTitle>Members - {orgName}</CardTitle>
+						<CardTitle className="font-display text-lg tracking-tight">Members — {orgName}</CardTitle>
 						<CardDescription>
 							Manage organization members and their roles
 						</CardDescription>
@@ -166,7 +166,7 @@ export default function OrgMembers({
 			<CardContent className="space-y-6">
 				{/* Seat upgrade checkout (Spec 0003 AC-3) */}
 				{seatCheckoutUrl && (
-					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
+					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border border-chart-2/40 bg-chart-2/10">
 						<div className="space-y-1">
 							<p className="text-sm font-medium">
 								Additional seats require payment
@@ -187,7 +187,7 @@ export default function OrgMembers({
 
 				{/* Invite Form */}
 				{canManageMembers && (
-					<div className="flex items-end gap-3 p-4 bg-muted/50 rounded-lg">
+					<div className="flex items-end gap-3 p-4 bg-muted/40 border border-border">
 						<div className="flex-1 space-y-2">
 							<Label htmlFor="invite-email">
 								Invite by email
@@ -261,7 +261,7 @@ export default function OrgMembers({
 						return (
 						<div
 							key={member.id}
-							className="flex items-center justify-between p-3 rounded-lg border"
+							className="flex items-center justify-between p-3 border border-border"
 						>
 							<div className="flex items-center gap-3">
 								<Avatar className="h-10 w-10">
