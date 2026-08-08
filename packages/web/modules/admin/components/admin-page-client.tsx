@@ -27,12 +27,14 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
 import {
 	Users,
 	Star,
 	Crown,
 	AlertTriangle,
-	Loader2,
 	Shield,
 } from "lucide-react";
 import {
@@ -66,32 +68,61 @@ export default function AdminPageClient() {
 }
 
 function AdminDashboard() {
-	const { data: stats, isLoading: statsLoading } = useQuery({
+	const {
+		data: stats,
+		isLoading: statsLoading,
+		isError: statsError,
+	} = useQuery({
 		queryKey: ["admin-stats"],
 		queryFn: getAdminStats,
 	});
 
-	const { data: usersData, isLoading: usersLoading } = useQuery({
+	const {
+		data: usersData,
+		isLoading: usersLoading,
+		isError: usersError,
+		refetch: refetchUsers,
+	} = useQuery({
 		queryKey: ["admin-users"],
 		queryFn: () => getUsersList(1, 10),
 	});
 
-	const { data: reviews, isLoading: reviewsLoading } = useQuery({
+	const {
+		data: reviews,
+		isLoading: reviewsLoading,
+		isError: reviewsError,
+		refetch: refetchReviews,
+	} = useQuery({
 		queryKey: ["admin-reviews"],
 		queryFn: () => getRecentReviews(10),
 	});
 
-	const { data: reviewsOverTime, isLoading: chartLoading } = useQuery({
+	const {
+		data: reviewsOverTime,
+		isLoading: chartLoading,
+		isError: chartError,
+		refetch: refetchChart,
+	} = useQuery({
 		queryKey: ["admin-reviews-over-time"],
 		queryFn: getReviewsOverTime,
 	});
 
-	const { data: verifyMetrics, isLoading: verifyLoading } = useQuery({
+	const {
+		data: verifyMetrics,
+		isLoading: verifyLoading,
+		isError: verifyError,
+		refetch: refetchVerify,
+	} = useQuery({
 		queryKey: ["admin-verify-metrics"],
 		queryFn: getVerifyMetrics,
 	});
 
-	const { data: indexingMetrics, isLoading: indexingLoading } = useQuery({
+	const {
+		data: indexingMetrics,
+		isLoading: indexingLoading,
+		isError: indexingError,
+		refetch: refetchIndexing,
+	} = useQuery({
 		queryKey: ["admin-indexing-metrics"],
 		queryFn: getIndexingMetrics,
 	});
@@ -116,24 +147,28 @@ function AdminDashboard() {
 					value={stats?.totalUsers ?? 0}
 					icon={Users}
 					loading={statsLoading}
+					error={statsError}
 				/>
 				<StatCard
 					title="Total Reviews"
 					value={stats?.totalReviews ?? 0}
 					icon={Star}
 					loading={statsLoading}
+					error={statsError}
 				/>
 				<StatCard
 					title="Active Subscriptions"
 					value={stats?.activeSubscriptions ?? 0}
 					icon={Crown}
 					loading={statsLoading}
+					error={statsError}
 				/>
 				<StatCard
 					title="Error Rate"
 					value={`${stats?.errorRate ?? 0}%`}
 					icon={AlertTriangle}
 					loading={statsLoading}
+					error={statsError}
 				/>
 			</div>
 
@@ -147,9 +182,25 @@ function AdminDashboard() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					{verifyLoading || indexingLoading ? (
-						<div className="flex items-center justify-center py-8">
-							<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+					{verifyError || indexingError ? (
+						<ErrorState
+							title="Couldn't load pipeline metrics"
+							description="Sandbox verify and indexing health couldn't be fetched."
+							onRetry={() => {
+								refetchVerify();
+								refetchIndexing();
+							}}
+						/>
+					) : verifyLoading || indexingLoading ? (
+						<div className="grid gap-6 md:grid-cols-2">
+							{[0, 1].map((col) => (
+								<div key={col} className="space-y-3">
+									<Skeleton className="h-3 w-32" />
+									{Array.from({ length: 5 }).map((_, i) => (
+										<Skeleton key={i} className="h-4 w-full" />
+									))}
+								</div>
+							))}
 						</div>
 					) : (
 						<div className="grid gap-6 md:grid-cols-2">
@@ -218,9 +269,24 @@ function AdminDashboard() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					{chartLoading ? (
-						<div className="h-[300px] flex items-center justify-center">
-							<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+					{chartError ? (
+						<ErrorState
+							title="Couldn't load review activity"
+							description="Daily review counts couldn't be fetched."
+							onRetry={() => refetchChart()}
+							className="h-[300px]"
+						/>
+					) : chartLoading ? (
+						<div className="flex h-[300px] items-end gap-2 px-2 pb-1">
+							{Array.from({ length: 30 }).map((_, i) => (
+								<Skeleton
+									key={i}
+									className="flex-1"
+									style={{
+											height: `${25 + ((i * 41) % 70)}%`,
+									}}
+								/>
+							))}
 						</div>
 					) : (
 						<ResponsiveContainer width="100%" height={300}>
@@ -263,9 +329,18 @@ function AdminDashboard() {
 						<CardDescription>Latest registered users</CardDescription>
 					</CardHeader>
 					<CardContent>
-						{usersLoading ? (
-							<div className="flex items-center justify-center py-8">
-								<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+						{usersError ? (
+							<ErrorState
+								title="Couldn't load users"
+								description="The user list couldn't be fetched."
+								onRetry={() => refetchUsers()}
+							/>
+						) : usersLoading ? (
+							<div className="space-y-2 py-4">
+								<Skeleton className="h-8 w-full" />
+								<Skeleton className="h-8 w-full" />
+								<Skeleton className="h-8 w-full" />
+								<Skeleton className="h-8 w-full" />
 							</div>
 						) : (
 							<Table>
@@ -276,35 +351,46 @@ function AdminDashboard() {
 										<TableHead>Tier</TableHead>
 										<TableHead>Joined</TableHead>
 									</TableRow>
-								</TableHeader>
-								<TableBody>
-									{usersData?.users.map((user) => (
-										<TableRow key={user.id}>
-											<TableCell className="font-medium">
-												{user.name}
-											</TableCell>
-											<TableCell className="text-muted-foreground">
-												{user.email}
-											</TableCell>
-											<TableCell>
-												<Badge
-													variant={
-														user.subscriptionTier === "PRO"
-															? "default"
-															: "secondary"
-													}
-												>
-													{user.subscriptionTier}
-												</Badge>
-											</TableCell>
-											<TableCell className="text-muted-foreground">
-												{new Date(
-													user.createdAt
-												).toLocaleDateString()}
-											</TableCell>
-										</TableRow>
-									))}
-								</TableBody>
+								</TableHeader>									<TableBody>
+										{!usersData?.users.length ? (
+											<TableRow>
+												<TableCell colSpan={4} className="h-32 text-center">
+													<EmptyState
+														kicker="Users"
+														title="No users yet"
+														className="py-6"
+													/>
+												</TableCell>
+											</TableRow>
+									) : (
+										usersData.users.map((user) => (
+											<TableRow key={user.id}>
+												<TableCell className="font-medium">
+													{user.name}
+												</TableCell>
+												<TableCell className="text-muted-foreground">
+													{user.email}
+												</TableCell>
+												<TableCell>
+													<Badge
+														variant={
+															user.subscriptionTier === "PRO"
+																? "default"
+																: "secondary"
+														}
+													>
+														{user.subscriptionTier}
+													</Badge>
+												</TableCell>
+												<TableCell className="text-muted-foreground">
+													{new Date(
+														user.createdAt
+													).toLocaleDateString()}
+												</TableCell>
+											</TableRow>
+										))
+									)}
+									</TableBody>
 							</Table>
 						)}
 					</CardContent>
@@ -316,9 +402,18 @@ function AdminDashboard() {
 						<CardDescription>Latest code reviews</CardDescription>
 					</CardHeader>
 					<CardContent>
-						{reviewsLoading ? (
-							<div className="flex items-center justify-center py-8">
-								<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+						{reviewsError ? (
+							<ErrorState
+								title="Couldn't load reviews"
+								description="Recent reviews couldn't be fetched."
+								onRetry={() => refetchReviews()}
+							/>
+						) : reviewsLoading ? (
+							<div className="space-y-2 py-4">
+								<Skeleton className="h-8 w-full" />
+								<Skeleton className="h-8 w-full" />
+								<Skeleton className="h-8 w-full" />
+								<Skeleton className="h-8 w-full" />
 							</div>
 						) : (
 							<Table>
@@ -329,45 +424,56 @@ function AdminDashboard() {
 										<TableHead>User</TableHead>
 										<TableHead>Date</TableHead>
 									</TableRow>
-								</TableHeader>
-								<TableBody>
-									{reviews?.map((review) => (
-										<TableRow key={review.id}>
-											<TableCell className="font-medium">
-												<a
-													href={review.prUrl}
-													target="_blank"
-													rel="noopener noreferrer"
-													className="hover:underline"
-												>
-													{review.prTitle} #
-													{review.prNumber}
-												</a>
-											</TableCell>
-											<TableCell>
-												<Badge
-													variant={
-														review.status === "completed"
-															? "default"
-															: review.status === "error"
-																? "destructive"
-																: "secondary"
-													}
-												>
-													{review.status}
-												</Badge>
-											</TableCell>
-											<TableCell className="text-muted-foreground">
-												{review.repository.user.name}
-											</TableCell>
-											<TableCell className="text-muted-foreground">
-												{new Date(
-													review.createdAt
-												).toLocaleDateString()}
-											</TableCell>
-										</TableRow>
-									))}
-								</TableBody>
+								</TableHeader>									<TableBody>
+										{!reviews?.length ? (
+											<TableRow>
+												<TableCell colSpan={4} className="h-32 text-center">
+													<EmptyState
+															kicker="Reviews"
+															title="No reviews yet"
+															className="py-6"
+														/>
+												</TableCell>
+											</TableRow>
+									) : (
+										reviews.map((review) => (
+											<TableRow key={review.id}>
+												<TableCell className="font-medium">
+													<a
+														href={review.prUrl}
+														target="_blank"
+														rel="noopener noreferrer"
+														className="hover:underline"
+													>
+														{review.prTitle} #
+														{review.prNumber}
+													</a>
+												</TableCell>
+												<TableCell>
+													<Badge
+														variant={
+															review.status === "completed"
+																? "default"
+																: review.status === "error"
+																	? "destructive"
+																	: "secondary"
+														}
+													>
+														{review.status}
+													</Badge>
+												</TableCell>
+												<TableCell className="text-muted-foreground">
+													{review.repository.user.name}
+												</TableCell>
+												<TableCell className="text-muted-foreground">
+													{new Date(
+														review.createdAt
+													).toLocaleDateString()}
+												</TableCell>
+											</TableRow>
+										))
+									)}
+									</TableBody>
 							</Table>
 						)}
 					</CardContent>
@@ -397,24 +503,27 @@ function StatCard({
 	value,
 	icon: Icon,
 	loading,
+	error,
 }: {
 	title: string;
 	value: string | number;
 	icon: React.ComponentType<{ className?: string }>;
 	loading: boolean;
+	error: boolean;
 }) {
 	return (
 		<Card>
 			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 				<CardTitle className="text-sm font-medium">{title}</CardTitle>
 				<Icon className="h-4 w-4 text-muted-foreground" />
-			</CardHeader>
-			<CardContent>
-				{loading ? (
-					<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-				) : (
-					<div className="font-display text-2xl tracking-tight">{value}</div>
-				)}
+			</CardHeader>				<CardContent>
+					{loading ? (
+						<Skeleton className="h-7 w-16" />
+					) : error ? (
+						<div className="font-display text-2xl tracking-tight text-muted-foreground">—</div>
+					) : (
+						<div className="font-display text-2xl tracking-tight">{value}</div>
+					)}
 			</CardContent>
 		</Card>
 	);

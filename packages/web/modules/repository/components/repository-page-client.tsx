@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ExternalLink, Star, Search } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
 
 import { useRepositories } from "@/modules/repository/hooks/use-repositories";
 import { RepositoryListSkeleton } from "@/modules/repository/components/repository-skeleton";
@@ -34,6 +36,7 @@ const RepositoryPageClient = () => {
 		data,
 		isLoading,
 		isError,
+		refetch,
 		fetchNextPage,
 		hasNextPage,
 		isFetchingNextPage,
@@ -130,9 +133,11 @@ const RepositoryPageClient = () => {
 						Manage and view all your GitHub repositories
 					</p>
 				</div>
-				<p className="text-destructive text-center">
-					Failed to load repositories
-				</p>
+				<ErrorState
+					title="Couldn't load repositories"
+					description="Your GitHub repositories couldn't be fetched. Check your connection and try again."
+					onRetry={() => refetch()}
+				/>
 			</div>
 		);
 	}
@@ -161,6 +166,19 @@ const RepositoryPageClient = () => {
 				/>
 			</div>
 
+			{allRepositories.length === 0 ? (
+				<EmptyState
+					kicker="Repositories"
+					title="No repositories found"
+					description="Connect your GitHub account to browse and connect repositories for AI review."
+				/>
+			) : filteredRepositories.length === 0 ? (
+				<EmptyState
+					kicker="Search"
+					title="No matching repositories"
+					description={`Nothing matches \u201c${searchQuery}\u201d. Try a different search term.`}
+				/>
+			) : (
 			<div className="grid gap-4">
 				{filteredRepositories.map((repo: any) => (
 					<Card
@@ -237,6 +255,7 @@ const RepositoryPageClient = () => {
 					</Card>
 				))}
 			</div>
+			)}
 
 			<div ref={observerTarget} className="py-4">
 				{isFetchingNextPage && <RepositoryListSkeleton />}

@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { getEmailPreference, setEmailPreference } from "../actions";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function EmailNotifications() {
 	const queryClient = useQueryClient();
@@ -46,8 +47,12 @@ export function EmailNotifications() {
 			</CardHeader>
 			<CardContent>
 				{isLoading ? (
-					<div className="animate-pulse space-y-4">
-						<div className="h-10 bg-muted rounded" />
+					<div className="space-y-3">
+						<Skeleton className="h-5 w-40" />
+						<Skeleton className="h-4 w-full max-w-md" />
+						<div className="flex justify-end pt-1">
+							<Skeleton className="h-6 w-10" />
+						</div>
 					</div>
 				) : (
 					<div className="flex items-center justify-between">

@@ -4,6 +4,8 @@ import { ActivityCalendar } from "react-activity-calendar";
 import { useTheme } from "next-themes";
 import { useQuery } from "@tanstack/react-query";
 
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { getContributionStats } from "@/modules/dashboard/actions";
 
 const ContributionGraph = () => {
@@ -17,9 +19,12 @@ const ContributionGraph = () => {
 
 	if (isLoading) {
 		return (
-			<div className="w-full flex flex-col items-center justify-center p-8">
-				<div className="animate-pulse text-muted-foreground">
-					Loading contribution data...
+			<div className="flex w-full flex-col items-center gap-4 p-4">
+				<Skeleton className="h-4 w-44" />
+				<div className="grid grid-flow-col auto-cols-max gap-1">
+					{Array.from({ length: 26 }).map((_, i) => (
+						<Skeleton key={i} className="h-3 w-3" />
+					))}
 				</div>
 			</div>
 		);
@@ -27,10 +32,12 @@ const ContributionGraph = () => {
 
 	if (!data || !data.contributions.length) {
 		return (
-			<div className="w-full flex flex-col items-center justify-center p-8">
-				<div className="text-muted-foreground">
-					No contribution data available
-				</div>
+			<div className="w-full">
+				<EmptyState
+					kicker="Contributions"
+					title="No contribution data yet"
+					description="Once you push code and receive reviews, your yearly contribution graph will fill in."
+				/>
 			</div>
 		);
 	}

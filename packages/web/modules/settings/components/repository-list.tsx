@@ -8,6 +8,8 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ExternalLink, Trash2, AlertTriangle } from "lucide-react";
@@ -117,9 +119,10 @@ export function RepositoryList() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<div className="animate-pulse space-y-4">
-						<div className="h-10 bg-muted rounded" />
-						<div className="h-10 bg-muted rounded" />
+					<div className="space-y-3">
+						<Skeleton className="h-14 w-full" />
+						<Skeleton className="h-14 w-full" />
+						<Skeleton className="h-14 w-full" />
 					</div>
 				</CardContent>
 			</Card>
@@ -185,13 +188,18 @@ export function RepositoryList() {
 			</CardHeader>
 			<CardContent>
 				{!repositories || repositories.length === 0 ? (
-					<div className="text-muted-foreground text-center py-4">
-						<p>No repositories connected.</p>
-						<p className="text-sm mt-2">
-							Connect your GitHub repositories to enable
-							AI-powered code reviews from repository page.
-						</p>
-					</div>
+					<EmptyState
+						kicker="Repositories"
+						title="No repositories connected"
+						description="Connect your GitHub repositories to enable AI-powered code reviews."
+						action={
+							<Button variant="outline" size="sm" asChild>
+								<a href="/dashboard/repository">
+									Connect repositories
+								</a>
+							</Button>
+						}
+					/>
 				) : (
 					<div className="space-y-4">
 						{repositories.map((repo) => (

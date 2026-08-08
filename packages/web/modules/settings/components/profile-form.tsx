@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -69,9 +70,16 @@ export function ProfileForm() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<div className="animate-pulse space-y-4">
-						<div className="h-10 bg-muted rounded" />
-						<div className="h-10 bg-muted rounded" />
+					<div className="space-y-6">
+						<div className="space-y-2">
+							<Skeleton className="h-4 w-20" />
+							<Skeleton className="h-10 w-full" />
+						</div>
+						<div className="space-y-2">
+							<Skeleton className="h-4 w-14" />
+							<Skeleton className="h-10 w-full" />
+						</div>
+						<Skeleton className="h-9 w-32" />
 					</div>
 				</CardContent>
 			</Card>

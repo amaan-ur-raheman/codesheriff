@@ -9,7 +9,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
 import { getHealthScores } from "@/modules/repository/actions/health-score";
 
 function getScoreColor(score: number): string {
@@ -83,7 +86,12 @@ function CircularScore({ score }: { score: number }) {
 }
 
 export function HealthScoreCard() {
-	const { data: scores = [], isLoading } = useQuery({
+	const {
+		data: scores = [],
+		isLoading,
+		isError,
+		refetch,
+	} = useQuery({
 		queryKey: ["health-scores"],
 		queryFn: () => getHealthScores(),
 	});
@@ -96,15 +104,64 @@ export function HealthScoreCard() {
 						Codebase Health
 					</CardTitle>
 				</CardHeader>
-				<CardContent className="flex justify-center py-4">
-					<Spinner />
+				<CardContent>
+					<div className="flex items-center gap-6">
+						<Skeleton className="h-24 w-24 shrink-0" />
+						<div className="flex-1 space-y-3">
+							<Skeleton className="h-4 w-40" />
+							<Skeleton className="h-3 w-28" />
+							<Skeleton className="h-3 w-24" />
+							<Skeleton className="h-3 w-32" />
+						</div>
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
+
+	if (isError) {
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle className="text-sm font-medium">
+						Codebase Health
+					</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<ErrorState
+						title="Couldn't load health scores"
+						description="Repository health scores couldn't be fetched."
+						onRetry={() => refetch()}
+					/>
 				</CardContent>
 			</Card>
 		);
 	}
 
 	if (scores.length === 0) {
-		return null;
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle className="text-sm font-medium">
+						Codebase Health
+					</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<EmptyState
+						kicker="Health"
+						title="No health data yet"
+						description="Health scores appear once your repositories have review activity."
+						action={
+							<Button variant="outline" size="sm" asChild>
+								<a href="/dashboard/repository">
+									View repositories
+								</a>
+							</Button>
+						}
+					/>
+				</CardContent>
+			</Card>
+		);
 	}
 
 	const avgScore = Math.round(
@@ -191,8 +248,14 @@ export function RepositoryHealthCard({
 	if (isLoading) {
 		return (
 			<Card>
-				<CardContent className="flex justify-center py-4">
-					<Spinner />
+				<CardContent>
+					<div className="flex items-center gap-4">
+						<Skeleton className="h-20 w-20 shrink-0" />
+						<div className="flex-1 space-y-2">
+							<Skeleton className="h-3 w-full" />
+							<Skeleton className="h-3 w-3/4" />
+						</div>
+					</div>
 				</CardContent>
 			</Card>
 		);
@@ -201,6 +264,23 @@ export function RepositoryHealthCard({
 	const validScores = trend
 		.filter((t) => t.healthScore !== null)
 		.map((t) => ({ score: t.healthScore }));
+
+	if (!isLoading && validScores.length === 0) {
+		return (
+			<Card>
+				<CardHeader>
+					<CardTitle className="text-sm font-medium">
+						{repositoryName}
+					</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+						No trend data yet
+					</p>
+				</CardContent>
+			</Card>
+		);
+	}
 
 	const currentScore = validScores.length > 0 ? validScores[validScores.length - 1].score! : 0;
 	const previousScore = validScores.length > 1 ? validScores[validScores.length - 2].score! : currentScore;
