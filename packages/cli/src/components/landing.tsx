@@ -1,6 +1,5 @@
 import React from "react";
 import { Box, Text, useInput } from "ink";
-import chalk from "chalk";
 
 interface LandingProps {
 	username?: string;

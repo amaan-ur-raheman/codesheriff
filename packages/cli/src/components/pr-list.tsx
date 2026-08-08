@@ -1,6 +1,5 @@
 import React from "react";
 import { Box, Text, useInput } from "ink";
-// @ts-ignore
 import SelectInput from "ink-select-input";
 import { usePullRequests } from "../hooks/use-api.js";
 import { PullRequest, Repository } from "../types.js";

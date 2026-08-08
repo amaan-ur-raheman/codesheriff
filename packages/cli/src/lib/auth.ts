@@ -45,7 +45,7 @@ export async function login(): Promise<void> {
 					pollSpinner.fail(chalk.red("Authorization expired. Please run login again."));
 					return;
 				}
-			} catch (pollErr) {
+			} catch {
 				// Silently retry polling failures
 			}
 		}

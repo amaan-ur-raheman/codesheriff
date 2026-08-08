@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from "react";
 import { Box, Text, useInput } from "ink";
-import chalk from "chalk";
 import { Review, CodeSuggestion } from "../types.js";
 import { applyFixLocally } from "../lib/fix.js";
 import { copyToClipboard } from "../lib/clipboard.js";

@@ -11,5 +11,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  // Keep bun:test files out of the emitted dist bundle and out of `tsc --noEmit`.
+  "exclude": ["src/**/*.test.ts"]
 }
