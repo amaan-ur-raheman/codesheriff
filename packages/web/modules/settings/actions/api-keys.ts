@@ -90,37 +90,3 @@ export async function deleteApiKey(keyId: string) {
 
 	return { success: true };
 }
-
-async function validateApiKey(key: string) {
-	const keyHash = hashKey(key);
-
-	const apiKey = await prisma.apiKey.findUnique({
-		where: { key: keyHash },
-		include: {
-			user: {
-				select: {
-					id: true,
-					name: true,
-					email: true,
-					role: true,
-					subscriptionTier: true,
-				},
-			},
-		},
-	});
-
-	if (!apiKey) {
-		return null;
-	}
-
-	if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
-		return null;
-	}
-
-	await prisma.apiKey.update({
-		where: { id: apiKey.id },
-		data: { lastUsed: new Date() },
-	});
-
-	return apiKey.user;
-}

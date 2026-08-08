@@ -26,13 +26,6 @@ function getScoreStrokeColor(score: number): string {
 	return "#ef4444";
 }
 
-function getScoreBgColor(score: number): string {
-	if (score >= 80) return "bg-emerald-500/10";
-	if (score >= 60) return "bg-yellow-500/10";
-	if (score >= 40) return "bg-orange-500/10";
-	return "bg-red-500/10";
-}
-
 function TrendArrow({
 	current,
 	previous,

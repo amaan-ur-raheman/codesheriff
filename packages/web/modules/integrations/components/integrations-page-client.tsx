@@ -50,7 +50,7 @@ export default function IntegrationsPageClient({ orgId }: IntegrationProps) {
 	const [webhookUrls, setWebhookUrls] = useState<Record<string, string>>({});
 	const [testing, setTesting] = useState<string | null>(null);
 
-	const { data: configs = [], isLoading } = useQuery({
+	const { data: configs = [] } = useQuery({
 		queryKey: ["integrations", orgId],
 		queryFn: () => getIntegrationConfigs(orgId),
 	});

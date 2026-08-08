@@ -1,6 +1,7 @@
 "use client";
 
 import { signIn } from "@/lib/auth-client";
+import Image from "next/image";
 import { GithubIcon, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { motion } from "motion/react";
@@ -53,7 +54,7 @@ const LoginUI = () => {
 					>
 						<a href="/" className="inline-flex items-center gap-2.5 font-bold text-xl text-foreground mb-6">
 							<div className="relative w-9 h-9 flex items-center justify-center shrink-0">
-								<img src="/logo-64.png" alt="Code Sheriff Logo" className="object-contain w-full h-full" />
+								<Image src="/logo-64.png" alt="Code Sheriff Logo" width={64} height={64} className="object-contain w-full h-full" />
 							</div>
 							CodeSheriff
 						</a>

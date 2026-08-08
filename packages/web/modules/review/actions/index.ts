@@ -3,7 +3,6 @@
 import prisma from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { Octokit } from "octokit";
 import { getOctokit } from "@/modules/github/lib/github";
 
 export async function getReviews() {

@@ -44,6 +44,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Image from "next/image";
 import Link from "next/link";
 
 import Logout from "@/modules/auth/components/logout";
@@ -131,7 +132,7 @@ export const AppSidebar = () => {
 				<div className="flex flex-col gap-4 px-2 py-6">
 					<div className="flex items-center gap-2.5 px-3 font-bold text-lg text-foreground">
 						<div className="relative w-7 h-7 flex items-center justify-center shrink-0">
-							<img src="/logo-32.png" alt="Code Sheriff Logo" className="object-contain w-full h-full" />
+							<Image src="/logo-32.png" alt="Code Sheriff Logo" width={32} height={32} className="object-contain w-full h-full" />
 						</div>
 						<span>CodeSheriff</span>
 					</div>

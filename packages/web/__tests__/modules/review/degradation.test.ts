@@ -49,7 +49,6 @@ describe("Comment Degradation Logic", () => {
 		const fileValidLines = new Set([15]);
 
 		// 2. Filter phase (recreated exactly from review.ts filter logic)
-		const line = commentObj.line;
 		const startLine = commentObj.start_line;
 
 		if (startLine && !fileValidLines.has(startLine)) {
@@ -111,7 +110,6 @@ describe("Comment Degradation Logic", () => {
 		// Mock fileValidLines: both startLine (10) and endLine (15) are in diff
 		const fileValidLines = new Set([10, 15]);
 
-		const line = commentObj.line;
 		const startLine = commentObj.start_line;
 
 		if (startLine && !fileValidLines.has(startLine)) {

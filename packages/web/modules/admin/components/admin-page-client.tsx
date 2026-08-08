@@ -48,7 +48,6 @@ import { useSession } from "@/lib/auth-client";
 
 export default function AdminPageClient() {
 	const { data: session } = useSession();
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const user = session?.user as any;
 
 	if (user?.role !== "admin") {

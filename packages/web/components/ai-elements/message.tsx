@@ -196,14 +196,16 @@ export const MessageBranchContent = ({
   ...props
 }: MessageBranchContentProps) => {
   const { currentBranch, setBranches, branches } = useMessageBranch();
-  const childrenArray = Array.isArray(children) ? children : [children];
 
   // Use useEffect to update branches when they change
   useEffect(() => {
-    if (branches.length !== childrenArray.length) {
-      setBranches(childrenArray);
+    const nextBranches = Array.isArray(children) ? children : [children];
+    if (branches.length !== nextBranches.length) {
+      setBranches(nextBranches);
     }
-  }, [childrenArray, branches, setBranches]);
+  }, [children, branches, setBranches]);
+
+  const childrenArray = Array.isArray(children) ? children : [children];
 
   return childrenArray.map((branch, index) => (
     <div
@@ -237,7 +239,11 @@ export const MessageBranchSelector = ({
 
   return (
     <ButtonGroup
-      className="[&>*:not(:first-child)]:rounded-l-md [&>*:not(:last-child)]:rounded-r-md"
+      className={cn(
+        "[&>*:not(:first-child)]:rounded-l-md [&>*:not(:last-child)]:rounded-r-md",
+        from === "user" && "justify-end",
+        className
+      )}
       orientation="horizontal"
       {...props}
     />
@@ -271,7 +277,6 @@ export type MessageBranchNextProps = ComponentProps<typeof Button>;
 
 export const MessageBranchNext = ({
   children,
-  className,
   ...props
 }: MessageBranchNextProps) => {
   const { goToNext, totalBranches } = useMessageBranch();
@@ -357,6 +362,7 @@ export function MessageAttachment({
     >
       {isImage ? (
         <>
+          {/* eslint-disable-next-line @next/next/no-img-element -- blob-URL attachment thumbnail; next/image cannot load blob: sources without unoptimized */}
           <img
             alt={filename || "attachment"}
             className="size-full object-cover"
