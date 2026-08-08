@@ -18,6 +18,18 @@ jobs:
       - run: bun --filter code-sheriff lint
       - run: bun --filter codesheriff-cli lint
 
+  design-doc:
+    # Keeps DESIGN.md (the locked Editorial Paper design contract) from
+    # drifting: lint + css-tailwind export must both pass on every PR.
+    # The linter is pinned in root devDependencies (bun.lock) so the gate
+    # itself cannot drift between runs.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bash scripts/design-md-check.sh
+
   typecheck:
     runs-on: ubuntu-latest
     env:

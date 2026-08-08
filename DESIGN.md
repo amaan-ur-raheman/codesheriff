@@ -129,12 +129,14 @@ Spacing runs on a 4px base (`spacing.base`, the Tailwind `--spacing` unit) — c
 
 ### Motion register
 
-Motion is quiet and purposeful; nothing bounces or lingers.
+Motion is quiet and purposeful; nothing bounces or lingers. The canonical tokens live in `packages/web/lib/motion.ts` (the landing's `modules/landing/lib/gsap.ts` re-exports them) — compose new animations from those names, never new literals.
 
-- **Shared curve**: `power3.out` (≈ `cubic-bezier(0.16, 1, 0.3, 1)`), exported as `EASE` from `modules/landing/lib/gsap.ts` — one curve for the whole system.
-- **Reveals**: one-shot scroll reveals with `REVEAL_TRIGGER` (`start: "top 85%"`, `once: true`, `toggleActions: "play none none none"`) — content plays in once and can never be left hidden on re-enter. Durations run 0.5–0.9s with gentle staggers (hero 0.13 / 0.09).
+- **Shared curve**: `power3.out` (≈ `cubic-bezier(0.16, 1, 0.3, 1)`), exported as `EASE` — one curve for the whole system.
+- **Duration register** (`DURATION`, seconds, named by role): `fast` 0.5 · `base` 0.6 · `cell` 0.65 · `stats` 0.55 · `section` 0.7 · `cta` 0.8 · `hero` 0.9 · `count` 1.3.
+- **Staggers** (`STAGGER`): `heroLines` 0.13 · `heroCta` 0.09.
+- **Reveals**: one-shot scroll reveals with `REVEAL_TRIGGER` (`start: "top 85%"`, `once: true`, `toggleActions: "play none none none"`) — content plays in once and can never be left hidden on re-enter.
 - **Marquee**: the scrolling band animates `translateX(0 → -50%)` over 44s linear, with an edge-fade mask and a pause on hover/focus.
-- **Reduced motion**: `prefers-reduced-motion` kills the marquee animation (falling back to a static wrapped list) and neutralizes transforms — every animated surface must have a static fallback.
+- **Reduced motion**: every animation is gated on `MOTION_PREFERRED_QUERY` (`(prefers-reduced-motion: no-preference)`); under reduced motion the marquee falls back to a static wrapped list and all transforms are neutralized — every animated surface must have a static fallback.
 
 ## Elevation & Depth
 
