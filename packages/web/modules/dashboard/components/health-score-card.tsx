@@ -13,17 +13,17 @@ import { Spinner } from "@/components/ui/spinner";
 import { getHealthScores } from "@/modules/repository/actions/health-score";
 
 function getScoreColor(score: number): string {
-	if (score >= 80) return "text-emerald-500";
-	if (score >= 60) return "text-yellow-500";
-	if (score >= 40) return "text-orange-500";
-	return "text-red-500";
+	if (score >= 80) return "text-verified";
+	if (score >= 60) return "text-chart-2";
+	if (score >= 40) return "text-brand-text";
+	return "text-destructive";
 }
 
 function getScoreStrokeColor(score: number): string {
-	if (score >= 80) return "#10b981";
-	if (score >= 60) return "#eab308";
-	if (score >= 40) return "#f97316";
-	return "#ef4444";
+	if (score >= 80) return "var(--verified)";
+	if (score >= 60) return "var(--chart-2)";
+	if (score >= 40) return "var(--brand-text)";
+	return "var(--destructive)";
 }
 
 function TrendArrow({
@@ -34,10 +34,10 @@ function TrendArrow({
 	previous: number;
 }) {
 	if (current > previous) {
-		return <TrendingUp className="h-4 w-4 text-emerald-500" />;
+		return <TrendingUp className="h-4 w-4 text-verified" />;
 	}
 	if (current < previous) {
-		return <TrendingDown className="h-4 w-4 text-red-500" />;
+		return <TrendingDown className="h-4 w-4 text-destructive" />;
 	}
 	return <Minus className="h-4 w-4 text-muted-foreground" />;
 }
@@ -74,7 +74,7 @@ function CircularScore({ score }: { score: number }) {
 				/>
 			</svg>
 			<span
-				className={`absolute text-xl font-bold ${getScoreColor(score)}`}
+				className={`absolute font-display text-xl tracking-tight ${getScoreColor(score)}`}
 			>
 				{score}
 			</span>

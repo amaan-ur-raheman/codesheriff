@@ -54,7 +54,7 @@ function ReviewCard({ review }: { review: any }) {
 	const [showFullReview, setShowFullReview] = useState(false);
 
 	return (
-		<Card className="hover:shadow-md transition-shadow">
+		<Card className="hover:border-brand/50 transition-colors">
 			<CardHeader>
 				<div className="flex items-center justify-between">
 					<div className="space-y-2 flex-1">
@@ -103,8 +103,7 @@ function ReviewCard({ review }: { review: any }) {
 						{formatDistanceToNow(new Date(review.createdAt), {
 							addSuffix: true,
 						})}
-					</div>
-				<div className="bg-muted p-6 rounded-lg">
+					</div>					<div className="bg-card border border-border p-6">
 					<div className="prose prose-sm dark:prose-invert max-w-none">
 						<MessageResponse
 							key={showFullReview ? "full" : "short"}
@@ -199,10 +198,13 @@ export default function ReviewsPageClient() {
 		return (
 			<div className="space-y-4">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">
+					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
+						Code reviews
+					</p>
+					<h1 className="font-display text-3xl tracking-tight text-foreground">
 						Review History
 					</h1>
-					<p className="text-muted-foreground">
+					<p className="mt-2 text-sm text-muted-foreground">
 						View all AI code reviews
 					</p>
 				</div>
@@ -219,10 +221,13 @@ export default function ReviewsPageClient() {
 	return (
 		<div className="space-y-4">
 			<div>
-				<h1 className="text-3xl font-bold tracking-tight">
+				<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
+					Code reviews
+				</p>
+				<h1 className="font-display text-3xl tracking-tight text-foreground">
 					Review History
 				</h1>
-				<p className="text-muted-foreground">
+				<p className="mt-2 text-sm text-muted-foreground">
 					View all AI code reviews
 				</p>
 			</div>

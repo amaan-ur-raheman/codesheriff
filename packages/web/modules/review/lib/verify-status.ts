@@ -26,13 +26,13 @@ export const VERIFY_STATUS_META: Record<VerifyStatusView, VerifyStatusMeta> = {
 		label: "Verified",
 		markdown: "> ✅ **Sandbox verified** — the suggested fix passed its checks.",
 		badgeClassName:
-			"border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+			"border-verified/50 bg-verified/10 text-verified",
 	},
 	failed: {
 		status: "failed",
 		label: "Test Failed",
 		markdown: "> ❌ **Test failed** — the suggested fix did not pass its checks.",
-		badgeClassName: "border-red-500/50 bg-red-500/10 text-red-700 dark:text-red-400",
+		badgeClassName: "border-destructive/50 bg-destructive/10 text-destructive",
 	},
 	sandbox_error: {
 		status: "sandbox_error",
@@ -40,7 +40,7 @@ export const VERIFY_STATUS_META: Record<VerifyStatusView, VerifyStatusMeta> = {
 		markdown:
 			"> ⚠️ **Sandbox error** — the change could not be verified (timeout or sandbox issue).",
 		badgeClassName:
-			"border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+			"border-chart-2/50 bg-chart-2/10 text-chart-2",
 	},
 	neutral: {
 		status: "neutral",

@@ -48,26 +48,22 @@ const SEVERITY_CONFIG: Record<
 	error: {
 		label: "Error",
 		icon: AlertCircle,
-		className:
-			"border-red-500/50 bg-red-500/10 text-red-700 dark:text-red-400",
+		className: "border-destructive/50 bg-destructive/10 text-destructive",
 	},
 	warning: {
 		label: "Warning",
 		icon: AlertTriangle,
-		className:
-			"border-yellow-500/50 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400",
+		className: "border-chart-2/50 bg-chart-2/10 text-chart-2",
 	},
 	info: {
 		label: "Info",
 		icon: Info,
-		className:
-			"border-blue-500/50 bg-blue-500/10 text-blue-700 dark:text-blue-400",
+		className: "border-chart-4/50 bg-chart-4/10 text-chart-4",
 	},
 	suggestion: {
 		label: "Suggestion",
 		icon: Lightbulb,
-		className:
-			"border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+		className: "border-verified/50 bg-verified/10 text-verified",
 	},
 };
 
@@ -95,21 +91,21 @@ function CodeDiff({
 	return (
 		<div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono">
 			{original && (
-				<div className="rounded-md border border-red-500/30 bg-red-500/5 p-3 overflow-x-auto">
-					<div className="text-[10px] uppercase tracking-wider text-red-500/70 mb-1.5 font-sans font-medium">
+				<div className="border border-destructive/30 bg-destructive/5 p-3 overflow-x-auto">
+					<div className="text-[10px] uppercase tracking-wider text-destructive/70 mb-1.5 font-mono font-medium">
 						Original
 					</div>
-					<pre className="whitespace-pre-wrap text-red-600 dark:text-red-400">
+					<pre className="whitespace-pre-wrap text-destructive">
 						{original}
 					</pre>
 				</div>
 			)}
 			{suggested && (
-				<div className="rounded-md border border-emerald-500/30 bg-emerald-500/5 p-3 overflow-x-auto">
-					<div className="text-[10px] uppercase tracking-wider text-emerald-500/70 mb-1.5 font-sans font-medium">
+				<div className="border border-verified/30 bg-verified/5 p-3 overflow-x-auto">
+					<div className="text-[10px] uppercase tracking-wider text-verified/70 mb-1.5 font-mono font-medium">
 						Suggested
 					</div>
-					<pre className="whitespace-pre-wrap text-emerald-600 dark:text-emerald-400">
+					<pre className="whitespace-pre-wrap text-verified">
 						{suggested}
 					</pre>
 				</div>
@@ -153,7 +149,7 @@ function SuggestionCard({
 			<CollapsibleTrigger asChild>
 				<button
 					className={cn(
-						"w-full text-left flex items-start gap-3 p-3 rounded-lg border transition-colors",
+						"w-full text-left flex items-start gap-3 p-3 border border-border transition-colors",
 						"hover:bg-muted/50",
 						open ? "bg-muted/30" : "bg-transparent"
 					)}
@@ -168,7 +164,7 @@ function SuggestionCard({
 							<SeverityBadge severity={suggestion.severity} />
 							<VerifyStatusBadge suggestion={suggestion} />
 							{suggestion.applied && (
-								<Badge variant="outline" className="border-emerald-500/50 bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 gap-1 text-[10px] font-semibold py-0 h-5">
+								<Badge variant="outline" className="border-verified/50 bg-verified/15 text-verified gap-1 text-[10px] font-semibold py-0 h-5">
 									<Check className="h-3 w-3 stroke-[2.5]" />
 									Applied
 								</Badge>
@@ -217,19 +213,19 @@ function SuggestionCard({
 								const isSandboxError = status === "sandbox_error";
 								return (
 									<div
-										className={cn(
-											"rounded-md border p-3 overflow-x-auto mt-2",
-											isSandboxError
-												? "border-amber-500/20 bg-amber-500/5"
-												: "border-red-500/20 bg-red-500/5"
+								className={cn(
+									"border p-3 overflow-x-auto mt-2",
+										isSandboxError
+											? "border-chart-2/20 bg-chart-2/5"
+											: "border-destructive/20 bg-destructive/5"
 										)}
 									>
 										<div
 											className={cn(
 												"text-[10px] uppercase tracking-wider mb-1.5 font-sans font-medium",
-												isSandboxError
-													? "text-amber-500/70"
-													: "text-red-500/70"
+										isSandboxError
+											? "text-chart-2/70"
+											: "text-destructive/70"
 											)}
 										>
 											Verification Details
@@ -237,9 +233,9 @@ function SuggestionCard({
 										<pre
 											className={cn(
 												"whitespace-pre-wrap text-xs font-mono",
-												isSandboxError
-													? "text-amber-600 dark:text-amber-400"
-													: "text-red-600 dark:text-red-400"
+										isSandboxError
+											? "text-chart-2"
+											: "text-destructive"
 											)}
 										>
 											{details}
@@ -252,14 +248,14 @@ function SuggestionCard({
 							{suggestion.suggestedCode && (
 								<div className="flex items-center justify-end pt-3 border-t border-border/60">
 									{suggestion.applied ? (
-										<Button variant="outline" disabled className="gap-2 text-emerald-600 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/5 cursor-default">
+										<Button variant="outline" disabled className="gap-2 text-verified border-verified/20 bg-verified/5 hover:bg-verified/5 cursor-default">
 											<Check className="h-4 w-4 stroke-[3]" />
 											Applied on GitHub
 										</Button>
 									) : (
-										<Button
-											variant="default"
-											className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs transition-all duration-200 shadow-sm"
+									<Button
+										variant="default"
+										className="gap-2 bg-verified text-verified-foreground hover:bg-verified/90 font-medium text-xs transition-colors duration-200"
 											disabled={applying}
 											onClick={handleApply}
 										>
@@ -293,19 +289,19 @@ function SummaryBar({ summary }: { summary: ReviewSuggestions["summary"] }) {
 		<div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
 			<span className="font-medium">Summary:</span>
 			{summary.errors > 0 && (
-				<span className="flex items-center gap-1 text-red-600 dark:text-red-400">
+				<span className="flex items-center gap-1 text-destructive">
 					<AlertCircle className="h-3 w-3" />
 					{summary.errors} error{summary.errors !== 1 && "s"}
 				</span>
 			)}
 			{summary.warnings > 0 && (
-				<span className="flex items-center gap-1 text-yellow-600 dark:text-yellow-400">
+				<span className="flex items-center gap-1 text-chart-2">
 					<AlertTriangle className="h-3 w-3" />
 					{summary.warnings} warning{summary.warnings !== 1 && "s"}
 				</span>
 			)}
 			{summary.suggestions > 0 && (
-				<span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+				<span className="flex items-center gap-1 text-verified">
 					<Lightbulb className="h-3 w-3" />
 					{summary.suggestions} suggestion
 					{summary.suggestions !== 1 && "s"}
@@ -417,7 +413,7 @@ export default function InlineSuggestions({
 							<Button
 								variant="default"
 								size="sm"
-								className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-all duration-200"
+								className="gap-2 bg-verified text-verified-foreground hover:bg-verified/90 font-semibold text-xs transition-colors duration-200"
 								disabled={applyingBatch}
 								onClick={handleApplyBatch}
 							>

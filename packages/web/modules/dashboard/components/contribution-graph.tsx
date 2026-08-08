@@ -53,13 +53,12 @@ const ContributionGraph = () => {
                         blockMargin={4}
                         fontSize={14}
                         showWeekdayLabels
-                        showMonthLabels
-                        theme={
-                            {
-                                light: ["hsl(0, 0%, 92%)", "hsl(142, 71%, 45%)"],
-                                dark: ["#161b22", "hsl(142, 71%, 45%)"]
-                            }
-                        }
+                        showMonthLabels						theme={
+							{
+								light: ["#ebe4d4", "#2e7d5b"],
+								dark: ["#241e15", "#34d399"]
+							}
+						}
 					/>
 				</div>
 			</div>
