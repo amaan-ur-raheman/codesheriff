@@ -141,9 +141,12 @@ export const auth = betterAuth({
 					 * Links the local user record with the Polar customer ID.
 					 */
 					onCustomerCreated: async (payload) => {
+						const email = payload.data.email ?? undefined;
+						if (!email) return;
+
 						const user = await prisma.user.findUnique({
 							where: {
-								email: payload.data.email,
+								email,
 							},
 						});
 
@@ -165,7 +168,7 @@ export const auth = betterAuth({
 						if (!payload || typeof payload.type !== "string") return;
 
 						const type = payload.type as string;
-						const customerId: string | undefined =
+						const customerId: string | null | undefined =
 							payload.data?.customerId;
 
 						// Subscription lifecycle events on an org customer.

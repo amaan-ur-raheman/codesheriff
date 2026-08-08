@@ -206,7 +206,7 @@ export type ReviewFeedbackGroupByOutputType = {
   _max: ReviewFeedbackMaxAggregateOutputType | null
 }
 
-type GetReviewFeedbackGroupByPayload<T extends ReviewFeedbackGroupByArgs> = Prisma.PrismaPromise<
+export type GetReviewFeedbackGroupByPayload<T extends ReviewFeedbackGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<ReviewFeedbackGroupByOutputType, T['by']> &
       {
@@ -1374,6 +1374,11 @@ export type ReviewFeedbackFindManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Skip the first `n` ReviewFeedbacks.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of ReviewFeedbacks.
+   */
   distinct?: Prisma.ReviewFeedbackScalarFieldEnum | Prisma.ReviewFeedbackScalarFieldEnum[]
 }
 

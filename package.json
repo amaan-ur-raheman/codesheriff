@@ -4,6 +4,10 @@
     "devDependencies": {
         "mprocs": "^0.9.6"
     },
+    "overrides": {
+        "protobufjs": "^7.6.5",
+        "mermaid": "^11.16.1"
+    },
     "scripts": {
         "web:dev": "bun --filter code-sheriff dev",
         "web:dev:all": "mprocs",

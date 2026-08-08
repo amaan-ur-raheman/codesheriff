@@ -168,7 +168,7 @@ export type IntegrationConfigGroupByOutputType = {
   _max: IntegrationConfigMaxAggregateOutputType | null
 }
 
-type GetIntegrationConfigGroupByPayload<T extends IntegrationConfigGroupByArgs> = Prisma.PrismaPromise<
+export type GetIntegrationConfigGroupByPayload<T extends IntegrationConfigGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<IntegrationConfigGroupByOutputType, T['by']> &
       {
@@ -1186,6 +1186,11 @@ export type IntegrationConfigFindManyArgs<ExtArgs extends runtime.Types.Extensio
    * Skip the first `n` IntegrationConfigs.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of IntegrationConfigs.
+   */
   distinct?: Prisma.IntegrationConfigScalarFieldEnum | Prisma.IntegrationConfigScalarFieldEnum[]
 }
 
