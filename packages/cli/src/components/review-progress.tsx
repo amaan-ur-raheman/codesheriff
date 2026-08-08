@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Box, Text, useInput } from "ink";
 import { useReview } from "../hooks/use-review.js";
 import { Repository, PullRequest, Review } from "../types.js";
+import { color } from "../theme.js";
 
 interface ReviewProgressProps {
 	repo: Repository;
@@ -29,29 +30,29 @@ export const ReviewProgress = ({ repo, pr, onComplete, onBack }: ReviewProgressP
 	}, [status, review]);
 
 	return (
-		<Box flexDirection="column" padding={2} borderStyle="round" borderColor="yellow">
+		<Box flexDirection="column" padding={2} borderStyle="single" borderColor={color.brand}>
 			<Box marginBottom={1}>
-				<Text bold color="yellow">
+				<Text bold color={color.brand}>
 					Reviewing PR #{pr.number} — {pr.title}
 				</Text>
 			</Box>
 
 			<Box flexDirection="row" gap={1} marginBottom={1}>
 				<Text>Status:</Text>
-				{status === "requesting" && <Text color="cyan">Triggering review on server...</Text>}
-				{status === "pending" && <Text color="yellow">AI is analyzing changes (this can take 10-20 seconds)...</Text>}
-				{status === "completed" && <Text color="green">Complete! Loading review layout...</Text>}
-				{status === "failed" && <Text color="red">Review failed.</Text>}
+				{status === "requesting" && <Text color={color.brand}>Triggering review on server...</Text>}
+				{status === "pending" && <Text color={color.warning}>AI is analyzing changes (this can take 10-20 seconds)...</Text>}
+				{status === "completed" && <Text color={color.verified}>Complete! Loading review layout...</Text>}
+				{status === "failed" && <Text color={color.destructive}>Review failed.</Text>}
 			</Box>
 
 			{error && (
-				<Box borderStyle="single" borderColor="red" padding={1} marginBottom={1}>
-					<Text color="red">Error: {error}</Text>
+				<Box borderStyle="single" borderColor={color.destructive} padding={1} marginBottom={1}>
+					<Text color={color.destructive}>Error: {error}</Text>
 				</Box>
 			)}
 
 			<Box>
-				<Text color="gray">[Esc/B] Cancel and go back</Text>
+				<Text color={color.muted}>[Esc/B] Cancel and go back</Text>
 			</Box>
 		</Box>
 	);
