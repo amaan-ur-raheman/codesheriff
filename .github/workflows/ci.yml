@@ -48,7 +48,8 @@ jobs:
       GITHUB_CLIENT_ID: "dummy"
       GITHUB_CLIENT_SECRET: "dummy"
       POLAR_WEBHOOK_SECRET: "dummy"
-      BETTER_AUTH_SECRET: "dummy"
+      BETTER_AUTH_SECRET: "dummy-dummy-dummy-dummy-secret-0123456789abcdef"
+      PINECONE_DB_API_KEY: "dummy"
       NEXT_PUBLIC_APP_URL: "http://localhost:3000"
       NEXT_PUBLIC_APP_BASE_URL: "http://localhost:3000"
     steps:
