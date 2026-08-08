@@ -186,29 +186,6 @@ export async function getRecentReviews(limit: number = 20) {
 	return reviews;
 }
 
-export async function getSystemHealth() {
-	await requireAdmin();
-
-	const [totalUsers, totalReviews, totalRepositories, totalApiKeys] =
-		await Promise.all([
-			prisma.user.count(),
-			prisma.review.count(),
-			prisma.repository.count(),
-			prisma.apiKey.count(),
-		]);
-
-	return {
-		status: "healthy",
-		timestamp: new Date().toISOString(),
-		stats: {
-			totalUsers,
-			totalReviews,
-			totalRepositories,
-			totalApiKeys,
-		},
-	};
-}
-
 export async function getReviewsOverTime() {
 	await requireAdmin();
 
