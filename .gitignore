@@ -158,7 +158,11 @@ pnpm-lock.yaml
 .gstack/
 
 # Thesis / research artifacts (not part of the product)
-docs/
+docs/*
+!docs/adr/
+!docs/agents/
+!docs/runbooks/
+!docs/specs/
 proposal.pdf
 proposal.tex
 public/fig1-architecture.png
