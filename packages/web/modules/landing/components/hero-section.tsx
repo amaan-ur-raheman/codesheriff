@@ -14,25 +14,40 @@ export function HeroSection() {
 		const ctx = gsap.context(() => {
 			const mm = gsap.matchMedia();
 			mm.add("(prefers-reduced-motion: no-preference)", () => {
+				const targets = gsap.utils.toArray<HTMLElement>(
+					".hero-eyebrow, .hero-line, .hero-sub, .hero-cta, .hero-meta, .hero-card",
+				);
+
+				// Explicit initial states rather than `from` tweens: a context
+				// revert or HMR remount restores `set()` cleanly, so no element
+				// can ever be left stuck at its hidden start state.
+				gsap.set(".hero-eyebrow", { opacity: 0, y: 14 });
+				gsap.set(".hero-line", { opacity: 0, y: 30 });
+				gsap.set(".hero-sub", { opacity: 0, y: 22 });
+				gsap.set(".hero-cta", { opacity: 0, y: 16 });
+				gsap.set(".hero-meta", { opacity: 0 });
+				gsap.set(".hero-card", { opacity: 0, y: 44, scale: 0.97 });
+
 				const tl = gsap.timeline({ defaults: { ease: EASE } });
-				tl.from(".hero-eyebrow", { opacity: 0, y: 14, duration: 0.5 }, 0.1)
-					.from(
+				tl.to(".hero-eyebrow", { opacity: 1, y: 0, duration: 0.5 }, 0.1)
+					.to(
 						".hero-line",
-						{ opacity: 0, y: 30, duration: 0.85, stagger: 0.13 },
+						{ opacity: 1, y: 0, duration: 0.85, stagger: 0.13 },
 						0.3,
 					)
-					.from(".hero-sub", { opacity: 0, y: 22, duration: 0.6 }, 0.75)
-					.from(
+					.to(".hero-sub", { opacity: 1, y: 0, duration: 0.6 }, 0.75)
+					.to(
 						".hero-cta",
-						{ opacity: 0, y: 16, duration: 0.5, stagger: 0.09 },
+						{ opacity: 1, y: 0, duration: 0.5, stagger: 0.09 },
 						0.9,
 					)
-					.from(".hero-meta", { opacity: 0, duration: 0.5 }, 1.05)
-					.from(
-						".hero-card",
-						{ opacity: 0, y: 44, scale: 0.97, duration: 0.95 },
-						0.4,
-					);
+					.to(".hero-meta", { opacity: 1, duration: 0.5 }, 1.05)
+					.to(".hero-card", { opacity: 1, y: 0, scale: 1, duration: 0.95 }, 0.4)
+					.eventCallback("onComplete", () => {
+						// Entrance done — leave zero inline styles behind so the
+						// hero is pure CSS state from here on.
+						gsap.set(targets, { clearProps: "all" });
+					});
 			});
 		}, rootRef);
 		return () => ctx.revert();
