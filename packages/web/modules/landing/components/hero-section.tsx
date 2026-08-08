@@ -2,9 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ArrowRight, CheckCircle2, GitPullRequest, Star } from "lucide-react";
-import { HeroCanvas } from "./hero-canvas";
+import { ArrowRight } from "lucide-react";
 import { gsap, EASE } from "../lib/gsap";
 
 export function HeroSection() {
@@ -15,35 +13,36 @@ export function HeroSection() {
 			const mm = gsap.matchMedia();
 			mm.add("(prefers-reduced-motion: no-preference)", () => {
 				const targets = gsap.utils.toArray<HTMLElement>(
-					".hero-eyebrow, .hero-line, .hero-sub, .hero-cta, .hero-card",
+					".hero-kicker, .hero-line, .hero-sub, .hero-cta, .hero-stats, .hero-sheet",
 				);
 
-				// Explicit initial states rather than `from` tweens: a context
-				// revert or HMR remount restores `set()` cleanly, so no element
-				// can ever be left stuck at its hidden start state.
-				gsap.set(".hero-eyebrow", { opacity: 0, y: 14 });
+				// Explicit initial states, never `from` tweens: a context
+				// revert or HMR remount restores `set()` cleanly, so nothing
+				// can be left stuck at a hidden state.
+				gsap.set(".hero-kicker", { opacity: 0, y: 12 });
 				gsap.set(".hero-line", { yPercent: 112 });
-				gsap.set(".hero-sub", { opacity: 0, y: 22 });
-				gsap.set(".hero-cta", { opacity: 0, y: 16 });
-				gsap.set(".hero-card", { opacity: 0, y: 44, scale: 0.97 });
+				gsap.set(".hero-sub", { opacity: 0, y: 20 });
+				gsap.set(".hero-cta", { opacity: 0, y: 14 });
+				gsap.set(".hero-stats", { opacity: 0, y: 16 });
+				gsap.set(".hero-sheet", { opacity: 0, y: 36 });
 
 				const tl = gsap.timeline({ defaults: { ease: EASE } });
-				tl.to(".hero-eyebrow", { opacity: 1, y: 0, duration: 0.5 }, 0.1)
+				tl.to(".hero-kicker", { opacity: 1, y: 0, duration: 0.5 }, 0.05)
 					.to(
 						".hero-line",
-						{ yPercent: 0, duration: 0.9, stagger: 0.12 },
-						0.3,
+						{ yPercent: 0, duration: 0.9, stagger: 0.13 },
+						0.25,
 					)
-					.to(".hero-sub", { opacity: 1, y: 0, duration: 0.6 }, 0.8)
+					.to(".hero-sub", { opacity: 1, y: 0, duration: 0.6 }, 0.75)
 					.to(
 						".hero-cta",
 						{ opacity: 1, y: 0, duration: 0.5, stagger: 0.09 },
-						0.95,
+						0.9,
 					)
-					.to(".hero-card", { opacity: 1, y: 0, scale: 1, duration: 0.95 }, 0.45)
+					.to(".hero-stats", { opacity: 1, y: 0, duration: 0.55 }, 1.0)
+					.to(".hero-sheet", { opacity: 1, y: 0, duration: 0.9 }, 0.5)
 					.eventCallback("onComplete", () => {
-						// Entrance done — leave zero inline styles behind so the
-						// hero is pure CSS state from here on.
+						// Entrance done — leave zero inline styles behind.
 						gsap.set(targets, { clearProps: "all" });
 					});
 			});
@@ -54,96 +53,97 @@ export function HeroSection() {
 	return (
 		<section
 			ref={rootRef}
-			className="relative min-h-[100dvh] flex items-center overflow-hidden pt-20"
+			className="relative overflow-hidden pt-40 pb-24"
 		>
-			{/* Three.js neon star + particle field, faded so it never fights the text */}
-			<div className="absolute inset-0 opacity-80 [mask-image:radial-gradient(ellipse_75%_70%_at_68%_45%,black,transparent_75%)]">
-				<HeroCanvas />
+			{/* hairline top meta row */}
+			<div className="hero-kicker mx-auto flex max-w-7xl items-center justify-between border-t border-border px-6 pt-4 pb-2">
+				<p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+					Automated code review · for GitHub
+				</p>
+				<p className="hidden font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground sm:block">
+					Edition 01 · 2026
+				</p>
 			</div>
-			{/* faint magenta bloom behind the copy for depth */}
-			<div
-				aria-hidden="true"
-				className="pointer-events-none absolute -left-40 top-1/3 h-[30rem] w-[30rem] rounded-full bg-neon/10 blur-3xl"
-			/>
 
-			<div className="relative mx-auto w-full max-w-7xl px-6 py-12 grid lg:grid-cols-2 gap-16 items-center">
-				<div>
-					<p className="hero-eyebrow inline-flex items-center gap-2 rounded-full border border-neon/30 bg-neon/5 px-3 py-1 font-mono text-xs font-medium text-neon-text">
-						<span className="h-1.5 w-1.5 rounded-full bg-neon" />
-						AI code review on every pull request
-					</p>
-
-					<h1 className="mt-6 text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.04em] leading-[1.02] text-balance">
-						<span className="hero-line-mask block overflow-hidden pb-1">
+			<div className="mx-auto mt-10 grid max-w-7xl items-center gap-16 px-6 lg:grid-cols-12 lg:gap-10">
+				{/* ---- copy ---- */}
+				<div className="lg:col-span-7">
+					<h1 className="font-display text-[clamp(2.75rem,5vw+1rem,5.25rem)] font-semibold leading-[1.05] tracking-[-0.02em] text-balance">
+						<span className="hero-line-mask block overflow-hidden pb-3">
 							<span className="hero-line block">Your code,</span>
 						</span>
-						<span className="hero-line-mask block overflow-hidden pb-1">
-							<span className="hero-line block text-neon">
+						<span className="hero-line-mask block overflow-hidden pb-5">
+							<span className="hero-line block font-medium italic text-brand">
 								under review.
 							</span>
 						</span>
 					</h1>
 
-					<p className="hero-sub mt-6 max-w-md text-lg leading-relaxed text-muted-foreground">
-						Automated reviews that catch bugs and enforce your standards
-						before code hits production.
+					<p className="hero-sub mt-7 max-w-md text-lg leading-relaxed text-muted-foreground">
+						Every pull request is read by an AI that catches bugs,
+						blocks regressions, and enforces your standards. Every fix
+						is verified in a sandbox before it reaches your branch.
 					</p>
 
-					<div className="mt-10 flex flex-wrap gap-4">
-						<Button size="lg" className="hero-cta px-8" asChild>
+					<div className="mt-10 flex flex-wrap items-center gap-8">
+						<Button size="lg" className="hero-cta rounded-none px-8" asChild>
 							<a href="/login">
-								Get Started
+								Get started
 								<ArrowRight className="ml-2 h-4 w-4" />
 							</a>
 						</Button>
-						<Button
-							size="lg"
-							variant="outline"
-							className="hero-cta"
-							asChild
+						<a
+							href="#how-it-works"
+							className="hero-cta text-sm text-foreground underline decoration-border underline-offset-[6px] transition-colors duration-200 hover:decoration-brand"
 						>
-							<a href="#how-it-works">See how it works</a>
-						</Button>
+							See how it works
+						</a>
+					</div>
+
+					<div className="hero-stats mt-14 flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-6">
+						{[
+							["12,400+", "PRs reviewed"],
+							["14s", "median review"],
+							["100%", "fixes sandboxed"],
+						].map(([value, label]) => (
+							<div key={label}>
+								<p className="font-display text-2xl font-semibold tracking-tight">
+									{value}
+								</p>
+								<p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+									{label}
+								</p>
+							</div>
+						))}
 					</div>
 				</div>
 
-				{/* Real component preview: a review-result card */}
-				<div className="hero-card relative">
-					{/* neon edge accent */}
-					<div
-						aria-hidden="true"
-						className="pointer-events-none absolute -inset-px rounded-xl bg-gradient-to-b from-neon/40 via-transparent to-transparent opacity-60"
-					/>
-					<div className="rounded-xl border border-border bg-card shadow-lg overflow-hidden">
-						<div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-							<div className="flex items-center gap-2.5 min-w-0">
-								<div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-neon/10 text-neon">
-									<GitPullRequest className="h-4 w-4" />
-								</div>
-								<div className="min-w-0">
-									<p className="truncate text-sm font-medium leading-tight">
-										acme/web-app
-									</p>
-									<p className="text-xs text-muted-foreground">
-										pull request #347
-									</p>
-								</div>
+				{/* ---- review sheet specimen ---- */}
+				<div className="hero-sheet lg:col-span-5">
+					<div className="border border-border bg-card shadow-sm">
+						{/* sheet header */}
+						<div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3.5">
+							<div className="min-w-0">
+								<p className="truncate font-mono text-[13px] font-medium">
+									acme/web-app · pull request #347
+								</p>
+								<p className="font-mono text-[11px] text-muted-foreground">
+									src/validation.ts · 4 comments
+								</p>
 							</div>
-							<Badge
-								variant="outline"
-								className="shrink-0 border-neon/40 bg-neon/5 text-neon-text"
-							>
-								AI Review
-							</Badge>
+							<span className="shrink-0 border border-brand/50 bg-brand-soft px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-brand-text">
+								AI review
+							</span>
 						</div>
 
-						<div className="space-y-0.5 px-4 py-3 font-mono text-[13px] leading-relaxed">
+						{/* diff */}
+						<div className="border-b border-border px-5 py-4 font-mono text-[12.5px] leading-relaxed">
 							<div className="flex gap-3">
 								<span className="w-4 shrink-0 select-none text-muted-foreground/40">
-									+
+									−
 								</span>
-								<span className="text-verified">
-									const validateInput = (data: UserInput) =&gt; {"{"}
+								<span className="text-muted-foreground line-through decoration-muted-foreground/40">
+									const password = req.body.password;
 								</span>
 							</div>
 							<div className="flex gap-3">
@@ -151,52 +151,36 @@ export function HeroSection() {
 									+
 								</span>
 								<span className="text-verified">
-									{"  "}if (!data.email) throw new ValidationError();
+									const hashed = await argon2.hash(req.body.password);
 								</span>
-							</div>
-							<div className="flex gap-3">
-								<span className="w-4 shrink-0 select-none text-muted-foreground/40">
-									+
-								</span>
-								<span className="text-verified">
-									{"  "}return sanitize(data);
-								</span>
-							</div>
-							<div className="flex gap-3">
-								<span className="w-4 shrink-0 select-none text-muted-foreground/40">
-									+
-								</span>
-								<span className="text-verified">{"}"}</span>
 							</div>
 						</div>
 
-						<div className="mx-4 mb-4 rounded-lg border border-border bg-muted/40 p-3.5">
-							<div className="mb-2 flex items-center justify-between gap-2">
-								<p className="text-xs font-medium">
+						{/* finding */}
+						<div className="px-5 py-4">
+							<div className="mb-2 flex items-center justify-between gap-3">
+								<p className="text-[13px] font-medium">
+									<span className="mr-2 font-mono text-[11px] text-brand-text">
+										01
+									</span>
 									Input validation missing
 								</p>
-								<span className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium text-verified">
-									<CheckCircle2 className="h-3 w-3" />
+								<span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] text-verified">
 									Sandbox verified
 								</span>
 							</div>
-							<p className="text-xs leading-relaxed text-muted-foreground">
+							<p className="text-[13px] leading-relaxed text-muted-foreground">
 								Add{" "}
-								<code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px] text-foreground">
+								<code className="rounded-sm bg-muted px-1 py-0.5 font-mono text-[11px] text-foreground">
 									isEmail()
 								</code>{" "}
 								validation before data reaches the database layer.
 							</p>
 						</div>
 					</div>
-
-					{/* floating badge on the card, anchored with a subtle motion-free layout */}
-					<div
-						aria-hidden="true"
-						className="absolute -right-3 -top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-neon/40 bg-background shadow-md"
-					>
-						<Star className="h-4 w-4 text-neon" />
-					</div>
+					<p className="mt-3 text-right font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+						Fig. 01 · a live review, unretouched
+					</p>
 				</div>
 			</div>
 		</section>

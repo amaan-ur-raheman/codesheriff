@@ -1,33 +1,38 @@
-# ADR-0001: Aesthetic direction - Signal
+# ADR-0001: Aesthetic direction - Editorial Paper
 
 ## Status
 
 Accepted (2026-08-08). Decision of the wayfinder grilling ticket "Grilling: Pick the aesthetic direction from 2-3 design-skill proposals" (issue 75) on the map "Map: Agency-Grade UI Redesign - Brand Pass, Design System, All Surfaces + CLI" (issue 73).
 
+**Revised (2026-08-08, prototype iteration 2):** the accent family changed from signal orange to **Dispatch emerald** after the user rejected the orange take on the prototype (issue 77).
+
+**Revised (2026-08-08, prototype iteration 3):** the accent family changed from Dispatch emerald to **Cyber Noir magenta** (tweakcn cyberpunk preset) after the emerald take was rejected as "too generic".
+
+**Revised (2026-08-08, prototype iteration 4 — current):** the direction itself changed. The user rejected three consecutive dark-first + single-accent takes as "generic" and asked for a full redesign from scratch using the impeccable, hallmark, design-taste-frontend, and emil-design-eng skills. Hallmark's diversification rule flagged the real failure: all three takes shared one *genre* (dark paper + grotesk sans + single neon accent + centered card grids) with different colors. The direction is now **Editorial Paper** — light-first print editorial — which is categorically different on every axis (paper band, display face, layout, accent, motion). Only the palette/typography sections below supersede the magenta values.
+
 ## Context
 
-The UI audit (`research-findings-ui-audit.md`) found the current look is the 2026 AI-default pairing: warm-neutral `#fafaf9` background with a copper `#7c5e4a` primary (peach `#e8a87c` in dark). The intended Geist typeface never renders (`--font-sans` in `app/globals.css` falls back to the system stack; `--font-geist-*` from `app/layout.tsx` is never mapped). Contrast passes WCAG AA on every core token pair in both themes (computed) and must be preserved as a floor. The effort destination is a full brand pass + design system + redesign of every surface (web + CLI), UI-only, shipped in place.
+The UI audit (`research-findings-ui-audit.md`) found the current look is the 2026 AI-default pairing: warm-neutral `#fafaf9` background with a copper `#7c5e4a` primary. Contrast must pass WCAG AA on every core token pair in both themes (computed) as a hard floor. The effort destination is a full brand pass + design system + redesign of every surface (web + CLI), UI-only, shipped in place.
 
-Three candidate directions were proposed and grilled with the user: **Signal** (dark precision instrument), **The Docket** (light editorial + indigo), **Wanted** (bold poster energy).
+Three candidate directions were originally proposed: **Signal** (dark precision instrument), **The Docket** (light editorial + indigo), **Wanted** (bold poster energy). After three rejected dark iterations, the light-first editorial register — the category that had never been tried — became the answer.
 
 ## Decision
 
-**Signal - dark precision instrument.** The brand is a precision instrument, not a website: near-black ink, one signal color, type as the interface.
+**Editorial Paper — light-first print editorial.** The page is set like a broadsheet: warm paper, serif display type, hairline rules instead of card borders, asymmetric composition, generous whitespace, and one surgical accent used as a highlighter, never wallpaper.
 
-- **Palette strategy:** committed but restrained. The signal accent covers under 10% of surfaces.
-  - Dark (default): background `#0A0B0E`, surfaces `#131418` / `#1C1E24` (cool neutrals, zero warmth), border hairlines around `#26282F`.
-  - Light: paper `#F7F7F5` (chroma 0, deliberately not cream), ink `#101114`, surfaces `#FFFFFF` / `#EFEFEC`.
-  - Accent: signal orange `#FF5A2A` (light) and a matching high-contrast variant in dark. Chosen over copper (the reflex) and over a conventional blue (the dev-tool default); it is the one signal color and doubles as the badge-star color.
-  - Semantic status colors (verify pass/fail) stay reserved for real state only.
-- **Type:** Geist Sans + Geist Mono, wired for real: map `--font-geist-sans` / `--font-geist-mono` into `--font-sans` / `--font-mono` in `app/globals.css`. No new font downloads; the `next/font` load already exists.
-- **Motif:** lean into the sheriff identity. The star/badge is redrawn as a clean geometric mark; the wordmark is built around it.
-- **Themes:** dark default (the current default stays), with a fully designed light theme. The identity must hold in both modes; WCAG AA contrast is a hard floor (light `muted-foreground` at 4.59 is the thin edge to watch when tuning tokens).
-- **Volume:** the landing carries the loudest identity (hero, type, motion); product surfaces (dashboard shell, pages, CLI) inherit the tokens with quiet confidence.
-- **Voice:** dry-witty sheriff tone, used sparingly on the landing and CLI; product UI copy stays neutral and clear.
+- **Palette (warm oat anchor, hue ≈ 80):**
+  - Light (default): warm paper `#F7F4EE`, ink `#231D15`, raised surface `#FCFAF5`, hairlines `#E2DBC9`. Accent: signal orange `#FC4C02` (display only, 3.10:1 on paper — large-text AA) with `--brand-text` `#B33900` (4.99–5.75:1) for small text and `--brand-soft` `#FDE6D6` for tints. All 30 computed token pairs pass AA.
+  - Dark: warm charcoal `#17130D` (never pure black), warm off-white ink `#EFE9DD`, hairlines `#2E271B`, accent brightened `#FF6B35` / `#FF9E6B`. Same anchor hue; only lightness and chroma move between modes.
+  - Semantic status colors stay reserved: `--verified` (`#0B7A55` light / `#34D399` dark), destructive red for failures.
+- **Type — the 2+1 rule:** **Fraunces** (display serif, normal + italic, via next/font) + **Geist** (body) + **Geist Mono** (outlier: kickers, meta, code, captions). Wordmark is Fraunces. This fixes a pre-existing bug: the `@theme inline` font keys referenced themselves (`--font-sans: var(--font-sans)`), so body text fell back to the system stack; they now reference the `--font-geist-*` / `--font-fraunces` variables directly, and a base rule pins body to the Geist stack.
+- **Macrostructure:** typographic editorial hero (hairline meta row, Fraunces line-mask headline, review card as a print "specimen sheet"); features as an asymmetric editorial ledger (sticky serif head, hairline rows, no cards); pipeline as a numbered editorial sequence (large italic serif numerals, hairline dividers); pricing as a rate-card table (divide-x hairlines, brand top-rule on Pro); editorial close + colophon footer.
+- **Motion:** quiet — one orchestrated entrance (line-mask reveal with `set`+`to`+`clearProps`, StrictMode-safe), per-element `once` scroll reveals, reduced-motion renders static. The Three.js star field was removed: it is dark-space vocabulary that fights light paper, and the hero is now typographic.
+- **Themes:** light is the new default (`defaultTheme="light"`, an app-wide brand decision — existing users keep their saved preference, system preference is honored). Dark mode is fully designed with the same design language.
+- **Volume:** the landing carries the loudest identity; product surfaces inherit the tokens with quiet confidence. **Voice:** specific, hand-set, slightly literary (Hallmark editorial register); no "empower/unleash/supercharge" marketing verbs, no em-dash meta lines.
 
 ## Consequences
 
-- **Positive:** escapes the warm-copper AI-default pairing and the "another blue dev tool" default; zero new font cost (wiring fix only); the sheriff star/badge becomes the brand's distinctive asset; the AA contrast floor is preserved by construction as long as token edits keep muted/border neutrals cool.
-- **Trade-offs:** signal orange on ink is a commitment. Muted-foreground and borders must stay cool-neutral or the palette drifts warm. The landing's "loud" register must not leak into product density (the volume rule enforces this). Orange competes with the semantic red for attention if status colors are not kept strictly semantic.
-- **Rejected alternatives:** The Docket (light editorial + indigo): calm and distinctive, but a light-first identity weakens the developer-tool credibility this product sells. Wanted (bold poster): the strongest agency showpiece, but the loudest to keep disciplined across product surfaces. Both remain available as future campaign/landing registers.
-- **Follow-ups:** the prototype ticket (issue 77) applies Signal as tokens + a landing hero and dashboard shell take; the scope ticket (issue 76) locks surfaces, ship order, and definition of done; the CLI derives an ANSI-safe subset of the Signal palette.
+- **Positive:** categorically different from the rejected dark+neon genre and from every AI-default palette; the serif display + hairline discipline is the "modern agency" register literally; fixes the latent Geist-body-font bug app-wide; light default aligns the brand's first impression with the new identity.
+- **Trade-offs:** editorial is a quieter register — the previous Three.js hero animation is gone by design (motion serves perception; one orchestrated entrance beats ten small ones). Body text depends on the `--font-geist-sans` variable resolving on `body` (verified in dev and build). The `defaultTheme="light"` flip changes the first impression of dashboard/auth surfaces for visitors without a saved preference — revertible in one line in `app/layout.tsx` if undesired.
+- **Rejected alternatives:** Cyber Noir magenta (iteration 3) — dark+neon genre the user rejected; tweakcn Bold Tech violet (the Linear/Sentry cluster) and Quantum Rose; ui-ux-pro-max's Editorial black+pink (kept only as a fallback accent family). The dark-first direction remains available as a campaign register.
+- **Follow-ups:** the prototype ticket (issue 77) applies Editorial Paper as tokens + the landing take; the scope ticket (issue 76) locks surfaces, ship order, and definition of done; the CLI derives an ANSI-safe subset of the palette. Screenshots: `/tmp/cs-editorial-hero.png`, `/tmp/cs-editorial-hero-dark.png`, `/tmp/cs-editorial-ledger.png`.

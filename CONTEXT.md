@@ -36,7 +36,7 @@ Glossary of core domain terms. Use these exact terms in issues, specs, refactors
 Terms for the UI redesign effort (map issue 73). Use these exactly in issues, tickets, and specs.
 
 - **Surface** — one named UI area of the product, redesigned as a unit: landing + marketing, auth/login, the dashboard shell, each dashboard page (dashboard, repository, reviews, integrations, organizations, subscriptions, settings, admin, device), and the CLI.
-- **Design system** — the locked token layer (color, type, spacing, radius, motion) every Surface builds on, being defined under the Signal direction (ADR-0001).
+- **Design system** — the locked token layer (color, type, spacing, radius, motion) every Surface builds on, being defined under the **Editorial Paper** direction (ADR-0001, revised iteration 4).
 - **Brand pass** — the full identity refresh: icon, wordmark, color, and voice.
-- **Direction** — the chosen aesthetic for the redesign. Currently **Signal** (ADR-0001): dark precision instrument, ink + signal-orange accent, Geist Sans/Mono, redrawn sheriff star.
+- **Direction** — the chosen aesthetic for the redesign. Currently **Editorial Paper** (ADR-0001): light-first print editorial, warm paper `#F7F4EE` + ink `#231D15`, signal-orange accent (`#FC4C02` display / `#B33900` small text / `#FDE6D6` tint), dark pair `#17130D` / `#EFE9DD`; Fraunces display + Geist body + Geist Mono outlier; hairline rules, asymmetric composition, quiet motion. Replaced the three rejected dark+accent directions (Signal orange, Dispatch emerald, Cyber Noir magenta).
 - **Definition of done** — the per-Surface acceptance bar of the redesign (ADR-0002): computed AA contrast, Lighthouse ≥ 90 perf + a11y, both themes, design-skill pre-flight, states + reduced-motion, zero behavior change.

@@ -1,90 +1,71 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore } from "react";
-import { GitPullRequest, ScanSearch, FlaskConical, MessageSquareText } from "lucide-react";
-import { gsap, ScrollTrigger } from "../lib/gsap";
-
-// Motion's useReducedMotion only honours the OS setting when wrapped in a
-// <MotionConfig reducedMotion="user">, so use the media query directly.
-const subscribeReducedMotion = (onChange: () => void) => {
-	const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-	mq.addEventListener("change", onChange);
-	return () => mq.removeEventListener("change", onChange);
-};
-const getReducedMotion = () =>
-	window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-function usePrefersReducedMotion() {
-	return useSyncExternalStore(
-		subscribeReducedMotion,
-		getReducedMotion,
-		() => false,
-	);
-}
+import { useEffect, useRef } from "react";
+import { gsap, EASE, REVEAL_TRIGGER, ScrollTrigger } from "../lib/gsap";
 
 const stages = [
 	{
-		icon: GitPullRequest,
+		number: "01",
 		kicker: "Trigger",
 		title: "A pull request opens",
 		body: "The webhook fires the moment a PR is created or updated. Nothing to install in CI, no YAML to maintain.",
 		meta: "webhook: pull_request.opened",
 	},
 	{
-		icon: ScanSearch,
+		number: "02",
 		kicker: "Analyze",
 		title: "The AI reads the diff",
 		body: "Every changed file is analyzed against your codebase context, project standards, and a library of known bug patterns.",
 		meta: "diff: 47 files · 1,203 lines",
 	},
 	{
-		icon: FlaskConical,
+		number: "03",
 		kicker: "Verify",
 		title: "Suggestions run in a sandbox",
 		body: "Every fix is executed in an isolated sandbox first. If the suggested patch doesn't compile and pass, it never reaches your PR.",
 		meta: "sandbox: e2b · 14s",
 	},
 	{
-		icon: MessageSquareText,
+		number: "04",
 		kicker: "Deliver",
 		title: "Comments land on the PR",
-		body: "Verified, inline suggestions appear on the exact lines, ready for one-click apply. Your team reviews less, ships more.",
+		body: "Verified, inline suggestions appear on the exact lines, ready for one-click apply. Your team reviews less and ships more.",
 		meta: "3 comments · 1 verified fix",
 	},
 ];
 
-/**
- * Scroll-pinned pipeline: each stage is sticky and stacks on the previous one
- * as you scroll, with the incoming card scaling the last one back. Reduced
- * motion renders the stages as a plain vertical list.
- */
 export function PipelineSection() {
 	const rootRef = useRef<HTMLElement>(null);
-	const reduceMotion = usePrefersReducedMotion();
 
 	useEffect(() => {
-		if (reduceMotion) return;
 		const ctx = gsap.context(() => {
 			const mm = gsap.matchMedia();
 			mm.add("(prefers-reduced-motion: no-preference)", () => {
-				const cards = gsap.utils.toArray<HTMLElement>(".pipeline-card");
-
-				cards.forEach((card, i) => {
-					if (i === cards.length - 1) return;
-					const next = cards[i + 1];
-					gsap.to(card, {
-						scale: 0.92,
-						opacity: 0.45,
-						yPercent: -8,
-						ease: "none",
-						scrollTrigger: {
-							trigger: next,
-							start: "top bottom",
-							end: "top top",
-							scrub: 0.6,
-						},
-					});
+				gsap.from(".pipeline-head", {
+					opacity: 0,
+					y: 20,
+					duration: 0.7,
+					ease: EASE,
+					scrollTrigger: {
+						trigger: ".pipeline-head",
+						...REVEAL_TRIGGER,
+					},
 				});
+				gsap.utils
+					.toArray<HTMLElement>(".pipeline-stage")
+					.forEach((stage) => {
+						gsap.from(stage, {
+							opacity: 0,
+							y: 22,
+							duration: 0.65,
+							ease: EASE,
+							clearProps: "transform",
+							scrollTrigger: {
+								trigger: stage,
+								...REVEAL_TRIGGER,
+							},
+						});
+					});
 			});
 		}, rootRef);
 		const raf = requestAnimationFrame(() => ScrollTrigger.refresh());
@@ -92,52 +73,54 @@ export function PipelineSection() {
 			cancelAnimationFrame(raf);
 			ctx.revert();
 		};
-	}, [reduceMotion]);
+	}, []);
 
 	return (
-		<section id="how-it-works" ref={rootRef} className="relative bg-muted/20">
-			<div className="mx-auto max-w-4xl px-6 pt-32 pb-8">
-				<div className="mb-16">
-					<h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-balance">
+		<section
+			id="how-it-works"
+			ref={rootRef}
+			className="relative border-y border-border bg-muted/30 py-28"
+		>
+			<div className="mx-auto max-w-7xl px-6">
+				<div className="pipeline-head max-w-2xl">
+					<p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-text">
+						How it runs
+					</p>
+					<h2 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.02em] text-balance sm:text-5xl">
 						From push to merge, fully automatic
 					</h2>
-					<p className="mt-4 max-w-xl text-lg text-muted-foreground">
+					<p className="mt-6 max-w-lg leading-relaxed text-muted-foreground">
 						Four stages run behind the scenes on every pull request.
-						Scroll to walk the pipeline.
+						You only ever see the result.
 					</p>
 				</div>
-			</div>
 
-			<div className="mx-auto max-w-4xl px-6">
-				<div className="relative pb-32">
-					{stages.map((stage, i) => (
+				<div className="mt-16 border-t border-border">
+					{stages.map((stage) => (
 						<div
-							key={stage.title}
-							className={`pipeline-card ${reduceMotion ? "" : "sticky min-h-[85dvh]"}`}
-							style={{
-								// Later cards stack over earlier ones; offsets clear the
-								// fixed navbar (h-16) when stuck. Static under reduced
-								// motion, so nothing can overlap-hidden.
-								top: reduceMotion ? undefined : `${i * 4 + 6}rem`,
-								zIndex: reduceMotion ? undefined : i + 1,
-							}}
+							key={stage.number}
+							className="pipeline-stage group grid gap-6 border-b border-border py-12 transition-colors duration-300 sm:grid-cols-12 sm:gap-10"
 						>
-							<div className="flex h-full min-h-[60dvh] flex-col justify-center rounded-2xl border border-border bg-card p-8 sm:p-12 shadow-lg">
-								<div className="flex h-12 w-12 items-center justify-center rounded-xl bg-neon/10 text-neon">
-									<stage.icon className="h-6 w-6" />
-								</div>
-								<p className="mt-8 font-mono text-xs font-medium uppercase tracking-[0.18em] text-neon-text">
+							<div className="sm:col-span-2">
+								<p className="font-display text-5xl font-light italic leading-none text-foreground/15 transition-colors duration-300 group-hover:text-brand">
+									{stage.number}
+								</p>
+							</div>
+							<div className="sm:col-span-7">
+								<p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
 									{stage.kicker}
 								</p>
-								<h3 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
+								<h3 className="mt-3 font-display text-2xl font-medium tracking-tight sm:text-3xl">
 									{stage.title}
 								</h3>
 								<p className="mt-4 max-w-xl leading-relaxed text-muted-foreground">
 									{stage.body}
 								</p>
-								<p className="mt-8 inline-block w-fit rounded-md border border-border bg-muted/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
+							</div>
+							<div className="sm:col-span-3 sm:text-right">
+								<span className="inline-block border border-border bg-background px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
 									{stage.meta}
-								</p>
+								</span>
 							</div>
 						</div>
 					))}

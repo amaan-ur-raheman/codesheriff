@@ -4,49 +4,53 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-	--background: #f8f8fc;
-	--foreground: #171431;
-	--shiki-light: #171431;
-	--shiki-light-bg: #ffffff;
-	--card: #ffffff;
-	--card-foreground: #171431;
-	--popover: #ffffff;
-	--popover-foreground: #171431;
-	--primary: #c0008e;
-	--primary-foreground: #ffffff;
-	--secondary: #edeafb;
-	--secondary-foreground: #2a2654;
-	--muted: #f0eefb;
-	--muted-foreground: #5d5990;
-	--accent: #e6e1f8;
-	--accent-foreground: #171431;
-	--destructive: #d6286e;
-	--destructive-foreground: #ffffff;
+	--background: #f7f4ee;
+	--foreground: #231d15;
+	--shiki-light: #231d15;
+	--shiki-light-bg: #fcfaf5;
+	--card: #fcfaf5;
+	--card-foreground: #231d15;
+	--popover: #fcfaf5;
+	--popover-foreground: #231d15;
+	--primary: #231d15;
+	--primary-foreground: #f7f4ee;
+	--secondary: #efeade;
+	--secondary-foreground: #3b3226;
+	--muted: #efeade;
+	--muted-foreground: #6b6150;
+	--accent: #f0ebe0;
+	--accent-foreground: #231d15;
+	--destructive: #b3261e;
+	--destructive-foreground: #fff8f2;
 	--verified: #0b7a55;
 	--verified-foreground: #ffffff;
-	--neon: #fe00c7;
-	--neon-text: #a4007e;
-	--border: #e0dcf5;
-	--input: #d6d0f0;
-	--ring: #c0008e;
-	--chart-1: #c0008e;
-	--chart-2: #5b5bd6;
-	--chart-3: #0ea47e;
-	--chart-4: #8b93a1;
-	--chart-5: #d97706;
-	--sidebar: #f8f8fc;
-	--sidebar-foreground: #171431;
-	--sidebar-primary: #c0008e;
-	--sidebar-primary-foreground: #ffffff;
-	--sidebar-accent: #e6e1f8;
-	--sidebar-accent-foreground: #171431;
-	--sidebar-border: #e5e2f7;
-	--sidebar-ring: #d6d0f0;
+	--brand: #fc4c02;
+	--brand-text: #b33900;
+	--brand-soft: #fde6d6;
+	--border: #e2dbc9;
+	--input: #d6cdb9;
+	--ring: #fc4c02;
+	--chart-1: #fc4c02;
+	--chart-2: #8a5a1f;
+	--chart-3: #2e7d5b;
+	--chart-4: #6b6150;
+	--chart-5: #b3261e;
+	--sidebar: #f7f4ee;
+	--sidebar-foreground: #231d15;
+	--sidebar-primary: #231d15;
+	--sidebar-primary-foreground: #f7f4ee;
+	--sidebar-accent: #f0ebe0;
+	--sidebar-accent-foreground: #231d15;
+	--sidebar-border: #e5decb;
+	--sidebar-ring: #d6cdb9;
 	--font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
 		BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans",
 		sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
 		"Noto Color Emoji";
-	--font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+	--font-display: var(--font-fraunces), Georgia, Cambria, "Times New Roman", Times,
+		serif;
+	--font-serif: var(--font-fraunces), Georgia, Cambria, "Times New Roman", Times,
+		serif;
 	--font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo,
 		Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 	--radius: 0.625rem;
@@ -74,49 +78,53 @@
 }
 
 .dark {
-	--background: #0a0918;
-	--foreground: #e9e9f5;
-	--shiki-dark: #e9e9f5;
-	--shiki-dark-bg: #100e24;
-	--card: #131126;
-	--card-foreground: #e9e9f5;
-	--popover: #131126;
-	--popover-foreground: #e9e9f5;
-	--primary: #d6009d;
-	--primary-foreground: #ffffff;
-	--secondary: #1c1940;
-	--secondary-foreground: #cfccf0;
-	--muted: #16132c;
-	--muted-foreground: #9a97b8;
-	--accent: #1e1a45;
-	--accent-foreground: #e9e9f5;
-	--destructive: #ff5c7a;
-	--destructive-foreground: #2a0a12;
+	--background: #17130d;
+	--foreground: #efe9dd;
+	--shiki-dark: #efe9dd;
+	--shiki-dark-bg: #1d1811;
+	--card: #1d1811;
+	--card-foreground: #efe9dd;
+	--popover: #1d1811;
+	--popover-foreground: #efe9dd;
+	--primary: #efe9dd;
+	--primary-foreground: #17130d;
+	--secondary: #241e15;
+	--secondary-foreground: #d9cdba;
+	--muted: #241e15;
+	--muted-foreground: #a89c86;
+	--accent: #262018;
+	--accent-foreground: #efe9dd;
+	--destructive: #ff6b5c;
+	--destructive-foreground: #2a0d08;
 	--verified: #34d399;
 	--verified-foreground: #04261b;
-	--neon: #fe00c7;
-	--neon-text: #ff5cd8;
-	--border: #262348;
-	--input: #2e2a55;
-	--ring: #d6009d;
-	--chart-1: #fe00c7;
-	--chart-2: #7c5cff;
+	--brand: #ff6b35;
+	--brand-text: #ff9e6b;
+	--brand-soft: #3a2315;
+	--border: #2e271b;
+	--input: #3a3122;
+	--ring: #ff6b35;
+	--chart-1: #ff6b35;
+	--chart-2: #d9a05b;
 	--chart-3: #34d399;
-	--chart-4: #9ba0a8;
-	--chart-5: #ff9d5c;
-	--sidebar: #0c0b1d;
-	--sidebar-foreground: #e9e9f5;
-	--sidebar-primary: #d6009d;
-	--sidebar-primary-foreground: #ffffff;
-	--sidebar-accent: #1c1940;
-	--sidebar-accent-foreground: #e9e9f5;
-	--sidebar-border: #211e44;
-	--sidebar-ring: #4a4492;
+	--chart-4: #a89c86;
+	--chart-5: #ff8f6b;
+	--sidebar: #17130d;
+	--sidebar-foreground: #efe9dd;
+	--sidebar-primary: #efe9dd;
+	--sidebar-primary-foreground: #17130d;
+	--sidebar-accent: #262018;
+	--sidebar-accent-foreground: #efe9dd;
+	--sidebar-border: #2a2318;
+	--sidebar-ring: #4a3a24;
 	--font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
 		BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans",
 		sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
 		"Noto Color Emoji";
-	--font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+	--font-display: var(--font-fraunces), Georgia, Cambria, "Times New Roman", Times,
+		serif;
+	--font-serif: var(--font-fraunces), Georgia, Cambria, "Times New Roman", Times,
+		serif;
 	--font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo,
 		Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 	--radius: 0.625rem;
@@ -163,8 +171,9 @@
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
-	--color-neon: var(--neon);
-	--color-neon-text: var(--neon-text);
+	--color-brand: var(--brand);
+	--color-brand-text: var(--brand-text);
+	--color-brand-soft: var(--brand-soft);
 	--color-chart-1: var(--chart-1);
 	--color-chart-2: var(--chart-2);
 	--color-chart-3: var(--chart-3);
@@ -179,9 +188,14 @@
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
 
-	--font-sans: var(--font-sans);
-	--font-mono: var(--font-mono);
-	--font-serif: var(--font-serif);
+	--font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	--font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
+		Consolas, "Liberation Mono", "Courier New", monospace;
+	--font-serif: var(--font-fraunces), Georgia, Cambria, "Times New Roman", Times,
+		serif;
+	--font-display: var(--font-fraunces), Georgia, Cambria, "Times New Roman", Times,
+		serif;
 
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
@@ -204,6 +218,7 @@
 	}
 	body {
 		@apply bg-background text-foreground;
+		font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 	}
 }
 

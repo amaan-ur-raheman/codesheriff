@@ -14,13 +14,10 @@ export function CTASection() {
 			mm.add("(prefers-reduced-motion: no-preference)", () => {
 				gsap.from(".cta-inner", {
 					opacity: 0,
-					y: 30,
+					y: 24,
 					duration: 0.8,
 					ease: EASE,
-					scrollTrigger: {
-						trigger: ".cta-inner",
-						...REVEAL_TRIGGER,
-					},
+					scrollTrigger: { trigger: ".cta-inner", ...REVEAL_TRIGGER },
 				});
 			});
 		}, rootRef);
@@ -32,36 +29,33 @@ export function CTASection() {
 	}, []);
 
 	return (
-		<section ref={rootRef} className="relative py-32">
+		<section ref={rootRef} className="relative border-t border-border py-28">
 			<div className="mx-auto max-w-7xl px-6">
-				<div className="cta-inner relative overflow-hidden rounded-3xl border border-border bg-card px-6 py-20 text-center">
-					{/* faint magenta bloom, well under any text */}
-					<div
-						aria-hidden="true"
-						className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-neon/10 blur-3xl"
-					/>
-
-					<div className="relative">
-						<h2 className="mx-auto max-w-2xl text-4xl font-bold tracking-tight text-balance sm:text-5xl">
-							Ready to ship better code?
-						</h2>
-						<p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
-							Join developers catching bugs before they reach
-							production. Get started in minutes, no credit card
-							required.
-						</p>
-						<div className="mt-10 flex flex-wrap justify-center gap-4">
-							<Button size="lg" className="px-8" asChild>
+				<div className="cta-inner mx-auto max-w-3xl text-center">
+					<p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-text">
+						Final word
+					</p>
+					<h2 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.02em] text-balance sm:text-6xl">
+						Ready to ship{" "}
+						<span className="font-medium italic text-brand">
+							better code?
+						</span>
+					</h2>
+					<p className="mx-auto mt-7 max-w-lg leading-relaxed text-muted-foreground">
+						Connect a repository and the first review lands in
+						minutes. No credit card required.
+					</p>
+					<div className="mt-10 flex flex-wrap items-center justify-center gap-8">
+						<Button size="lg" className="rounded-none px-8" asChild>
 							<a href="/login">
-								Get Started
+								Get started
 								<ArrowRight className="ml-2 h-4 w-4" />
 							</a>
-							</Button>
-						</div>
-						<p className="mt-6 font-mono text-xs text-muted-foreground">
-							Connect a repo, review lands in minutes
-						</p>
+						</Button>
 					</div>
+					<p className="mt-8 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+						Setup takes about four minutes
+					</p>
 				</div>
 			</div>
 		</section>

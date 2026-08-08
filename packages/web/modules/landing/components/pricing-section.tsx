@@ -10,7 +10,7 @@ const plans = [
 		name: "Free",
 		price: "$0",
 		period: "forever",
-		description: "Perfect for individual developers.",
+		description: "For individual developers getting started.",
 		features: [
 			"3 repositories",
 			"50 reviews / month",
@@ -18,7 +18,7 @@ const plans = [
 			"Email notifications",
 			"Community support",
 		],
-		cta: "Start Free",
+		cta: "Start free",
 		highlight: false,
 	},
 	{
@@ -37,7 +37,7 @@ const plans = [
 		],
 		cta: "Get Pro",
 		highlight: true,
-		badge: "Most Popular",
+		badge: "Most popular",
 	},
 	{
 		name: "Enterprise",
@@ -53,7 +53,7 @@ const plans = [
 			"Custom integrations",
 			"SLA guarantee",
 		],
-		cta: "Contact Sales",
+		cta: "Contact sales",
 		highlight: false,
 	},
 ];
@@ -67,31 +67,23 @@ export function PricingSection() {
 			mm.add("(prefers-reduced-motion: no-preference)", () => {
 				gsap.from(".pricing-head", {
 					opacity: 0,
-					y: 24,
+					y: 20,
 					duration: 0.7,
 					ease: EASE,
-					scrollTrigger: {
-						trigger: ".pricing-head",
-						...REVEAL_TRIGGER,
-					},
+					scrollTrigger: { trigger: ".pricing-head", ...REVEAL_TRIGGER },
 				});
-				// Per-card triggers so a stale grid position can never leave
-				// individual cards hidden.
-				gsap.utils.toArray<HTMLElement>(".pricing-card").forEach((card) => {
-					gsap.from(card, {
-						opacity: 0,
-						y: 36,
-						duration: 0.7,
-						ease: EASE,
-						// Drop GSAP's inline transform on complete so the Pro card's
-						// scale/lift and the hover lifts survive.
-						clearProps: "transform",
-						scrollTrigger: {
-							trigger: card,
-							...REVEAL_TRIGGER,
-						},
+				gsap.utils
+					.toArray<HTMLElement>(".pricing-cell")
+					.forEach((cell) => {
+						gsap.from(cell, {
+							opacity: 0,
+							y: 24,
+							duration: 0.65,
+							ease: EASE,
+							clearProps: "transform",
+							scrollTrigger: { trigger: cell, ...REVEAL_TRIGGER },
+						});
 					});
-				});
 			});
 		}, rootRef);
 		const raf = requestAnimationFrame(() => ScrollTrigger.refresh());
@@ -102,60 +94,70 @@ export function PricingSection() {
 	}, []);
 
 	return (
-		<section id="pricing" ref={rootRef} className="relative py-32">
+		<section id="pricing" ref={rootRef} className="relative py-28">
 			<div className="mx-auto max-w-7xl px-6">
-				<div className="pricing-head mb-16 max-w-2xl">
-					<h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-balance">
-						Pricing that scales with your team
+				<div className="pricing-head max-w-2xl">
+					<p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-text">
+						Pricing
+					</p>
+					<h2 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.02em] text-balance sm:text-5xl">
+						Start free. Upgrade when the team grows.
 					</h2>
-					<p className="mt-4 text-lg text-muted-foreground">
-						Start free, upgrade when you need more. No hidden fees, cancel
-						anytime.
+					<p className="mt-6 max-w-lg leading-relaxed text-muted-foreground">
+						No hidden fees, no per-seat surprises, cancel anytime.
 					</p>
 				</div>
 
-				<div className="pricing-grid mx-auto grid max-w-5xl gap-6 md:grid-cols-3 md:items-center">
+				<div className="mt-16 grid border border-border divide-y md:divide-y-0 md:divide-x divide-border md:grid-cols-3">
 					{plans.map((plan) => (
 						<div
 							key={plan.name}
-							className={`pricing-card relative rounded-2xl border p-8 transition-all duration-300 ${
-								plan.highlight
-									? "border-primary/40 bg-card ring-1 ring-primary/20 md:-translate-y-2 md:scale-[1.03] hover:shadow-xl"
-									: "border-border bg-card hover:border-primary/25 hover:-translate-y-1"
+							className={`pricing-cell relative p-8 sm:p-10 ${
+								plan.highlight ? "bg-card" : "bg-background"
 							}`}
 						>
-							{plan.badge && (
-								<div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 font-mono text-[11px] font-semibold text-primary-foreground shadow-md">
-									{plan.badge}
-								</div>
+							{plan.highlight && (
+								<div
+									aria-hidden="true"
+									className="absolute top-0 left-0 right-0 h-[3px] bg-brand"
+								/>
 							)}
 
-							<div className="mb-8">
-								<h3 className="mb-2 text-lg font-semibold">
+							<div className="flex items-baseline justify-between gap-3">
+								<h3 className="text-base font-semibold">
 									{plan.name}
 								</h3>
-								<div className="mb-3 flex items-baseline gap-1">
-									<span className="text-4xl font-bold">
-										{plan.price}
+								{plan.badge && (
+									<span className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand-text">
+										{plan.badge}
 									</span>
-									{plan.period && (
-										<span className="text-sm text-muted-foreground">
-											{plan.period}
-										</span>
-									)}
-								</div>
-								<p className="text-sm text-muted-foreground">
-									{plan.description}
-								</p>
+								)}
 							</div>
 
-							<ul className="mb-8 space-y-3">
+							<div className="mt-6 flex items-baseline gap-1.5">
+								<span className="font-display text-5xl font-semibold tracking-tight">
+									{plan.price}
+								</span>
+								{plan.period && (
+									<span className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+										{plan.period}
+									</span>
+								)}
+							</div>
+							<p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+								{plan.description}
+							</p>
+
+							<ul className="mt-8 space-y-2.5 border-t border-border pt-8">
 								{plan.features.map((feature) => (
 									<li
 										key={feature}
-										className="flex items-start gap-3 text-sm"
+										className="flex items-start gap-2.5 text-sm"
 									>
-										<Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" strokeWidth={2.5} />
+										<Check
+											className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand"
+											strokeWidth={2.5}
+										/>
 										<span className="text-muted-foreground">
 											{feature}
 										</span>
@@ -165,7 +167,7 @@ export function PricingSection() {
 
 							<Button
 								variant={plan.highlight ? "default" : "outline"}
-								className="w-full"
+								className="mt-8 w-full rounded-none"
 								asChild
 							>
 								<a href="/login">{plan.cta}</a>
