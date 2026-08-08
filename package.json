@@ -2,7 +2,8 @@
     "name": "code-sheriff-monorepo",
     "version": "1.0.0",
     "devDependencies": {
-        "mprocs": "^0.9.6"
+        "mprocs": "^0.9.6",
+        "@google/design.md": "^0.4.0"
     },
     "overrides": {
         "protobufjs": "^7.6.5",
