@@ -39,7 +39,7 @@ export function EmailNotifications() {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Email Notifications</CardTitle>
+				<CardTitle className="font-display text-lg tracking-tight">Email Notifications</CardTitle>
 				<CardDescription>
 					Control which emails you receive from Code Sheriff.
 				</CardDescription>

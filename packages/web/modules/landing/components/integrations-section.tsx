@@ -42,22 +42,32 @@ export function IntegrationsSection() {
 	return (
 		<section ref={rootRef} className="border-t border-border py-20">
 			<div className="mx-auto max-w-7xl px-6">
-				<div className="integrations-band flex flex-wrap items-center gap-x-10 gap-y-5 border border-border bg-muted/20 px-8 py-7">
-					<p className="w-full font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground sm:w-auto">
-						Works where you already work
-					</p>
-					{integrations.map((name) => (
-						<span
-							key={name}
-							className="flex items-center gap-2.5 font-mono text-[13px] text-muted-foreground"
-						>
-							<span
-								aria-hidden="true"
-								className="h-1.5 w-1.5 bg-brand"
-							/>
-							{name}
-						</span>
-					))}
+				<p className="text-center font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground mb-5">
+					Works where you already work
+				</p>
+				<div className="integrations-band marquee-mask overflow-hidden border border-border bg-muted/20">
+					<div className="marquee-track flex w-max py-7" aria-label="Supported integrations">
+						{[0, 1].map((copy) => (
+							<div
+								key={copy}
+								aria-hidden={copy === 1}
+								className="flex shrink-0 items-center gap-x-10 pr-10"
+							>
+								{integrations.map((name) => (
+									<span
+										key={name}
+										className="flex items-center gap-2.5 font-mono text-[13px] text-muted-foreground whitespace-nowrap"
+									>
+										<span
+											aria-hidden="true"
+											className="h-1.5 w-1.5 bg-brand"
+										/>
+										{name}
+									</span>
+								))}
+							</div>
+						))}
+					</div>
 				</div>
 			</div>
 		</section>

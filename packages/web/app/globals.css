@@ -222,6 +222,58 @@
 	}
 }
 
+/* Editorial marquee — Skiper-style scrolling band, quiet register */
+@keyframes marquee-scroll {
+	from {
+		transform: translateX(0);
+	}
+	to {
+		transform: translateX(-50%);
+	}
+}
+
+.marquee-track {
+	animation: marquee-scroll 44s linear infinite;
+}
+
+.marquee-track:hover,
+.marquee-track:focus-within {
+	animation-play-state: paused;
+}
+
+.marquee-mask {
+	-webkit-mask-image: linear-gradient(
+		to right,
+		transparent,
+		black 10%,
+		black 90%,
+		transparent
+	);
+	mask-image: linear-gradient(
+		to right,
+		transparent,
+		black 10%,
+		black 90%,
+		transparent
+	);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.marquee-track {
+		animation: none;
+		width: 100%;
+		flex-wrap: wrap;
+		justify-content: center;
+		row-gap: 1.25rem;
+	}
+	.marquee-track > div {
+		padding-right: 0;
+	}
+	.marquee-track > div:last-child {
+		display: none;
+	}
+}
+
 /* Shiki custom syntax highlighter overrides for dark mode */
 .dark pre[data-streamdown="code-block-body"] {
 	background-color: var(--shiki-dark-bg) !important;

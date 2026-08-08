@@ -63,7 +63,7 @@ export function ProfileForm() {
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle>Profile Settings</CardTitle>
+					<CardTitle className="font-display text-lg tracking-tight">Profile Settings</CardTitle>
 					<CardDescription>
 						Update your profile information
 					</CardDescription>
@@ -81,7 +81,7 @@ export function ProfileForm() {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Profile Settings</CardTitle>
+				<CardTitle className="font-display text-lg tracking-tight">Profile Settings</CardTitle>
 				<CardDescription>
 					Update your profile information
 				</CardDescription>
