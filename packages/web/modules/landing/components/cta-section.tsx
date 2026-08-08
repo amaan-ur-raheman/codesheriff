@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { gsap, EASE, REVEAL_TRIGGER, ScrollTrigger } from "../lib/gsap";
+import { gsap, EASE, REVEAL_TRIGGER, DURATION, MOTION_PREFERRED_QUERY, ScrollTrigger } from "../lib/gsap";
 
 export function CTASection() {
 	const rootRef = useRef<HTMLElement>(null);
@@ -11,11 +11,11 @@ export function CTASection() {
 	useEffect(() => {
 		const ctx = gsap.context(() => {
 			const mm = gsap.matchMedia();
-			mm.add("(prefers-reduced-motion: no-preference)", () => {
+			mm.add(MOTION_PREFERRED_QUERY, () => {
 				gsap.from(".cta-inner", {
 					opacity: 0,
 					y: 24,
-					duration: 0.8,
+					duration: DURATION.cta,
 					ease: EASE,
 					scrollTrigger: { trigger: ".cta-inner", ...REVEAL_TRIGGER },
 				});

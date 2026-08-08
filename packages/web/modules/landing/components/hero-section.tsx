@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { gsap, EASE } from "../lib/gsap";
+import { gsap, EASE, DURATION, STAGGER, MOTION_PREFERRED_QUERY } from "../lib/gsap";
 
 export function HeroSection() {
 	const rootRef = useRef<HTMLElement>(null);
@@ -11,7 +11,7 @@ export function HeroSection() {
 	useEffect(() => {
 		const ctx = gsap.context(() => {
 			const mm = gsap.matchMedia();
-			mm.add("(prefers-reduced-motion: no-preference)", () => {
+			mm.add(MOTION_PREFERRED_QUERY, () => {
 				const targets = gsap.utils.toArray<HTMLElement>(
 					".hero-kicker, .hero-line, .hero-sub, .hero-cta, .hero-stats, .hero-sheet",
 				);
@@ -27,20 +27,20 @@ export function HeroSection() {
 				gsap.set(".hero-sheet", { opacity: 0, y: 36 });
 
 				const tl = gsap.timeline({ defaults: { ease: EASE } });
-				tl.to(".hero-kicker", { opacity: 1, y: 0, duration: 0.5 }, 0.05)
+				tl.to(".hero-kicker", { opacity: 1, y: 0, duration: DURATION.fast }, 0.05)
 					.to(
 						".hero-line",
-						{ yPercent: 0, duration: 0.9, stagger: 0.13 },
+						{ yPercent: 0, duration: DURATION.hero, stagger: STAGGER.heroLines },
 						0.25,
 					)
-					.to(".hero-sub", { opacity: 1, y: 0, duration: 0.6 }, 0.75)
+					.to(".hero-sub", { opacity: 1, y: 0, duration: DURATION.base }, 0.75)
 					.to(
 						".hero-cta",
-						{ opacity: 1, y: 0, duration: 0.5, stagger: 0.09 },
+						{ opacity: 1, y: 0, duration: DURATION.fast, stagger: STAGGER.heroCta },
 						0.9,
 					)
-					.to(".hero-stats", { opacity: 1, y: 0, duration: 0.55 }, 1.0)
-					.to(".hero-sheet", { opacity: 1, y: 0, duration: 0.9 }, 0.5);
+					.to(".hero-stats", { opacity: 1, y: 0, duration: DURATION.stats }, 1.0)
+					.to(".hero-sheet", { opacity: 1, y: 0, duration: DURATION.hero }, 0.5);
 
 				// Count-up the stat numerals once the stats row settles.
 				gsap.utils.toArray<HTMLElement>(".hero-stat-num").forEach((el) => {
@@ -50,8 +50,8 @@ export function HeroSection() {
 						obj,
 						{
 							v: target,
-							duration: 1.3,
-							ease: "power3.out",
+							duration: DURATION.count,
+							ease: EASE,
 							onUpdate: () => {
 								el.textContent =
 									target >= 1000

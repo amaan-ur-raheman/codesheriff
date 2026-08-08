@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Plus } from "lucide-react";
-import { gsap, EASE, REVEAL_TRIGGER, ScrollTrigger } from "../lib/gsap";
+import { gsap, EASE, REVEAL_TRIGGER, DURATION, MOTION_PREFERRED_QUERY, ScrollTrigger } from "../lib/gsap";
 
 const faqs = [
 	{
@@ -44,11 +44,11 @@ export function FAQSection() {
 	useEffect(() => {
 		const ctx = gsap.context(() => {
 			const mm = gsap.matchMedia();
-			mm.add("(prefers-reduced-motion: no-preference)", () => {
+			mm.add(MOTION_PREFERRED_QUERY, () => {
 				gsap.from(".faq-head", {
 					opacity: 0,
 					y: 20,
-					duration: 0.7,
+					duration: DURATION.section,
 					ease: EASE,
 					scrollTrigger: { trigger: ".faq-head", ...REVEAL_TRIGGER },
 				});

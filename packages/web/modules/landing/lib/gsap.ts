@@ -1,10 +1,19 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-gsap.registerPlugin(ScrollTrigger);
+// Motion tokens are canonical in @/lib/motion (see DESIGN.md → Motion
+// register). This file re-exports them so landing sections keep one import
+// path alongside gsap/ScrollTrigger, and bootstraps the ScrollTrigger setup
+// that the landing needs. New tokens belong in lib/motion.ts, not here.
+export {
+	EASE,
+	DURATION,
+	STAGGER,
+	MOTION_PREFERRED_QUERY,
+	REVEAL_TRIGGER,
+} from "@/lib/motion";
 
-/** Shared motion curve for the editorial design system (≈ cubic-bezier(0.16, 1, 0.3, 1)). */
-export const EASE = "power3.out" as const;
+gsap.registerPlugin(ScrollTrigger);
 
 // Recalculate trigger positions once the page has fully settled (fonts,
 // images, lazy-loaded chunks). Without this, a layout shift after trigger
@@ -16,14 +25,3 @@ if (typeof window !== "undefined") {
 }
 
 export { gsap, ScrollTrigger };
-
-/**
- * Shared config for one-shot scroll reveals. `once: true` + explicit
- * `toggleActions` means a reveal plays exactly once when its trigger enters
- * and can never leave content hidden on a re-enter or reverse.
- */
-export const REVEAL_TRIGGER = {
-	start: "top 85%",
-	once: true,
-	toggleActions: "play none none none",
-} as const;

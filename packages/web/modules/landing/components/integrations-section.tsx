@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { gsap, EASE, REVEAL_TRIGGER, ScrollTrigger } from "../lib/gsap";
+import { gsap, EASE, REVEAL_TRIGGER, DURATION, MOTION_PREFERRED_QUERY, ScrollTrigger } from "../lib/gsap";
 
 const integrations = [
 	"GitHub",
@@ -21,11 +21,11 @@ export function IntegrationsSection() {
 	useEffect(() => {
 		const ctx = gsap.context(() => {
 			const mm = gsap.matchMedia();
-			mm.add("(prefers-reduced-motion: no-preference)", () => {
+			mm.add(MOTION_PREFERRED_QUERY, () => {
 				gsap.from(".integrations-band", {
 					opacity: 0,
 					y: 16,
-					duration: 0.7,
+					duration: DURATION.section,
 					ease: EASE,
 					clearProps: "transform",
 					scrollTrigger: { trigger: ".integrations-band", ...REVEAL_TRIGGER },

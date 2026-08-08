@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { gsap, EASE, REVEAL_TRIGGER, ScrollTrigger } from "../lib/gsap";
+import { gsap, EASE, REVEAL_TRIGGER, DURATION, MOTION_PREFERRED_QUERY, ScrollTrigger } from "../lib/gsap";
 
 const featured = {
 	quote:
@@ -29,11 +29,11 @@ export function TestimonialsSection() {
 	useEffect(() => {
 		const ctx = gsap.context(() => {
 			const mm = gsap.matchMedia();
-			mm.add("(prefers-reduced-motion: no-preference)", () => {
+			mm.add(MOTION_PREFERRED_QUERY, () => {
 				gsap.from(".testimonials-head", {
 					opacity: 0,
 					y: 20,
-					duration: 0.7,
+					duration: DURATION.section,
 					ease: EASE,
 					scrollTrigger: {
 						trigger: ".testimonials-head",
@@ -46,7 +46,7 @@ export function TestimonialsSection() {
 						gsap.from(cell, {
 							opacity: 0,
 							y: 20,
-							duration: 0.65,
+							duration: DURATION.cell,
 							ease: EASE,
 							clearProps: "transform",
 							scrollTrigger: {
