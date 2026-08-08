@@ -16,6 +16,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun --filter code-sheriff lint
+      - run: bun --filter codesheriff-cli lint
 
   typecheck:
     runs-on: ubuntu-latest
@@ -37,3 +38,22 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun --filter code-sheriff test
+      - run: bun --filter codesheriff-cli test
+
+  build:
+    # `next build` catches compile/static-gen breaks that typecheck misses.
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
+      GITHUB_CLIENT_ID: "dummy"
+      GITHUB_CLIENT_SECRET: "dummy"
+      POLAR_WEBHOOK_SECRET: "dummy"
+      BETTER_AUTH_SECRET: "dummy"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+      NEXT_PUBLIC_APP_BASE_URL: "http://localhost:3000"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun --filter code-sheriff build
+      - run: bun --filter codesheriff-cli build
