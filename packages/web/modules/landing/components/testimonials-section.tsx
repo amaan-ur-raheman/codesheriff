@@ -7,6 +7,8 @@ const featured = {
 	quote:
 		"CodeSheriff flagged a race condition in our billing service the morning it shipped. We would have found it in production.",
 	attribution: "Staff engineer · B2B SaaS",
+	// #8: mono-letter avatar initials anchoring the quote
+	initials: "SE",
 	meta: "PR #482 · 6 files · 2 verified fixes",
 };
 
@@ -15,11 +17,13 @@ const quotes = [
 		quote:
 			"The sandbox verification is the part that sells itself. The only suggestions that reach our PRs are the ones that compile and pass.",
 		attribution: "Tech lead · fintech platform",
+		initials: "TL",
 	},
 	{
 		quote:
 			"It reads a diff like a senior reviewer who already knows our codebase. The health score gave the team a number to chase.",
 		attribution: "Engineering manager · e-commerce",
+		initials: "EM",
 	},
 ];
 
@@ -40,10 +44,6 @@ export function TestimonialsSection() {
 						...REVEAL_TRIGGER,
 					},
 				});
-				// Batch-reveal the pull-quotes: the featured quote and the two
-				// secondary quotes enter as one staggered register. Explicit
-				// initial states (never `from`) per the landing safety rule,
-				// cleared on complete so no inline styles survive.
 				gsap.set(".testimonial-cell", { opacity: 0, y: 20 });
 				ScrollTrigger.batch(".testimonial-cell", {
 					start: "top 88%",
@@ -88,12 +88,20 @@ export function TestimonialsSection() {
 							</p>
 						</blockquote>
 						<figcaption className="lg:col-span-4 lg:text-right">
-							<p className="font-mono text-[11px] uppercase tracking-[0.14em] text-foreground">
-								{featured.attribution}
-							</p>
-							<p className="mt-2 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-								{featured.meta}
-							</p>
+							<div className="flex items-center gap-3 lg:justify-end">
+								{/* mono-letter avatar — same border/bg treatment as the sidebar connected account block */}
+								<div className="flex h-8 w-8 shrink-0 items-center justify-center border border-border bg-muted font-mono text-[11px] font-medium text-foreground">
+									{featured.initials}
+								</div>
+								<div>
+									<p className="font-mono text-[11px] uppercase tracking-[0.14em] text-foreground">
+										{featured.attribution}
+									</p>
+									<p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+										{featured.meta}
+									</p>
+								</div>
+							</div>
 						</figcaption>
 					</figure>
 
@@ -105,12 +113,17 @@ export function TestimonialsSection() {
 								className="testimonial-cell py-12 pr-0 md:pr-12"
 							>
 								<blockquote>
-									<p className="font-display text-xl font-medium italic leading-snug text-balance">
-										“{item.quote}”
-									</p>
+								<p className="font-display text-xl font-medium italic leading-snug text-balance">
+									“{item.quote}”
+								</p>
 								</blockquote>
-								<figcaption className="mt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-									{item.attribution}
+								<figcaption className="mt-6 flex items-center gap-3">
+									<div className="flex h-7 w-7 shrink-0 items-center justify-center border border-border bg-muted font-mono text-[10px] font-medium text-foreground">
+										{item.initials}
+									</div>
+									<span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+										{item.attribution}
+									</span>
 								</figcaption>
 							</figure>
 						))}
