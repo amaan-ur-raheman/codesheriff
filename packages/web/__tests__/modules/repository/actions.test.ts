@@ -58,7 +58,10 @@ describe("Repository Index Actions", () => {
 				{ id: "101", name: "repo-a" },
 				{ id: "102", name: "repo-b" },
 			];
-			vi.mocked(getRepositories).mockResolvedValueOnce(mockGithubRepos as any);
+			vi.mocked(getRepositories).mockResolvedValueOnce({
+				items: mockGithubRepos,
+				totalPages: 12,
+			} as any);
 
 			mockPrisma.repository.findMany.mockResolvedValueOnce([
 				{ githubId: BigInt(101), userId: "user-123" },
@@ -66,16 +69,12 @@ describe("Repository Index Actions", () => {
 
 			const result = await fetchRepositories(1, 10);
 
-			expect(result).toHaveLength(2);
-			expect(result[0]).toEqual({
-				id: "101",
-				name: "repo-a",
-				isConnected: true,
-			});
-			expect(result[1]).toEqual({
-				id: "102",
-				name: "repo-b",
-				isConnected: false,
+			expect(result).toEqual({
+				items: [
+					{ id: "101", name: "repo-a", isConnected: true },
+					{ id: "102", name: "repo-b", isConnected: false },
+				],
+				totalPages: 12,
 			});
 
 			expect(getRepositories).toHaveBeenCalledWith(1, 10);
