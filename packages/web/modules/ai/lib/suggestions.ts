@@ -61,13 +61,44 @@ export function readStoredSuggestions(
 		return null;
 	}
 
-	const suggestions = candidate.suggestions as CodeSuggestion[];
-	const summary =
-		candidate.summary &&
-		typeof candidate.summary === "object" &&
-		!Array.isArray(candidate.summary)
-			? (candidate.summary as ReviewSuggestions["summary"])
-			: computeSummary(suggestions);
+	// Validate each suggestion entry has required fields.
+	const validSeverities = new Set(["error", "warning", "info", "suggestion"]);
+	const suggestions: CodeSuggestion[] = candidate.suggestions.filter(
+		(s: any): s is CodeSuggestion =>
+			!!s &&
+			typeof s === "object" &&
+			typeof s.id === "string" &&
+			typeof s.filePath === "string" &&
+			typeof s.title === "string" &&
+			validSeverities.has(s.severity)
+	);
+
+	if (suggestions.length === 0 && candidate.suggestions.length > 0) {
+		return null;
+	}
+
+	// Stored summary counters are only trustworthy when every entry survived
+	// validation — otherwise recompute so badge counts can't exceed the list.
+	const hadDroppedEntries =
+		suggestions.length !== candidate.suggestions.length;
+
+	// Validate stored summary counters before using them.
+	const rawSummary = candidate.summary;
+	let summary: ReviewSuggestions["summary"];
+	if (
+		!hadDroppedEntries &&
+		rawSummary &&
+		typeof rawSummary === "object" &&
+		!Array.isArray(rawSummary) &&
+		typeof (rawSummary as any).totalIssues === "number" &&
+		typeof (rawSummary as any).errors === "number" &&
+		typeof (rawSummary as any).warnings === "number" &&
+		typeof (rawSummary as any).suggestions === "number"
+	) {
+		summary = rawSummary as ReviewSuggestions["summary"];
+	} else {
+		summary = computeSummary(suggestions);
+	}
 
 	return { suggestions, summary };
 }
