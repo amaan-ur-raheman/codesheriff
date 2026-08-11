@@ -25,6 +25,7 @@ import {
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { Pagination } from "@/components/ui/pagination";
 
 import {
 	getConnectedRepositories,
@@ -32,37 +33,48 @@ import {
 	disconnectAllRepositories,
 } from "../actions";
 
+const PAGE_SIZE = 8;
+
 export function RepositoryList() {
 	const queryClient = useQueryClient();
 
 	const [disconnectAllOpen, setDisconnectAllOpen] = useState(false);
+	const [page, setPage] = useState(1);
 
-	const { data: repositories, isLoading } = useQuery({
-		queryKey: ["connected-repositories"],
-		queryFn: async () => await getConnectedRepositories(),
+	const { data, isLoading } = useQuery({
+		queryKey: ["connected-repositories", page],
+		queryFn: async () => await getConnectedRepositories(page, PAGE_SIZE),
 		staleTime: 2 * 60 * 1000, // 2 minutes
 		refetchOnWindowFocus: false,
 	});
 
+	const repositories = data?.repositories ?? [];
+	const total = data?.total ?? 0;
+
 	const disconnectMutation = useMutation({
 		mutationFn: async (repositoryId: string) => {
 			return await disconnectRepository(repositoryId);
-		},
-		onSuccess: (result) => {
-			if (result.success) {
-				queryClient.invalidateQueries({
-					queryKey: ["connected-repositories"],
-				});
-				queryClient.invalidateQueries({
-					queryKey: ["dashboard-stats"],
-				});
-				queryClient.invalidateQueries({
-					queryKey: ["reviews"],
-				});
-				queryClient.invalidateQueries({
-					queryKey: ["subscription-data"],
-				});
-				toast.success("Repository disconnected successfully");
+		},			onSuccess: (result) => {
+				if (result.success) {
+					queryClient.invalidateQueries({
+						queryKey: ["connected-repositories"],
+					});
+					queryClient.invalidateQueries({
+						queryKey: ["dashboard-stats"],
+					});
+					queryClient.invalidateQueries({
+						queryKey: ["reviews"],
+					});
+					queryClient.invalidateQueries({
+						queryKey: ["subscription-data"],
+					});
+					// Clamp to a valid page: disconnecting the only row on the
+					// final page would otherwise strand the user on an empty
+					// page 2+ with no Next button.
+					setPage((p) =>
+						Math.min(p, Math.max(1, Math.ceil((total - 1) / PAGE_SIZE)))
+					);
+					toast.success("Repository disconnected successfully");
 			} else {
 				toast.error(result?.error || "Failed to disconnect repository");
 			}
@@ -97,6 +109,7 @@ export function RepositoryList() {
 					} repositories successfully`
 				);
 				setDisconnectAllOpen(false);
+				setPage(1);
 			} else {
 				toast.error(
 					result?.error || "Failed to disconnect repositories"
@@ -113,7 +126,7 @@ export function RepositoryList() {
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle className="font-display text-lg tracking-tight">Connected Repositories</CardTitle>
+					<CardTitle className="text-base font-semibold">Connected Repositories</CardTitle>
 					<CardDescription>
 						Manage your connected GitHub repositories
 					</CardDescription>
@@ -134,12 +147,12 @@ export function RepositoryList() {
 			<CardHeader>
 				<div className="flex items-center justify-between">
 					<div>
-						<CardTitle className="font-display text-lg tracking-tight">Connected Repositories</CardTitle>
+						<CardTitle className="text-base font-semibold">Connected Repositories</CardTitle>
 						<CardDescription>
 							Manage your connected GitHub repositories
 						</CardDescription>
 					</div>
-					{repositories && repositories.length > 0 && (
+					{total > 0 && (
 						<AlertDialog
 							open={disconnectAllOpen}
 							onOpenChange={setDisconnectAllOpen}
@@ -158,7 +171,7 @@ export function RepositoryList() {
 									</AlertDialogTitle>
 									<AlertDialogDescription>
 										This will disconnect all{" "}
-										{repositories.length} repositories and
+										{total} repositories and
 										delete all associated AI reviews. This
 										action cannot be undone.
 									</AlertDialogDescription>
@@ -187,7 +200,7 @@ export function RepositoryList() {
 				</div>
 			</CardHeader>
 			<CardContent>
-				{!repositories || repositories.length === 0 ? (
+				{total === 0 ? (
 					<EmptyState
 						kicker="Repositories"
 						title="No repositories connected"
@@ -270,6 +283,13 @@ export function RepositoryList() {
 								</AlertDialog>
 							</div>
 						))}
+						{total > PAGE_SIZE && (
+							<Pagination
+								page={page}
+								totalPages={Math.ceil(total / PAGE_SIZE)}
+								onPageChange={setPage}
+							/>
+						)}
 					</div>
 				)}
 			</CardContent>

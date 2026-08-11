@@ -18,28 +18,50 @@ import {
 	CardContent,
 	CardHeader,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
+import { Pagination } from "@/components/ui/pagination";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { getReviews } from "@/modules/review/actions";
 import { ReviewCard } from "@/modules/review/components/review-card";
 import { PageHeader } from "@/components/page-header";
 
+const REVIEWS_PER_PAGE = 10;
+
 export default function ReviewsPageClient() {
-	const { data: reviews, isLoading } = useQuery({
-		queryKey: ["reviews"],
+	const [page, setPage] = useState(1);
+
+	const { data, isLoading, isError, isFetching, refetch } = useQuery({
+		queryKey: ["reviews", page],
 		queryFn: async () => {
-			return await getReviews();
+			return await getReviews(page, REVIEWS_PER_PAGE);
 		},
+		// Keep the previous page visible while the next one loads — no flash.
+		placeholderData: (prev) => prev,
 		refetchInterval: (query) => {
-			const hasActive = query.state.data?.some(
+			const hasActive = query.state.data?.reviews.some(
 				(r) => r.status === "pending" || r.status === "in_progress"
 			);
 			return hasActive ? 3000 : false;
 		},
 	});
+
+	const reviews = data?.reviews ?? [];
+	const total = data?.total ?? 0;
+	const totalPages = Math.max(1, Math.ceil(total / REVIEWS_PER_PAGE));
+
+	// If the review count shrank (e.g. a repo disconnect in Settings deleted
+	// reviews), pull back to a page that exists instead of stranding the user
+	// on an empty one.
+	useEffect(() => {
+		if (page > totalPages) {
+			setPage(totalPages);
+		}
+	}, [page, totalPages]);
 
 	if (isLoading) {
 		return (
@@ -75,6 +97,23 @@ export default function ReviewsPageClient() {
 		);
 	}
 
+	if (isError) {
+		return (
+			<div className="space-y-4">
+				<PageHeader
+					kicker="Code reviews"
+					title="Review History"
+					description="View all AI code reviews"
+				/>
+				<ErrorState
+					title="Couldn't load reviews"
+					description="Your reviews couldn't be fetched right now."
+					onRetry={() => refetch()}
+				/>
+			</div>
+		);
+	}
+
 	return (
 		<div className="space-y-4">
 			<PageHeader
@@ -83,7 +122,7 @@ export default function ReviewsPageClient() {
 				description="View all AI code reviews"
 			/>
 
-			{reviews?.length === 0 ? (
+			{total === 0 ? (
 				<Card>
 					<CardContent>
 						<EmptyState
@@ -102,10 +141,19 @@ export default function ReviewsPageClient() {
 				</Card>
 			) : (
 				<div className="grid gap-4">
-					{reviews?.map((review) => (
+					{reviews.map((review) => (
 						<ReviewCard key={review.id} review={review} />
 					))}
 				</div>
+			)}
+
+			{totalPages > 1 && (
+				<Pagination
+					page={page}
+					totalPages={totalPages}
+					onPageChange={setPage}
+					isFetching={isFetching}
+				/>
 			)}
 		</div>
 	);
