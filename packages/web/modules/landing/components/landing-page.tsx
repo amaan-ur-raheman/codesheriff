@@ -17,14 +17,16 @@ export function LandingPage() {
 		<div className="min-h-dvh bg-background text-foreground">
 			<ScrollProgress />
 			<Navbar />
-			<HeroSection />
-			<FeaturesSection />
-			<IntegrationsSection />
-			<PipelineSection />
-			<TestimonialsSection />
-			<PricingSection />
-			<FAQSection />
-			<CTASection />
+			<main id="main">
+				<HeroSection />
+				<FeaturesSection />
+				<IntegrationsSection />
+				<PipelineSection />
+				<TestimonialsSection />
+				<PricingSection />
+				<FAQSection />
+				<CTASection />
+			</main>
 			<Footer />
 		</div>
 	);

@@ -28,10 +28,24 @@ function mulberry32(seed: number) {
 	};
 }
 
-const COUNT = 220;
+const COUNT_DESKTOP = 220;
+const COUNT_MOBILE = 120;
 const MAX_CONNECT_DIST = 2.4;
 
-function PipelinePointField({ ink, brand }: { ink: string; brand: string }) {
+/**
+ * Safely parse a CSS color string for THREE.Color.
+ * Handles oklch(), bare channel values, and other formats
+ * that THREE.Color does not accept natively.
+ */
+function parseColor(value: string, fallback: string): THREE.Color {
+	try {
+		return new THREE.Color(value);
+	} catch {
+		return new THREE.Color(fallback);
+	}
+}
+
+function PipelinePointField({ ink, brand, count }: { ink: string; brand: string; count: number }) {
 	const pointsRef = useRef<THREE.Points>(null);
 	const linesRef = useRef<THREE.LineSegments>(null);
 	const groupRef = useRef<THREE.Group>(null);
@@ -41,14 +55,14 @@ function PipelinePointField({ ink, brand }: { ink: string; brand: string }) {
 
 	const { pointsGeometry, linesGeometry } = useMemo(() => {
 		const rnd = mulberry32(0xc05e);
-		const positions = new Float32Array(COUNT * 3);
-		const colors = new Float32Array(COUNT * 3);
-		const inkColor = new THREE.Color(ink);
-		const brandColor = new THREE.Color(brand);
+		const positions = new Float32Array(count * 3);
+		const colors = new Float32Array(count * 3);
+		const inkColor = parseColor(ink, "#231d15");
+		const brandColor = parseColor(brand, "#fc4c02");
 
 		const coords: Array<[number, number, number]> = [];
 
-		for (let i = 0; i < COUNT; i++) {
+		for (let i = 0; i < count; i++) {
 			const x = (rnd() - 0.5) * 16;
 			const y = (rnd() - 0.5) * 10;
 			const z = (rnd() - 0.5) * 6;
@@ -70,8 +84,8 @@ function PipelinePointField({ ink, brand }: { ink: string; brand: string }) {
 		const linePos: number[] = [];
 		const lineColors: number[] = [];
 
-		for (let i = 0; i < COUNT; i++) {
-			for (let j = i + 1; j < COUNT; j++) {
+		for (let i = 0; i < count; i++) {
+			for (let j = i + 1; j < count; j++) {
 				const dx = coords[i][0] - coords[j][0];
 				const dy = coords[i][1] - coords[j][1];
 				const dz = coords[i][2] - coords[j][2];
@@ -104,7 +118,8 @@ function PipelinePointField({ ink, brand }: { ink: string; brand: string }) {
 		);
 
 		return { pointsGeometry: pGeo, linesGeometry: lGeo };
-	}, [ink, brand]);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ink, brand, count]);
 
 	useEffect(() => {
 		return () => {
@@ -210,7 +225,7 @@ export default function PointField() {
 				camera={{ position: [0, 0, 9], fov: 50 }}
 				className="!absolute inset-0"
 			>
-				<PipelinePointField ink={ink} brand={brand} />
+				<PipelinePointField ink={ink} brand={brand} count={typeof window !== "undefined" && window.innerWidth < 768 ? COUNT_MOBILE : COUNT_DESKTOP} />
 			</Canvas>
 		</div>
 	);

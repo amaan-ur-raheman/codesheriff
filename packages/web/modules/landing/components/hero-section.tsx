@@ -20,7 +20,7 @@ export function HeroSection() {
 			const mm = gsap.matchMedia();
 			mm.add(MOTION_PREFERRED_QUERY, () => {
 				const targets = gsap.utils.toArray<HTMLElement>(
-					".hero-kicker, .hero-line, .hero-sub, .hero-cta, .hero-stats, .hero-sheet",
+					".hero-kicker, .hero-line, .hero-sub, .hero-cta, .hero-sheet",
 				);
 
 				// Explicit initial states, never `from` tweens: a context
@@ -30,7 +30,6 @@ export function HeroSection() {
 				gsap.set(".hero-line", { yPercent: 112 });
 				gsap.set(".hero-sub", { opacity: 0, y: 20 });
 				gsap.set(".hero-cta", { opacity: 0, y: 14 });
-				gsap.set(".hero-stats", { opacity: 0, y: 16 });
 				// Masked reveal: the review sheet unmasks bottom-up (clip-path,
 				// inset(top right bottom left) — 100% bottom inset hides it,
 				// animating to 0% grows the visible window upward from the
@@ -52,53 +51,11 @@ export function HeroSection() {
 						{ opacity: 1, y: 0, duration: DURATION.fast, stagger: STAGGER.heroCta },
 						0.9,
 					)
-					.to(".hero-stats", { opacity: 1, y: 0, duration: DURATION.stats }, 1.0)
 					.to(
 						".hero-sheet",
 						{ clipPath: "inset(0 0 0% 0)", y: 0, duration: DURATION.hero },
 						0.5,
 					);
-
-				// Count-up the stat numerals once the stats row settles.
-				gsap.utils.toArray<HTMLElement>(".hero-stat-num").forEach((el) => {
-					const target = Number(el.dataset.count || "0");
-					const obj = { v: 0 };
-					tl.to(
-						obj,
-						{
-							v: target,
-							duration: DURATION.count,
-							ease: EASE,
-							onUpdate: () => {
-								el.textContent =
-									target >= 1000
-										? Math.round(obj.v).toLocaleString("en-US")
-										: String(Math.round(obj.v));
-							},
-						},
-						1.05,
-					);
-				});
-
-				// Whisper parallax: the stats row drifts up slightly as the
-				// hero scrolls away. Scrub-linked so it follows the scroll,
-				// not a one-shot. Applied to a dedicated wrapper so it never
-				// collides with the entrance tween on .hero-stats. The trigger
-				// is the section element itself (not a selector string — a
-				// gsap.context scopes selectors to descendants, so a class on
-				// the scope root would never match).
-				if (rootRef.current) {
-					gsap.to(".hero-stats-parallax", {
-						y: -14,
-						ease: "none",
-						scrollTrigger: {
-							trigger: rootRef.current,
-							start: "top top",
-							end: "bottom top",
-							scrub: 1,
-						},
-					});
-				}
 
 				tl.eventCallback("onComplete", () => {
 					// Entrance done — leave zero inline styles behind.
@@ -106,21 +63,13 @@ export function HeroSection() {
 				});
 			});
 		}, rootRef);
-		return () => {
-			// Restore the static numerals — the count-up mutates textContent,
-			// which a context revert won't restore (StrictMode/HMR remount
-			// safety: a mid-count teardown leaves the markup value intact).
-			gsap.utils.toArray<HTMLElement>(".hero-stat-num").forEach((el) => {
-				el.textContent = el.dataset.static || "";
-			});
-			ctx.revert();
-		};
+		return () => ctx.revert();
 	}, []);
 
 	return (
 		<section
 			ref={rootRef}
-			className="hero-root relative isolate overflow-hidden flex min-h-svh flex-col pt-32 pb-24"
+			className="hero-root relative isolate overflow-hidden flex min-h-svh flex-col pt-24 pb-24"
 		>
 			<HeroWireframe />
 
@@ -134,10 +83,10 @@ export function HeroSection() {
 				</p>
 			</div>
 
-			<div className="relative z-10 mx-auto my-auto grid max-w-7xl items-center gap-16 px-6 lg:grid-cols-12 lg:gap-10">
+			<div className="relative z-10 mx-auto my-auto grid max-w-7xl items-center gap-10 px-6 lg:grid-cols-12 lg:gap-10">
 				{/* ---- copy ---- */}
 				<div className="lg:col-span-7">
-					<h1 className="font-display text-[clamp(2.75rem,5vw+1rem,5.25rem)] font-semibold leading-[1.05] tracking-[-0.02em] text-balance">
+					<h1 className="font-display text-[clamp(2.75rem,5vw+1rem,5.25rem)] font-semibold leading-[1.1] tracking-[-0.02em] text-balance">
 						<span className="hero-line-mask block overflow-hidden pb-3">
 							<span className="hero-line block">Your code,</span>
 						</span>
@@ -155,7 +104,7 @@ export function HeroSection() {
 					</p>
 
 					<div className="mt-10 flex flex-wrap items-center gap-8">
-						<Button size="lg" className="hero-cta rounded-none px-8" asChild>
+						<Button size="lg" className="hero-cta rounded-none px-8 active:scale-[0.98] transition-transform duration-100" asChild>
 							<a href="/login">
 								Get started
 								<ArrowRight className="ml-2 h-4 w-4" />
@@ -167,32 +116,6 @@ export function HeroSection() {
 						>
 							See how it works
 						</a>
-					</div>
-
-					<div className="hero-stats-parallax">
-						<div className="hero-stats mt-14 flex flex-wrap gap-x-10 gap-y-4 border-t border-border pt-6">
-							{/* mock: replace with verified product metrics before launch */}
-							{[
-								{ value: 12400, display: "12,400", suffix: "+", label: "PRs reviewed" },
-								{ value: 14, display: "14", suffix: "s", label: "median review" },
-								{ value: 100, display: "100", suffix: "%", label: "fixes sandboxed" },
-							].map((stat) => (
-								<div key={stat.label}>
-									<p className="font-display text-2xl font-semibold tracking-tight tabular-nums">
-										<span
-												className="hero-stat-num"
-												data-count={stat.value}
-												data-static={stat.display}
-											>
-												{stat.display}
-											</span>
-											{stat.suffix}
-										</p>
-										<p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-											{stat.label}
-										</p>
-									</div>							))}
-						</div>
 					</div>
 				</div>
 
