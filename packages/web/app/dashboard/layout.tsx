@@ -32,7 +32,7 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
 						<NotificationBell />
 					</div>
 				</header>
-				<main className="flex-1 overflow-auto p-6 md:p-8">
+				<main id="main" className="flex-1 overflow-auto p-4 sm:p-6 md:p-8">
 					{children}
 				</main>
 			</SidebarInset>
