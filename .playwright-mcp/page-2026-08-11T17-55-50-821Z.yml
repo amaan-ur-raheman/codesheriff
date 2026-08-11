@@ -1,0 +1,37 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e3]:
+    - complementary [ref=f2e4]:
+      - link [ref=f2e5] [cursor=pointer]:
+        - /url: /
+        - img "Code Sheriff Logo" [ref=f2e7]
+        - text: CodeSheriff
+      - generic [ref=f2e8]:
+        - paragraph [ref=f2e9]: Automated code review
+        - heading [level=1] [ref=f2e11]:
+          - text: Your code,
+          - emphasis [ref=f2e12]: under review.
+        - paragraph [ref=f2e13]: "AI reviews every pull request against your team's standards: surfaced as inline comments, verified in a sandbox, shipped without the busywork."
+      - generic [ref=f2e14]:
+        - generic [ref=f2e15]: GitHub-native
+        - generic [ref=f2e16]: Private by default
+        - generic [ref=f2e17]: Sandbox-verified
+    - generic [ref=f2e19]:
+      - paragraph [ref=f2e20]: Sign in
+      - heading "Welcome back" [level=1] [ref=f2e21]
+      - paragraph [ref=f2e22]: Sign in to continue to your dashboard.
+      - button "Continue with GitHub" [ref=f2e23]
+      - generic [ref=f2e29]:
+        - paragraph [ref=f2e30]: New to CodeSheriff? Signing in with GitHub creates your account automatically.
+        - generic [ref=f2e31]:
+          - link "Terms" [ref=f2e32] [cursor=pointer]:
+            - /url: "#"
+          - generic [ref=f2e33]: /
+          - link "Privacy" [ref=f2e34] [cursor=pointer]:
+            - /url: "#"
+          - generic [ref=f2e35]: /
+          - link "Support" [ref=f2e36] [cursor=pointer]:
+            - /url: "#"
+      - link "← Back to home" [ref=f2e38] [cursor=pointer]:
+        - /url: /
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f2e44] [cursor=pointer]

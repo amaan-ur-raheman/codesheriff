@@ -22,7 +22,8 @@ import {
 	getSubscriptionData,
 	syncSubscriptionStatus,
 } from "@/modules/payment/actions";
-import { Spinner } from "@/components/ui/spinner";
+import { CardSkeleton } from "@/components/ui/route-skeletons";
+import { PageHeader } from "@/components/page-header";
 
 const PLAN_FEATURE = {
 	free: [
@@ -77,8 +78,17 @@ export default function SubscriptionPageClient() {
 
 	if (isLoading) {
 		return (
-			<div className="flex items-center  justify-center min-h-[400px]">
-				<Spinner />
+			<div className="space-y-6">
+				<PageHeader
+					kicker="Billing"
+					title="Subscription Plans"
+					description="Choose the right plan for your needs"
+				/>
+				<CardSkeleton bodyLines={4} />
+				<div className="grid gap-6 md:grid-cols-2">
+					<CardSkeleton className="min-h-[320px]" bodyLines={7} />
+					<CardSkeleton className="min-h-[320px]" bodyLines={7} />
+				</div>
 			</div>
 		);
 	}
@@ -86,17 +96,11 @@ export default function SubscriptionPageClient() {
 	if (error) {
 		return (
 			<div className="space-y-6">
-				<div>
-					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
-						Billing
-					</p>
-					<h1 className="font-display text-3xl tracking-tight text-foreground">
-						Subscription Plans
-					</h1>
-					<p className="mt-2 text-sm text-muted-foreground">
-						Failed to load subscription data. Please try again.
-					</p>
-				</div>
+				<PageHeader
+					kicker="Billing"
+					title="Subscription Plans"
+					description="Failed to load subscription data. Please try again."
+				/>
 				<Alert variant={"destructive"}>
 					<AlertTitle>Error</AlertTitle>
 					<AlertDescription>
@@ -118,17 +122,11 @@ export default function SubscriptionPageClient() {
 	if (!data?.user) {
 		return (
 			<div className="space-y-8">
-				<div>
-					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
-						Billing
-					</p>
-					<h1 className="font-display text-3xl tracking-tight text-foreground">
-						Subscription Plans
-					</h1>
-					<p className="mt-2 text-sm text-muted-foreground">
-						Please sign in to view subscription options.
-					</p>
-				</div>
+				<PageHeader
+					kicker="Billing"
+					title="Subscription Plans"
+					description="Please sign in to view subscription options."
+				/>
 			</div>
 		);
 	}
@@ -183,17 +181,11 @@ export default function SubscriptionPageClient() {
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
-				<div>
-					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
-						Billing
-					</p>
-					<h1 className="font-display text-3xl tracking-tight text-foreground">
-						Subscription Plans
-					</h1>
-					<p className="mt-2 text-sm text-muted-foreground">
-						Choose the right plan for your needs
-					</p>
-				</div>
+				<PageHeader
+					kicker="Billing"
+					title="Subscription Plans"
+					description="Choose the right plan for your needs"
+				/>
 
 				<Button
 					variant={"outline"}
@@ -225,7 +217,7 @@ export default function SubscriptionPageClient() {
 			{data.limits && (
 				<Card>
 					<CardHeader>
-						<CardTitle className="font-display text-lg tracking-tight">Current Usage</CardTitle>
+						<CardTitle className="text-base font-semibold">Current Usage</CardTitle>
 						<CardDescription>
 							Your current plan limits and usage
 						</CardDescription>
@@ -298,11 +290,11 @@ export default function SubscriptionPageClient() {
 			{/* Plans */}
 			<div className="grid gap-6 md:grid-cols-2">
 				{/* Free Plan */}
-				<Card className={!isPro ? "ring-2 ring-primary" : ""}>
+				<Card className={!isPro ? "ring-2 ring-brand" : ""}>
 					<CardHeader>
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle className="font-display text-lg tracking-tight">Free Plan</CardTitle>
+								<CardTitle className="text-base font-semibold">Free Plan</CardTitle>
 								<CardDescription>
 									Perfect for getting started
 								</CardDescription>
@@ -349,11 +341,11 @@ export default function SubscriptionPageClient() {
 				</Card>
 
 				{/* Pro Plan */}
-				<Card className={isPro ? "ring-2 ring-primary" : ""}>
+				<Card className={isPro ? "ring-2 ring-brand" : ""}>
 					<CardHeader>
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle className="font-display text-lg tracking-tight">Pro Plan</CardTitle>
+								<CardTitle className="text-base font-semibold">Pro Plan</CardTitle>
 								<CardDescription>
 									For professional developers
 								</CardDescription>
@@ -363,7 +355,7 @@ export default function SubscriptionPageClient() {
 							)}
 						</div>
 						<div className="mt-2">
-							<span className="font-display text-3xl tracking-tight">$29.99</span>
+							<span className="font-display text-3xl tracking-tight">$19</span>
 							<span className="text-muted-foreground">
 								/month
 							</span>

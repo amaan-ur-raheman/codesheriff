@@ -44,7 +44,7 @@ export default function OrgRepositories({
 	);
 	const [searchQuery, setSearchQuery] = useState("");
 
-	const allRepositories = data?.pages.flatMap((page) => page) || [];
+	const allRepositories = data || [];
 
 	const filteredRepositories = allRepositories.filter(
 		(repo: Repository) =>
@@ -72,7 +72,7 @@ export default function OrgRepositories({
 			<CardHeader>
 				<div className="flex items-center justify-between">
 					<div>
-						<CardTitle className="font-display text-lg tracking-tight">Repositories — {orgName}</CardTitle>
+						<CardTitle className="text-base font-semibold">Repositories: {orgName}</CardTitle>
 						<CardDescription>
 							Connect repositories to this organization so review
 							events are delivered to its Slack and Discord

@@ -24,6 +24,8 @@ jobs:
     # The linter is pinned in root devDependencies (bun.lock) so the gate
     # itself cannot drift between runs.
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2

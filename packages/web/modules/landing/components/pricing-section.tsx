@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
-import { gsap, EASE, REVEAL_TRIGGER, DURATION, MOTION_PREFERRED_QUERY, ScrollTrigger } from "../lib/gsap";
+import { gsap, EASE, REVEAL_TRIGGER, DURATION, STAGGER, MOTION_PREFERRED_QUERY, ScrollTrigger } from "../lib/gsap";
 
 const plans = [
 	{
@@ -12,8 +12,8 @@ const plans = [
 		period: "forever",
 		description: "For individual developers getting started.",
 		features: [
-			"3 repositories",
-			"50 reviews / month",
+			"5 repositories",
+			"5 reviews per repository",
 			"Basic AI analysis",
 			"Email notifications",
 			"Community support",
@@ -65,25 +65,42 @@ export function PricingSection() {
 		const ctx = gsap.context(() => {
 			const mm = gsap.matchMedia();
 			mm.add(MOTION_PREFERRED_QUERY, () => {
-				gsap.from(".pricing-head", {
-					opacity: 0,
-					y: 20,
+				const belowFold = (el: Element) =>
+					el.getBoundingClientRect().top > window.innerHeight * 0.95;
+
+				const priceHead = rootRef.current?.querySelector(".pricing-head");
+				if (priceHead && belowFold(priceHead)) {
+					gsap.set(".pricing-head", { opacity: 0, y: 20 });
+				}
+				gsap.to(".pricing-head", {
+					opacity: 1,
+					y: 0,
 					duration: DURATION.section,
 					ease: EASE,
+					clearProps: "opacity,transform",
 					scrollTrigger: { trigger: ".pricing-head", ...REVEAL_TRIGGER },
 				});
-				gsap.utils
-					.toArray<HTMLElement>(".pricing-cell")
-					.forEach((cell) => {
-						gsap.from(cell, {
-							opacity: 0,
-							y: 24,
+				// Batch-reveal the pricing cells: one shared trigger, staggered
+				// onEnter, so the three tiers enter as a register instead of
+				// each managing its own ScrollTrigger. Explicit initial states
+				// (never `from`) per the landing safety rule, cleared on
+				// complete so no inline styles survive.
+				const cells = gsap.utils.toArray<HTMLElement>(".pricing-cell");
+				const hiddenCells = cells.filter(belowFold);
+				if (hiddenCells.length) gsap.set(hiddenCells, { opacity: 0, y: 24 });
+				ScrollTrigger.batch(".pricing-cell", {
+					start: "top 92%",
+					once: true,
+					onEnter: (batch) =>
+						gsap.to(batch, {
+							opacity: 1,
+							y: 0,
 							duration: DURATION.cell,
 							ease: EASE,
-							clearProps: "transform",
-							scrollTrigger: { trigger: cell, ...REVEAL_TRIGGER },
-						});
-					});
+							stagger: STAGGER.heroCta,
+							clearProps: "opacity,transform",
+						}),
+				});
 			});
 		}, rootRef);
 		const raf = requestAnimationFrame(() => ScrollTrigger.refresh());
@@ -94,13 +111,12 @@ export function PricingSection() {
 	}, []);
 
 	return (
-		<section id="pricing" ref={rootRef} className="relative py-28">
+		<section id="pricing" ref={rootRef} className="relative py-20 lg:py-28">
 			<div className="mx-auto max-w-7xl px-6">
 				<div className="pricing-head max-w-2xl">
-					<p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-text">
-						Pricing
-					</p>
-					<h2 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.02em] text-balance sm:text-5xl">
+					{/* hairline-led header: no kicker, a brand hairline carries the mark */}
+					<div className="h-px w-16 bg-brand" />
+					<h2 className="mt-6 font-display text-4xl font-semibold leading-[1.1] tracking-[-0.02em] text-balance sm:text-5xl">
 						Start free. Upgrade when the team grows.
 					</h2>
 					<p className="mt-6 max-w-lg leading-relaxed text-muted-foreground">
@@ -113,7 +129,7 @@ export function PricingSection() {
 						<div
 							key={plan.name}
 							className={`pricing-cell relative p-8 sm:p-10 ${
-								plan.highlight ? "bg-card" : "bg-background"
+								plan.highlight ? "bg-card border-l-2 border-l-brand" : "bg-background"
 							}`}
 						>
 							{plan.highlight && (

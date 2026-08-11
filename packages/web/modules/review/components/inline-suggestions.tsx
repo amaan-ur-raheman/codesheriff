@@ -27,12 +27,15 @@ import {
 	Check,
 	Loader2,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
 	parseSuggestionsFromReview,
+	readStoredSuggestions,
 	type CodeSuggestion,
 	type ReviewSuggestions,
 } from "@/modules/ai/lib/suggestions";
+import type { ReviewWithRepository } from "@/modules/review/types";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import { useQueryClient } from "@tanstack/react-query";
 import { applySuggestion, applySuggestionsBatch } from "@/modules/review/actions";
@@ -43,7 +46,7 @@ import { resolveVerifyStatus } from "@/modules/review/lib/verify-status";
 
 const SEVERITY_CONFIG: Record<
 	CodeSuggestion["severity"],
-	{ label: string; icon: React.ElementType; className: string }
+	{ label: string; icon: LucideIcon; className: string }
 > = {
 	error: {
 		label: "Error",
@@ -89,7 +92,7 @@ function CodeDiff({
 	if (!original && !suggested) return null;
 
 	return (
-		<div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono">
+		<div className="grid grid-cols-1 gap-2 text-xs font-mono">
 			{original && (
 				<div className="border border-destructive/30 bg-destructive/5 p-3 overflow-x-auto">
 					<div className="text-[10px] uppercase tracking-wider text-destructive/70 mb-1.5 font-mono font-medium">
@@ -286,7 +289,7 @@ function SummaryBar({ summary }: { summary: ReviewSuggestions["summary"] }) {
 	if (summary.totalIssues === 0) return null;
 
 	return (
-		<div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+		<div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-muted-foreground">
 			<span className="font-medium">Summary:</span>
 			{summary.errors > 0 && (
 				<span className="flex items-center gap-1 text-destructive">
@@ -312,9 +315,8 @@ function SummaryBar({ summary }: { summary: ReviewSuggestions["summary"] }) {
 }
 
 interface InlineSuggestionsProps {
-	review: any;
+	review: ReviewWithRepository;
 }
-
 export default function InlineSuggestions({
 	review,
 }: InlineSuggestionsProps) {
@@ -325,13 +327,11 @@ export default function InlineSuggestions({
 	let parsedSuggestions: CodeSuggestion[] = [];
 	let summary = { totalIssues: 0, errors: 0, warnings: 0, suggestions: 0 };
 
-	if (review.suggestions && typeof review.suggestions === "object") {
-		const suggestionsData = review.suggestions as any;
-		if (Array.isArray(suggestionsData.suggestions)) {
-			parsedSuggestions = suggestionsData.suggestions;
-		}
-		if (suggestionsData.summary) {
-			summary = suggestionsData.summary;
+	if (review.suggestions) {
+		const stored = readStoredSuggestions(review.suggestions);
+		if (stored) {
+			parsedSuggestions = stored.suggestions;
+			summary = stored.summary;
 		}
 	}
 
@@ -348,9 +348,12 @@ export default function InlineSuggestions({
 
 	const handleApplyCallback = () => {
 		queryClient.invalidateQueries({ queryKey: ["reviews"] });
+		// Keep the review detail page (/dashboard/reviews/[id]) in sync after
+		// a suggestion is applied or batched.
+		queryClient.invalidateQueries({ queryKey: ["review", review.id] });
 	};
 
-	const handleSelectAll = (checked: any) => {
+	const handleSelectAll = (checked: boolean | "indeterminate") => {
 		if (checked) {
 			setSelectedIds(unappliedSuggestions.map((s) => s.id));
 		} else {
@@ -387,11 +390,11 @@ export default function InlineSuggestions({
 
 	return (
 		<div className="space-y-4">
-			<div className="flex items-center justify-between gap-4 flex-wrap bg-muted/40 p-3 rounded-lg border border-border">
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-muted/40 p-3 rounded-lg border border-border">
 				<SummaryBar summary={summary} />
 				
 				{unappliedSuggestions.length > 0 && (
-					<div className="flex items-center gap-3">
+					<div className="flex flex-wrap items-center gap-2 sm:gap-3">
 						<div className="flex items-center gap-2">
 							<Checkbox
 								id={`select-all-${review.id}`}

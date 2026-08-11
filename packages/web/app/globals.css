@@ -101,7 +101,7 @@
 	--brand: #ff6b35;
 	--brand-text: #ff9e6b;
 	--brand-soft: #3a2315;
-	--border: #2e271b;
+	--border: #3a3122;
 	--input: #3a3122;
 	--ring: #ff6b35;
 	--chart-1: #ff6b35;
@@ -219,6 +219,14 @@
 	body {
 		@apply bg-background text-foreground;
 		font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+	p {
+		text-wrap: pretty;
+	}
+	h2, h3 {
+		text-wrap: balance;
 	}
 }
 
@@ -230,6 +238,56 @@
 	to {
 		transform: translateX(-50%);
 	}
+}
+
+/* Editorial animated underline links (Skiper-style link choreography,
+   quiet register). A hairline draws across on hover/focus — the same
+   signal-orange emphasis the plain links got via hover:decoration-brand,
+   now as a motion micro-interaction. The app-wide reduced-motion gate
+   (transition-duration: 0.01ms !important) makes the reveal instant
+   under reduced motion, so no per-rule gate is needed. */
+.link-underline {
+	position: relative;
+	display: inline-block;
+}
+
+.link-underline::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	bottom: -3px;
+	height: 1px;
+	width: 100%;
+	background: var(--color-brand);
+	transform: scaleX(0);
+	transform-origin: right;
+	transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.link-underline:hover::after,
+.link-underline:focus-visible::after {
+	transform: scaleX(1);
+	transform-origin: left;
+}
+
+/* Center-out variant: expands from the middle instead of drawing left→right. */
+.link-underline-center::after {
+	transform-origin: center;
+}
+
+.link-underline-center:hover::after,
+.link-underline-center:focus-visible::after {
+	transform: scaleX(1);
+	transform-origin: center;
+}
+
+/* Pipeline scrubbed progression: while a stage is the current one in the
+   scroll register, its numeral flips to signal orange. The color change
+   rides the existing transition-colors utility on the numeral, and the
+   class is only toggled inside the MOTION_PREFERRED_QUERY gate (the GSAP
+   matchMedia callback), so reduced-motion users never see a tick jump. */
+.pipeline-stage.stage-active .stage-num {
+	color: var(--color-brand);
 }
 
 .marquee-track {
@@ -303,6 +361,37 @@
 	}
 }
 
+/* App-wide reduced-motion policy (see lib/motion.ts): the core Tailwind
+   animation utilities become static under prefers-reduced-motion. This sits
+   outside any cascade layer, so it overrides the layered utilities. */
+@media (prefers-reduced-motion: reduce) {
+	.animate-spin,
+	.animate-pulse,
+	.animate-ping,
+	.animate-bounce {
+		animation: none;
+	}
+	/* tw-animate-css enter/exit on popovers, dialogs, dropdowns, tooltips,
+	   and the sidebar. These are almost always applied through conditional
+	   variants (e.g. data-[state=open]:animate-in) whose compiled selectors
+	   outrank the plain class, so !important is required here. */
+	.animate-in,
+	.animate-out {
+		animation: none !important;
+	}
+	/* CSS transitions (transition-colors/-all/-transform, transition-opacity,
+	   and arbitrary transition-[...] values on inputs, the sidebar, FAQ rows,
+	   etc.) become instant state changes. A universal rule is used because
+	   transition utilities span many class names and state variants — an
+	   enumerated list would drift. !important beats both the layered
+	   utilities and higher-specificity selectors. */
+	*,
+	*::before,
+	*::after {
+		transition-duration: 0.01ms !important;
+	}
+}
+
 /* Shiki custom syntax highlighter overrides for dark mode */
 .dark pre[data-streamdown="code-block-body"] {
 	background-color: var(--shiki-dark-bg) !important;
@@ -330,3 +419,15 @@
 	margin-top: 0.25rem;
 	margin-bottom: 0.25rem;
 }
+
+/* Prevent inline code from overflowing its container on mobile */
+.prose :not(pre) > code {
+	word-break: break-all;
+	white-space: pre-wrap;
+}
+
+/* Feature rows and pipeline stages — GSAP set+to handles initial states at
+   runtime, but only for elements below the fold at init time (belowFold
+   guard in each section). Elements already visible are never hidden, so a
+   late or missed ScrollTrigger can never strand content at opacity:0.
+   clearProps removes inline styles after animation so no residue persists. */

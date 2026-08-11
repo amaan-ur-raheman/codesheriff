@@ -78,7 +78,15 @@ export async function updateUserProfile(data: {
 	}
 }
 
-export async function getConnectedRepositories() {
+/**
+ * Returns one page of the user's connected repositories plus the total
+ * count, so the settings list can render numbered pagination without
+ * loading every row. The total also feeds the "Disconnect All" dialog.
+ */
+export async function getConnectedRepositories(
+	page: number = 1,
+	pageSize: number = 8
+) {
 	try {
 		const session = await auth.api.getSession({
 			headers: await headers(),
@@ -88,26 +96,40 @@ export async function getConnectedRepositories() {
 			throw new Error("Unauthorized");
 		}
 
-		const repositories = await prisma.repository.findMany({
-			where: {
-				userId: session.user.id,
-			},
-			select: {
-				id: true,
-				name: true,
-				fullName: true,
-				url: true,
-				createdAt: true,
-			},
-			orderBy: {
-				createdAt: "desc",
-			},
-		});
+		const where = {
+			userId: session.user.id,
+		};
 
-		return repositories;
+		// Server actions accept arbitrary args — clamp so out-of-range callers
+		// can't produce a negative Prisma skip, a zero take, or a huge query.
+		// The upper bound mirrors the reviews page's cap of 50 rows. The `|| 1`
+		// also coerces NaN (non-numeric hostile input) to a valid value.
+		const safePage = Math.max(1, Math.floor(page) || 1);
+		const safePageSize = Math.min(50, Math.max(1, Math.floor(pageSize) || 1));
+
+		const [repositories, total] = await Promise.all([
+			prisma.repository.findMany({
+				where,
+				select: {
+					id: true,
+					name: true,
+					fullName: true,
+					url: true,
+					createdAt: true,
+				},
+				orderBy: {
+					createdAt: "desc",
+				},
+				skip: (safePage - 1) * safePageSize,
+				take: safePageSize,
+			}),
+			prisma.repository.count({ where }),
+		]);
+
+		return { repositories, total };
 	} catch (error) {
 		console.error("Error fetching connected repositories:", error);
-		return [];
+		return { repositories: [], total: 0 };
 	}
 }
 

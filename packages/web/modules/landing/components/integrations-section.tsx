@@ -22,12 +22,19 @@ export function IntegrationsSection() {
 		const ctx = gsap.context(() => {
 			const mm = gsap.matchMedia();
 			mm.add(MOTION_PREFERRED_QUERY, () => {
-				gsap.from(".integrations-band", {
-					opacity: 0,
-					y: 16,
+				const belowFold = (el: Element) =>
+					el.getBoundingClientRect().top > window.innerHeight * 0.95;
+
+				const band = rootRef.current?.querySelector(".integrations-band");
+				if (band && belowFold(band)) {
+					gsap.set(".integrations-band", { opacity: 0, y: 16 });
+				}
+				gsap.to(".integrations-band", {
+					opacity: 1,
+					y: 0,
 					duration: DURATION.section,
 					ease: EASE,
-					clearProps: "transform",
+					clearProps: "opacity,transform",
 					scrollTrigger: { trigger: ".integrations-band", ...REVEAL_TRIGGER },
 				});
 			});

@@ -11,11 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { Users, Crown, Shield, User } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Spinner } from "@/components/ui/spinner";
+import { CardSkeleton } from "@/components/ui/route-skeletons";
 import { getOrganizations } from "@/modules/organization/actions";
 import CreateOrgDialog from "@/modules/organization/components/create-org-dialog";
 import OrgMembers from "@/modules/organization/components/org-members";
 import OrgRepositories from "@/modules/organization/components/org-repositories";
+import { PageHeader } from "@/components/page-header";
 
 export default function OrganizationPageClient() {
 	const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
@@ -55,8 +56,24 @@ export default function OrganizationPageClient() {
 
 	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center min-h-[400px]">
-				<Spinner />
+			<div className="space-y-6">
+				<div className="flex items-center justify-between">
+					<PageHeader
+						kicker="Teams"
+						title="Organizations"
+						description="Manage your teams and collaborate with members"
+					/>
+					<CreateOrgDialog />
+				</div>
+				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+					{Array.from({ length: 3 }).map((_, i) => (
+						<CardSkeleton
+							key={i}
+							className="min-h-[180px]"
+							bodyLines={3}
+						/>
+					))}
+				</div>
 			</div>
 		);
 	}
@@ -64,14 +81,11 @@ export default function OrganizationPageClient() {
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="text-3xl font-bold tracking-tight">
-						Organizations
-					</h1>
-					<p className="text-muted-foreground">
-						Manage your teams and collaborate with members
-					</p>
-				</div>
+				<PageHeader
+					kicker="Teams"
+					title="Organizations"
+					description="Manage your teams and collaborate with members"
+				/>
 				<CreateOrgDialog />
 			</div>
 

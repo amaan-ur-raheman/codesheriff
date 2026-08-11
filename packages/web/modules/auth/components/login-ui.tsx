@@ -4,10 +4,13 @@ import { signIn } from "@/lib/auth-client";
 import Image from "next/image";
 import { GithubIcon, ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 
 const LoginUI = () => {
 	const [isLoading, setIsLoading] = useState(false);
+	// Respect the app-wide reduced-motion policy (see lib/motion.ts): the
+	// entrance runs as an instant reveal instead of a slide/fade.
+	const prefersReducedMotion = useReducedMotion();
 
 	const handleGithubLogin = async () => {
 		setIsLoading(true);
@@ -23,7 +26,7 @@ const LoginUI = () => {
 	};
 
 	return (
-		<div className="min-h-screen bg-background grid lg:grid-cols-2">
+		<div className="min-h-dvh bg-background grid lg:grid-cols-2">
 			{/* Editorial panel — the print specimen half */}
 			<aside className="hidden lg:flex flex-col justify-between border-r border-border p-12 xl:p-16">
 				<a
@@ -46,7 +49,7 @@ const LoginUI = () => {
 						<em className="italic text-brand-text">under review.</em>
 					</h1>
 					<p className="mt-8 text-base leading-relaxed text-muted-foreground max-w-sm">
-						AI reviews every pull request against your team&apos;s standards — surfaced as inline comments, verified in a sandbox, shipped without the busywork.
+						AI reviews every pull request against your team&apos;s standards: surfaced as inline comments, verified in a sandbox, shipped without the busywork.
 					</p>
 				</div>
 
@@ -62,7 +65,11 @@ const LoginUI = () => {
 				<motion.div
 					initial={{ opacity: 0, y: 16 }}
 					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+					transition={
+						prefersReducedMotion
+							? { duration: 0 }
+							: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
+					}
 					className="w-full max-w-sm"
 				>
 					<a
@@ -88,7 +95,7 @@ const LoginUI = () => {
 					<button
 						onClick={handleGithubLogin}
 						disabled={isLoading}
-						className="group mt-10 w-full h-12 bg-foreground text-background font-medium hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-3"
+						className="group mt-10 w-full h-12 bg-foreground text-background font-medium hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-3 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
 					>
 						{isLoading ? (
 							<div className="w-5 h-5 border-2 border-background/30 border-t-background rounded-full animate-spin" />
@@ -97,7 +104,7 @@ const LoginUI = () => {
 						)}
 						{isLoading ? "Signing in..." : "Continue with GitHub"}
 						{!isLoading && (
-							<ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+							<ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-[transform,opacity] duration-200" />
 						)}
 					</button>
 
@@ -105,25 +112,13 @@ const LoginUI = () => {
 						<p className="text-center text-sm text-muted-foreground mb-6">
 							New to CodeSheriff? Signing in with GitHub creates your account automatically.
 						</p>
-						<div className="flex items-center justify-center gap-5 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-							<a href="#" className="hover:text-foreground transition-colors">
-								Terms
-							</a>
-							<span className="text-border">/</span>
-							<a href="#" className="hover:text-foreground transition-colors">
-								Privacy
-							</a>
-							<span className="text-border">/</span>
-							<a href="#" className="hover:text-foreground transition-colors">
-								Support
-							</a>
-						</div>
+
 					</div>
 
 					<div className="mt-10 text-center">
 						<a
 							href="/"
-							className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors"
+							className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 py-2 px-3 -mx-3 rounded hover:bg-muted transition-colors"
 						>
 							← Back to home
 						</a>

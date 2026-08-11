@@ -82,7 +82,7 @@ describe("Search Actions", () => {
 				type: "review",
 				title: "PR #4: Add tests",
 				description: "completed",
-				url: "/dashboard/reviews?id=rev-1",
+				url: "/dashboard/reviews/rev-1",
 				icon: "PullRequest",
 			});
 

@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import IntegrationsPageClient from "@/modules/integrations/components/integrations-page-client";
 import prisma from "@/lib/db";
 import { requireAuth } from "@/modules/auth/utils/auth-utils";
+
+export const metadata: Metadata = {
+	title: "Integrations",
+	description: "Connect external services to receive notifications about your code reviews.",
+};
 
 export default async function IntegrationsPage() {
 	const session = await requireAuth();

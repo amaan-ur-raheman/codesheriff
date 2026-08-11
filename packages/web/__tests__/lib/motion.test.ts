@@ -14,6 +14,7 @@ describe("shared motion language", () => {
 
 	it("locks the duration register", () => {
 		expect(DURATION).toEqual({
+			micro: 0.22,
 			fast: 0.5,
 			base: 0.6,
 			cell: 0.65,
@@ -40,9 +41,10 @@ describe("shared motion language", () => {
 
 	it("reveals play once and can never leave content hidden", () => {
 		expect(REVEAL_TRIGGER).toEqual({
-			start: "top 85%",
+			start: "top 92%",
 			once: true,
 			toggleActions: "play none none none",
+			invalidateOnRefresh: true,
 		});
 	});
 });

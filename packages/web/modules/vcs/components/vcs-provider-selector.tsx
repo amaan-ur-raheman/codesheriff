@@ -71,7 +71,7 @@ export default function VCSProviderSelector({
             type="button"
             onClick={() => handleSelect(provider.id)}
             className={cn(
-              "relative flex flex-col items-start gap-3 border-2 p-6 text-left transition-all",
+              "relative flex flex-col items-start gap-3 border-2 p-6 text-left transition-[border-color,background-color,box-shadow,transform]",
               "bg-card shadow-sm",
               isSelected
                 ? "border-primary ring-2 ring-primary/20"

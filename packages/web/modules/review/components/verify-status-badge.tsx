@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Check, AlertCircle, AlertTriangle } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
 	VERIFY_STATUS_META,
@@ -10,7 +11,7 @@ import {
 } from "@/modules/review/lib/verify-status";
 import type { CodeSuggestion } from "@/modules/ai/lib/suggestions";
 
-const ICONS: Record<VerifyStatusView, React.ElementType> = {
+const ICONS: Record<VerifyStatusView, LucideIcon> = {
 	verified: Check,
 	failed: AlertCircle,
 	sandbox_error: AlertTriangle,

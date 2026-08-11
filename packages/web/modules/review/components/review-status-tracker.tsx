@@ -61,7 +61,7 @@ export function ReviewStatusTracker() {
 							<div className="flex-1 min-w-0 text-sm leading-snug">
 								<span className="font-semibold text-foreground">CodeSheriff</span>{" "}
 								<span className="text-muted-foreground text-[13px]">
-									Waiting for status to be reported — Review in progress
+									Waiting for status to be reported. Review in progress.
 								</span>
 							</div>
 						</div>
@@ -77,7 +77,7 @@ export function ReviewStatusTracker() {
 							<div className="flex-1 min-w-0 text-sm leading-tight mt-0.5">
 								<div className="font-semibold text-foreground">Merge conflict check</div>
 								<div className="text-xs text-muted-foreground mt-0.5">
-									Status not yet available — coming soon.
+									Status not yet available. Coming soon.
 								</div>
 							</div>
 						</div>

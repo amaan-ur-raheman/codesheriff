@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { getOctokit } from "@/modules/github/lib/github";
 
-export async function getReviews() {
+export async function getReviews(page = 1, pageSize = 10) {
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
@@ -14,8 +14,50 @@ export async function getReviews() {
 		throw new Error("Unauthorized");
 	}
 
-	const reviews = await prisma.review.findMany({
+	const where = {
+		repository: {
+			userId: session.user.id,
+		},
+	};
+
+	// Server actions accept arbitrary args — clamp so out-of-range callers
+	// can't produce a negative Prisma skip, a zero take, or a huge query.
+	// The upper bound preserves the old hard cap of 50 rows. The `|| 1` also
+	// coerces NaN (non-numeric hostile input) to a valid value.
+	const safePage = Math.max(1, Math.floor(page) || 1);
+	const safePageSize = Math.min(50, Math.max(1, Math.floor(pageSize) || 1));
+	const skip = (safePage - 1) * safePageSize;
+
+	const [reviews, total] = await Promise.all([
+		prisma.review.findMany({
+			where,
+			include: {
+				repository: true,
+			},
+			orderBy: {
+				createdAt: "desc",
+			},
+			skip,
+			take: safePageSize,
+		}),
+		prisma.review.count({ where }),
+	]);
+
+	return { reviews, total };
+}
+
+export async function getReview(reviewId: string) {
+	const session = await auth.api.getSession({
+		headers: await headers(),
+	});
+
+	if (!session) {
+		throw new Error("Unauthorized");
+	}
+
+	const review = await prisma.review.findFirst({
 		where: {
+			id: reviewId,
 			repository: {
 				userId: session.user.id,
 			},
@@ -23,13 +65,9 @@ export async function getReviews() {
 		include: {
 			repository: true,
 		},
-		orderBy: {
-			createdAt: "desc",
-		},
-		take: 50,
 	});
 
-	return reviews;
+	return review;
 }
 
 export async function applySuggestion(reviewId: string, suggestionId: string) {

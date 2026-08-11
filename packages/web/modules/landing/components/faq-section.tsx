@@ -33,7 +33,7 @@ const faqs = [
 	{
 		question: "What does it cost, and can we cancel?",
 		answer:
-			"Free forever for 3 repositories and 50 reviews a month. Pro is $19 per month, cancel anytime. No credit card to start.",
+			"Free forever for 5 repositories and 5 reviews per repository. Pro is $19 per month, cancel anytime. No credit card to start.",
 	},
 ];
 
@@ -45,11 +45,19 @@ export function FAQSection() {
 		const ctx = gsap.context(() => {
 			const mm = gsap.matchMedia();
 			mm.add(MOTION_PREFERRED_QUERY, () => {
-				gsap.from(".faq-head", {
-					opacity: 0,
-					y: 20,
+				const belowFold = (el: Element) =>
+					el.getBoundingClientRect().top > window.innerHeight * 0.95;
+
+				const faqHead = rootRef.current?.querySelector(".faq-head");
+				if (faqHead && belowFold(faqHead)) {
+					gsap.set(".faq-head", { opacity: 0, y: 20 });
+				}
+				gsap.to(".faq-head", {
+					opacity: 1,
+					y: 0,
 					duration: DURATION.section,
 					ease: EASE,
+					clearProps: "opacity,transform",
 					scrollTrigger: { trigger: ".faq-head", ...REVEAL_TRIGGER },
 				});
 			});
@@ -62,13 +70,12 @@ export function FAQSection() {
 	}, []);
 
 	return (
-		<section ref={rootRef} className="border-t border-border py-28">
+		<section ref={rootRef} className="border-t border-border py-20 lg:py-28">
 			<div className="mx-auto max-w-4xl px-6">
 				<div className="faq-head max-w-2xl">
-					<p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-text">
-						FAQ
-					</p>
-					<h2 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.02em] text-balance sm:text-5xl">
+					{/* hairline-led header: no kicker, a brand hairline carries the mark */}
+					<div className="h-px w-16 bg-brand" />
+					<h2 className="mt-6 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.02em] text-balance sm:text-5xl">
 						Questions, answered
 					</h2>
 				</div>
@@ -83,7 +90,7 @@ export function FAQSection() {
 									aria-expanded={isOpen}
 									aria-controls={`faq-panel-${i}`}
 									onClick={() => setOpen(isOpen ? -1 : i)}
-									className="flex w-full items-center justify-between gap-6 py-7 text-left"
+									className="flex w-full cursor-pointer items-center justify-between gap-6 py-7 text-left"
 								>
 									<span className="flex items-baseline gap-5">
 										<span className="font-mono text-xs text-brand-text">
@@ -106,8 +113,11 @@ export function FAQSection() {
 										isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr] invisible"
 									}`}
 								>
-									<div className="overflow-hidden">
-										<p className="max-w-2xl pb-7 pl-[2.9rem] leading-relaxed text-muted-foreground">
+									<div
+										className="overflow-hidden"
+										aria-hidden={!isOpen}
+									>
+										<p className="max-w-2xl pb-7 pl-6 sm:pl-[2.9rem] leading-relaxed text-muted-foreground">
 											{faq.answer}
 										</p>
 									</div>

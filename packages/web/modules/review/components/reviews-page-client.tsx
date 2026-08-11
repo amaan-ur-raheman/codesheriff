@@ -1,6 +1,6 @@
 /**
  * Reviews page client component displaying AI-generated code reviews
- * 
+ *
  * Features:
  * - List of all code reviews with status indicators
  * - Review content display with markdown formatting
@@ -8,208 +8,69 @@
  * - Status badges (pending, completed, failed)
  * - Inline code suggestions with collapsible cards
  * - Responsive card layout
- * 
+ *
  * @component
  */
 "use client";
 
-import { useState } from "react";
 import {
 	Card,
 	CardContent,
-	CardDescription,
 	CardHeader,
-	CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-	ExternalLink,
-	Clock,
-	CheckCircle2,
-	XCircle,
-	Sparkles,
-	ChevronDown,
-	ChevronRight,
-} from "lucide-react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { formatDistanceToNow } from "date-fns";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
+import { Pagination } from "@/components/ui/pagination";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { getReviews } from "@/modules/review/actions";
-import InlineSuggestions from "@/modules/review/components/inline-suggestions";
-import ReviewFeedback from "@/modules/review/components/review-feedback";
-import ReviewFlowCanvas from "@/modules/review/components/review-flow-canvas";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageResponse } from "@/components/ai-elements/message";
-import { useTheme } from "next-themes";
+import { ReviewCard } from "@/modules/review/components/review-card";
+import { PageHeader } from "@/components/page-header";
 
-function ReviewCard({ review }: { review: any }) {
-	const { resolvedTheme } = useTheme();
-	const [showSuggestions, setShowSuggestions] = useState(false);
-	const [showFullReview, setShowFullReview] = useState(false);
-
-	return (
-		<Card className="hover:border-brand/50 transition-colors">
-			<CardHeader>
-				<div className="flex items-center justify-between">
-					<div className="space-y-2 flex-1">
-						<div className="flex items-center gap-2">
-							<CardTitle className="text-lg">
-								{review.prTitle}
-							</CardTitle>
-							{review.status === "completed" && (
-								<Badge variant="default" className="gap-1">
-									<CheckCircle2 className="h-3 w-3" />
-									Completed
-								</Badge>
-							)}
-							{review.status === "failed" && (
-								<Badge variant="destructive" className="gap-1">
-									<XCircle className="h-3 w-3" />
-									Failed
-								</Badge>
-							)}
-							{review.status === "pending" && (
-								<Badge variant="secondary" className="gap-1">
-									<Clock className="h-3 w-3" />
-									Pending
-								</Badge>
-							)}
-						</div>
-						<CardDescription>
-							{review.repository.fullName} ⋅ PR #{review.prNumber}
-						</CardDescription>
-					</div>
-
-					<Button variant="ghost" size="icon" asChild>
-						<a
-							href={review.prUrl}
-							target="_blank"
-							rel="noopener noreferrer"
-						>
-							<ExternalLink className="h-4 w-4" />
-						</a>
-					</Button>
-				</div>
-			</CardHeader>
-			<CardContent>
-				<div className="space-y-4">
-					<div className="text-sm text-muted-foreground">
-						{formatDistanceToNow(new Date(review.createdAt), {
-							addSuffix: true,
-						})}
-					</div>					<div className="bg-card border border-border p-6">
-					<div className="prose prose-sm dark:prose-invert max-w-none">
-						<MessageResponse
-							key={showFullReview ? "full" : "short"}
-							mode="static"
-							mermaid={{
-								config: {
-									theme: resolvedTheme === "dark" ? "dark" : "default",
-								},
-							}}
-						>
-							{showFullReview
-								? (review.review ?? "")
-								: (review.review?.substring(0, 300) ?? "No review content") + (review.review && review.review.length > 300 ? "..." : "")}
-						</MessageResponse>
-					</div>
-					{review.review && review.review.length > 300 && (
-						<button
-							onClick={() => setShowFullReview(!showFullReview)}
-							className="mt-4 text-xs text-primary hover:underline block"
-						>
-							{showFullReview ? "Show less" : "Show full review"}
-						</button>
-					)}
-				</div>
-
-					{review.status === "completed" && (
-						<Collapsible
-							open={showSuggestions}
-							onOpenChange={setShowSuggestions}
-						>
-							<CollapsibleTrigger asChild>
-								<Button variant="outline" className="w-full gap-2">
-									<Sparkles className="h-4 w-4" />
-									Show Inline Suggestions
-									{showSuggestions ? (
-										<ChevronDown className="h-4 w-4 ml-auto" />
-									) : (
-										<ChevronRight className="h-4 w-4 ml-auto" />
-									)}
-								</Button>
-							</CollapsibleTrigger>
-							<CollapsibleContent>
-								<div className="mt-3 p-4 rounded-lg border bg-card">
-									<Tabs defaultValue="list" className="w-full space-y-4">
-										<TabsList className="grid w-full grid-cols-2">
-											<TabsTrigger value="list">List View</TabsTrigger>
-											<TabsTrigger value="visual">Visual Graph View</TabsTrigger>
-										</TabsList>
-										<TabsContent value="list" className="space-y-4">
-											<InlineSuggestions review={review} />
-										</TabsContent>
-										<TabsContent value="visual" className="space-y-4">
-											<ReviewFlowCanvas review={review} />
-										</TabsContent>
-									</Tabs>
-								</div>
-							</CollapsibleContent>
-						</Collapsible>
-					)}
-
-					<ReviewFeedback reviewId={review.id} />
-					<Button variant="outline" asChild>
-						<a
-							href={review.prUrl}
-							target="_blank"
-							rel="noopener noreferrer"
-						>
-							View Full Review on GitHub
-						</a>
-					</Button>
-				</div>
-			</CardContent>
-		</Card>
-	);
-}
+const REVIEWS_PER_PAGE = 10;
 
 export default function ReviewsPageClient() {
-	const { data: reviews, isLoading } = useQuery({
-		queryKey: ["reviews"],
+	const [page, setPage] = useState(1);
+
+	const { data, isLoading, isError, isFetching, refetch } = useQuery({
+		queryKey: ["reviews", page],
 		queryFn: async () => {
-			return await getReviews();
+			return await getReviews(page, REVIEWS_PER_PAGE);
 		},
+		// Keep the previous page visible while the next one loads — no flash.
+		placeholderData: (prev) => prev,
 		refetchInterval: (query) => {
-			const hasActive = query.state.data?.some(
-				(r: any) => r.status === "pending" || r.status === "in_progress"
+			const hasActive = query.state.data?.reviews.some(
+				(r) => r.status === "pending" || r.status === "in_progress"
 			);
 			return hasActive ? 3000 : false;
 		},
 	});
 
+	const reviews = data?.reviews ?? [];
+	const total = data?.total ?? 0;
+	const totalPages = Math.max(1, Math.ceil(total / REVIEWS_PER_PAGE));
+
+	// If the review count shrank (e.g. a repo disconnect in Settings deleted
+	// reviews), pull back to a page that exists instead of stranding the user
+	// on an empty one.
+	useEffect(() => {
+		if (page > totalPages) {
+			setPage(totalPages);
+		}
+	}, [page, totalPages]);
+
 	if (isLoading) {
 		return (
 			<div className="space-y-4">
-				<div>
-					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
-						Code reviews
-					</p>
-					<h1 className="font-display text-3xl tracking-tight text-foreground">
-						Review History
-					</h1>
-					<p className="mt-2 text-sm text-muted-foreground">
-						View all AI code reviews
-					</p>
-				</div>
+				<PageHeader
+					kicker="Code reviews"
+					title="Review History"
+					description="View all AI code reviews"
+				/>
 				<div className="grid gap-4">
 					<Card>
 						<CardHeader className="space-y-2">
@@ -236,21 +97,32 @@ export default function ReviewsPageClient() {
 		);
 	}
 
+	if (isError) {
+		return (
+			<div className="space-y-4">
+				<PageHeader
+					kicker="Code reviews"
+					title="Review History"
+					description="View all AI code reviews"
+				/>
+				<ErrorState
+					title="Couldn't load reviews"
+					description="Your reviews couldn't be fetched right now."
+					onRetry={() => refetch()}
+				/>
+			</div>
+		);
+	}
+
 	return (
 		<div className="space-y-4">
-			<div>
-				<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
-					Code reviews
-				</p>
-				<h1 className="font-display text-3xl tracking-tight text-foreground">
-					Review History
-				</h1>
-				<p className="mt-2 text-sm text-muted-foreground">
-					View all AI code reviews
-				</p>
-			</div>
+			<PageHeader
+				kicker="Code reviews"
+				title="Review History"
+				description="View all AI code reviews"
+			/>
 
-			{reviews?.length === 0 ? (
+			{total === 0 ? (
 				<Card>
 					<CardContent>
 						<EmptyState
@@ -269,10 +141,19 @@ export default function ReviewsPageClient() {
 				</Card>
 			) : (
 				<div className="grid gap-4">
-					{reviews?.map((review: any) => (
+					{reviews.map((review) => (
 						<ReviewCard key={review.id} review={review} />
 					))}
 				</div>
+			)}
+
+			{totalPages > 1 && (
+				<Pagination
+					page={page}
+					totalPages={totalPages}
+					onPageChange={setPage}
+					isFetching={isFetching}
+				/>
 			)}
 		</div>
 	);

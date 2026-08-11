@@ -73,7 +73,7 @@ function CircularScore({ score }: { score: number }) {
 					strokeDashoffset={offset}
 					strokeLinecap="round"
 					fill="none"
-					className="transition-all duration-1000"
+					className="transition-[stroke-dashoffset] duration-1000"
 				/>
 			</svg>
 			<span

@@ -1,23 +1,14 @@
 import Image from "next/image";
-import { Github, Twitter } from "lucide-react";
+
 
 const footerLinks = {
 	Product: [
 		{ label: "Features", href: "#features" },
 		{ label: "Pricing", href: "#pricing" },
-		{ label: "Documentation", href: "#" },
-		{ label: "Changelog", href: "#" },
-	],
-	Company: [
-		{ label: "About", href: "#" },
-		{ label: "Blog", href: "#" },
-		{ label: "Careers", href: "#" },
-		{ label: "Contact", href: "#" },
 	],
 	Legal: [
-		{ label: "Privacy Policy", href: "#" },
-		{ label: "Terms of Service", href: "#" },
-		{ label: "Security", href: "#" },
+		{ label: "Privacy Policy", href: "/privacy" },
+		{ label: "Terms of Service", href: "/terms" },
 	],
 };
 
@@ -52,22 +43,7 @@ export function Footer() {
 							reach production and verifies every fix before it
 							reaches your branch.
 						</p>
-						<div className="mt-6 flex gap-3">
-							<a
-								href="#"
-								className="flex h-9 w-9 items-center justify-center border border-border text-muted-foreground transition-colors duration-200 hover:border-brand hover:text-brand"
-								aria-label="GitHub"
-							>
-								<Github className="h-4 w-4" />
-							</a>
-							<a
-								href="#"
-								className="flex h-9 w-9 items-center justify-center border border-border text-muted-foreground transition-colors duration-200 hover:border-brand hover:text-brand"
-								aria-label="Twitter"
-							>
-								<Twitter className="h-4 w-4" />
-							</a>
-						</div>
+
 					</div>
 
 					{Object.entries(footerLinks).map(([category, links]) => (
@@ -80,11 +56,9 @@ export function Footer() {
 									<li key={link.label}>
 										<a
 											href={link.href}
-											className="text-sm text-muted-foreground underline-offset-[6px] decoration-border transition-colors duration-200 hover:text-foreground hover:decoration-brand"
+											className="link-underline text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
 										>
-											<span className="underline decoration-inherit">
-												{link.label}
-											</span>
+											{link.label}
 										</a>
 									</li>
 								))}
@@ -97,9 +71,6 @@ export function Footer() {
 					<p className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
 						© {new Date().getFullYear()} CodeSheriff. All rights
 						reserved.
-					</p>
-					<p className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-						Set in Fraunces &amp; Geist
 					</p>
 				</div>
 			</div>

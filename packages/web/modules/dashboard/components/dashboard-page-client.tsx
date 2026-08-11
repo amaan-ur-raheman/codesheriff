@@ -33,7 +33,11 @@ import {
 	GitPullRequest,
 	MessageSquare,
 	GitBranch,
+	ArrowUpRight,
+	Blocks,
+	Users,
 } from "lucide-react";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -45,6 +49,39 @@ import {
 } from "@/modules/dashboard/actions";
 import ContributionGraph from "@/modules/dashboard/components/contribution-graph";
 import { HealthScoreCard } from "@/modules/dashboard/components/health-score-card";
+import { PageHeader } from "@/components/page-header";
+import {
+	CHART_TOOLTIP_STYLE,
+	CHART_AXIS_TICK,
+	CHART_GRID_STROKE,
+} from "@/lib/charts";
+
+const QUICK_ACTIONS = [
+	{
+		href: "/dashboard/reviews",
+		label: "Review pull requests",
+		description: "See the latest AI reviews",
+		icon: GitPullRequest,
+	},
+	{
+		href: "/dashboard/repository",
+		label: "Configure repositories",
+		description: "Review settings and custom rules",
+		icon: GitBranch,
+	},
+	{
+		href: "/dashboard/integrations",
+		label: "Connect integrations",
+		description: "Slack and Discord notifications",
+		icon: Blocks,
+	},
+	{
+		href: "/dashboard/organizations",
+		label: "Manage your team",
+		description: "Invite members and assign roles",
+		icon: Users,
+	},
+];
 
 const DashboardPageClient = () => {
 	const {
@@ -70,19 +107,13 @@ const DashboardPageClient = () => {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
-					Overview
-				</p>
-				<h1 className="font-display text-3xl tracking-tight text-foreground">
-					Dashboard
-				</h1>
-				<p className="mt-2 text-sm text-muted-foreground">
-					Your coding activity and AI reviews at a glance
-				</p>
-			</div>
+			<PageHeader
+				kicker="Overview"
+				title="Dashboard"
+				description="Your coding activity and AI reviews at a glance"
+			/>
 
-			<div className="grid gap-4 md:grid-cols-4">
+			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">
@@ -91,7 +122,7 @@ const DashboardPageClient = () => {
 						<GitBranch className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="font-display text-3xl tracking-tight">
+						<div className="font-mono text-3xl tracking-tight tabular-nums">
 							{isLoading ? (
 								<Skeleton className="h-8 w-14" />
 							) : isStatsError ? (
@@ -113,7 +144,7 @@ const DashboardPageClient = () => {
 						<GitCommit className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="font-display text-3xl tracking-tight">
+						<div className="font-mono text-3xl tracking-tight tabular-nums">
 							{isLoading ? (
 								<Skeleton className="h-8 w-20" />
 							) : isStatsError ? (
@@ -135,7 +166,7 @@ const DashboardPageClient = () => {
 						<GitPullRequest className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="font-display text-3xl tracking-tight">
+						<div className="font-mono text-3xl tracking-tight tabular-nums">
 							{isLoading ? (
 								<Skeleton className="h-8 w-14" />
 							) : isStatsError ? (
@@ -157,7 +188,7 @@ const DashboardPageClient = () => {
 						<MessageSquare className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="font-display text-3xl tracking-tight">
+						<div className="font-mono text-3xl tracking-tight tabular-nums">
 							{isLoading ? (
 								<Skeleton className="h-8 w-14" />
 							) : isStatsError ? (
@@ -177,19 +208,44 @@ const DashboardPageClient = () => {
 				<HealthScoreCard />
 				<Card className="flex flex-col">
 					<CardHeader>
-						<CardTitle className="font-display text-lg tracking-tight">Quick Actions</CardTitle>
-						<CardDescription>Manage your repositories</CardDescription>
+						<CardTitle className="text-sm font-semibold tracking-wide uppercase font-mono">Quick Actions</CardTitle>
+						<CardDescription>
+							Jump straight to the work that matters
+						</CardDescription>
 					</CardHeader>
-					<CardContent className="flex-1 flex items-center">
-						<p className="text-sm text-muted-foreground">
-							Visit the Repositories page to configure review settings and custom rules.
-						</p>
+					<CardContent className="flex-1 p-0">
+						<div className="divide-y divide-border">
+							{QUICK_ACTIONS.map((action) => {
+								const Icon = action.icon;
+								return (
+									<Link
+										key={action.href}
+										href={action.href}
+										className="group flex items-center gap-3 px-6 py-3 transition-colors hover:bg-muted/40"
+									>
+										<span className="flex size-8 shrink-0 items-center justify-center border border-border text-muted-foreground transition-colors group-hover:border-brand/40 group-hover:text-brand">
+											<Icon className="h-4 w-4" />
+										</span>
+										<span className="flex-1 min-w-0">
+											<span className="block text-sm font-medium">
+												{action.label}
+											</span>
+											<span className="block text-xs text-muted-foreground">
+												{action.description}
+											</span>
+										</span>
+										<ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground opacity-0 -translate-x-1 transition-[transform,opacity,color] group-hover:translate-x-0 group-hover:opacity-100 group-hover:text-brand" />
+									</Link>
+								);
+							})}
+						</div>
 					</CardContent>
 				</Card>
 			</div>
 
 			<Card>
-				<CardHeader>						<CardTitle className="font-display text-lg tracking-tight">Contribution Activity</CardTitle>
+				<CardHeader>
+					<CardTitle className="text-base font-semibold">Contribution Activity</CardTitle>
 					<CardDescription>
 						Visualizing your coding frequency over the last year
 					</CardDescription>
@@ -202,7 +258,7 @@ const DashboardPageClient = () => {
 			<div className="grid gap-4 md:grid-cols-2">
 				<Card className="col-span-2">
 					<CardHeader>
-						<CardTitle className="font-display text-lg tracking-tight">Activity Overview</CardTitle>
+						<CardTitle className="text-base font-semibold">Activity Overview</CardTitle>
 						<CardDescription>
 							Monthly breakdown of commits, PRs and reviews (last
 							6 months)
@@ -210,7 +266,7 @@ const DashboardPageClient = () => {
 					</CardHeader>
 					<CardContent>
 						{isLoadingActivity ? (
-							<div className="flex h-80 w-full items-end gap-2 px-2 pb-1">
+							<div className="flex h-60 sm:h-80 w-full items-end gap-2 px-2 pb-1">
 								{Array.from({ length: 12 }).map((_, i) => (
 									<Skeleton
 										key={i}
@@ -222,7 +278,7 @@ const DashboardPageClient = () => {
 								))}
 							</div>
 						) : isActivityError ? (
-							<div className="h-80 w-full">
+							<div className="h-60 sm:h-80 w-full">
 								<ErrorState
 									title="Couldn't load activity"
 									description="Your contribution activity couldn't be fetched right now."
@@ -231,7 +287,7 @@ const DashboardPageClient = () => {
 								/>
 							</div>
 						) : !monthlyActivity || monthlyActivity.length === 0 ? (
-							<div className="h-80 w-full">
+							<div className="h-60 sm:h-80 w-full">
 								<EmptyState
 									kicker="Activity"
 									title="No activity yet"
@@ -240,26 +296,25 @@ const DashboardPageClient = () => {
 								/>
 							</div>
 						) : (
-							<div className="h-80 w-full">
+							<div className="h-60 sm:h-80 w-full">
 								<ResponsiveContainer
 									width={"100%"}
 									height={"100%"}
 								>
 									<BarChart data={monthlyActivity || []}>
-										<CartesianGrid strokeDasharray="3 3" />
-										<XAxis dataKey="name" />
-										<YAxis />
-										<Tooltip
-											contentStyle={{
-												backgroundColor:
-													"var(--background)",
-												borderColor: "var(--border)",
-											}}
-											itemStyle={{
-												color: "var(--foreground)",
+										<CartesianGrid
+											strokeDasharray="3 3"
+											stroke={CHART_GRID_STROKE}
+										/>
+										<XAxis dataKey="name" tick={CHART_AXIS_TICK} stroke={CHART_GRID_STROKE} />
+										<YAxis tick={CHART_AXIS_TICK} stroke={CHART_GRID_STROKE} />
+										<Tooltip {...CHART_TOOLTIP_STYLE} />
+										<Legend
+											wrapperStyle={{
+												fontSize: 12,
+												color: "var(--muted-foreground)",
 											}}
 										/>
-										<Legend />
 									<Bar
 										dataKey="commits"
 										name="Commits"

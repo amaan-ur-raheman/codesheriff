@@ -8,6 +8,7 @@ vi.mock("@/lib/db", () => ({
 			findUnique: vi.fn(),
 			findFirst: vi.fn(),
 			update: vi.fn(),
+			count: vi.fn(),
 		},
 	},
 }));
@@ -61,6 +62,7 @@ const mockPrisma = prisma as unknown as {
 		findUnique: ReturnType<typeof vi.fn>;
 		findFirst: ReturnType<typeof vi.fn>;
 		update: ReturnType<typeof vi.fn>;
+		count: ReturnType<typeof vi.fn>;
 	};
 };
 
@@ -70,18 +72,69 @@ describe("Review Server Actions", () => {
 	});
 
 	describe("getReviews", () => {
-		it("retrieves reviews for the logged-in user", async () => {
+		it("retrieves the first page of reviews with a total count", async () => {
 			const mockReviews = [
 				{ id: "rev-1", prTitle: "Add landing page" },
 				{ id: "rev-2", prTitle: "Fix database schema" },
 			];
 			mockPrisma.review.findMany.mockResolvedValue(mockReviews);
+			mockPrisma.review.count.mockResolvedValue(2);
 
-			const result = await getReviews();
-			expect(result).toEqual(mockReviews);
+			const result = await getReviews(1, 10);
+			expect(result).toEqual({ reviews: mockReviews, total: 2 });
 			expect(mockPrisma.review.findMany).toHaveBeenCalledWith(
 				expect.objectContaining({
 					where: { repository: { userId: "user-123" } },
+					orderBy: { createdAt: "desc" },
+					skip: 0,
+					take: 10,
+				})
+			);
+			expect(mockPrisma.review.count).toHaveBeenCalledWith(
+				expect.objectContaining({
+					where: { repository: { userId: "user-123" } },
+				})
+			);
+		});
+
+		it("offsets the query for later pages", async () => {
+			mockPrisma.review.findMany.mockResolvedValue([]);
+			mockPrisma.review.count.mockResolvedValue(25);
+
+			const result = await getReviews(3, 10);
+			expect(result).toEqual({ reviews: [], total: 25 });
+			expect(mockPrisma.review.findMany).toHaveBeenCalledWith(
+				expect.objectContaining({
+					skip: 20,
+					take: 10,
+				})
+			);
+		});
+
+		it("caps pageSize at 50 so callers cannot request unbounded queries", async () => {
+			mockPrisma.review.findMany.mockResolvedValue([]);
+			mockPrisma.review.count.mockResolvedValue(0);
+
+			const result = await getReviews(1, 100000);
+			expect(result).toEqual({ reviews: [], total: 0 });
+			expect(mockPrisma.review.findMany).toHaveBeenCalledWith(
+				expect.objectContaining({
+					skip: 0,
+					take: 50,
+				})
+			);
+		});
+
+		it("clamps page and pageSize to valid ranges for hostile inputs", async () => {
+			mockPrisma.review.findMany.mockResolvedValue([]);
+			mockPrisma.review.count.mockResolvedValue(0);
+
+			const result = await getReviews(0, 0);
+			expect(result).toEqual({ reviews: [], total: 0 });
+			expect(mockPrisma.review.findMany).toHaveBeenCalledWith(
+				expect.objectContaining({
+					skip: 0,
+					take: 1,
 				})
 			);
 		});

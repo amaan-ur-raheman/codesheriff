@@ -63,7 +63,7 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
 			type: "review" as const,
 			title: `PR #${review.prNumber}: ${review.prTitle}`,
 			description: review.status,
-			url: `/dashboard/reviews?id=${review.id}`,
+			url: `/dashboard/reviews/${review.id}`,
 			icon: "PullRequest",
 		})),
 	];

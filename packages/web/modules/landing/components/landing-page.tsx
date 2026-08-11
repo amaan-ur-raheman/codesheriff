@@ -1,6 +1,7 @@
 "use client";
 
 import { Navbar } from "./navbar";
+import { ScrollProgress } from "./scroll-progress";
 import { HeroSection } from "./hero-section";
 import { FeaturesSection } from "./features-section";
 import { IntegrationsSection } from "./integrations-section";
@@ -13,16 +14,19 @@ import { Footer } from "./footer";
 
 export function LandingPage() {
 	return (
-		<div className="min-h-screen bg-background text-foreground">
+		<div className="min-h-dvh bg-background text-foreground">
+			<ScrollProgress />
 			<Navbar />
-			<HeroSection />
-			<FeaturesSection />
-			<IntegrationsSection />
-			<PipelineSection />
-			<TestimonialsSection />
-			<PricingSection />
-			<FAQSection />
-			<CTASection />
+			<main id="main">
+				<HeroSection />
+				<FeaturesSection />
+				<IntegrationsSection />
+				<PipelineSection />
+				<TestimonialsSection />
+				<PricingSection />
+				<FAQSection />
+				<CTASection />
+			</main>
 			<Footer />
 		</div>
 	);

@@ -15,6 +15,25 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Send, Loader2 } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
+import type { IntegrationConfig } from "@/lib/generated/prisma/client";
+
+/**
+ * Read the webhook URL out of a stored integration config (a Prisma Json
+ * column) without casting through `any`.
+ */
+function getWebhookUrl(config: IntegrationConfig): string {
+	const value = config.config;
+	if (
+		value &&
+		typeof value === "object" &&
+		"webhookUrl" in value &&
+		typeof (value as { webhookUrl?: unknown }).webhookUrl === "string"
+	) {
+		return (value as { webhookUrl: string }).webhookUrl;
+	}
+	return "";
+}
 
 interface IntegrationProps {
 	orgId: string;
@@ -103,13 +122,11 @@ export default function IntegrationsPageClient({ orgId }: IntegrationProps) {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h2 className="text-2xl font-bold tracking-tight">Integrations</h2>
-				<p className="text-muted-foreground">
-					Connect external services to receive notifications about your code
-					reviews.
-				</p>
-			</div>
+			<PageHeader
+				kicker="Connections"
+				title="Integrations"
+				description="Connect external services to receive notifications about your code reviews."
+			/>
 
 			<div className="grid gap-4 md:grid-cols-2">
 				{INTEGRATIONS.map((integration) => {
@@ -162,10 +179,10 @@ export default function IntegrationsPageClient({ orgId }: IntegrationProps) {
 												size="sm"
 												disabled={testing === integration.type}
 												onClick={() =>
-													handleTest(
-														integration.type,
-														(config.config as any).webhookUrl
-													)
+												handleTest(
+													integration.type,
+													getWebhookUrl(config)
+												)
 												}
 											>
 												{testing === integration.type ? (

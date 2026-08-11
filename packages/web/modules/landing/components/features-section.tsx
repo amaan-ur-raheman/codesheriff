@@ -34,11 +34,23 @@ export function FeaturesSection() {
 		const ctx = gsap.context(() => {
 			const mm = gsap.matchMedia();
 			mm.add(MOTION_PREFERRED_QUERY, () => {
-				gsap.from(".features-head", {
-					opacity: 0,
-					y: 20,
+				// Only hide elements that are below the viewport at init time.
+				// Elements already visible (e.g. on a short page or after a
+				// fast scroll) are left as-is so they can never be stranded
+				// invisible if their ScrollTrigger fires late or misses.
+				const belowFold = (el: Element) =>
+					el.getBoundingClientRect().top > window.innerHeight * 0.95;
+
+				const featHead = rootRef.current?.querySelector(".features-head");
+				if (featHead && belowFold(featHead)) {
+					gsap.set(".features-head", { opacity: 0, y: 20 });
+				}
+				gsap.to(".features-head", {
+					opacity: 1,
+					y: 0,
 					duration: DURATION.section,
 					ease: EASE,
+					clearProps: "opacity,transform",
 					scrollTrigger: { trigger: ".features-head", ...REVEAL_TRIGGER },
 				});
 				// Per-row triggers so a stale position can never leave a row
@@ -46,17 +58,43 @@ export function FeaturesSection() {
 				gsap.utils
 					.toArray<HTMLElement>(".feature-row")
 					.forEach((row) => {
-						gsap.from(row, {
-							opacity: 0,
-							y: 18,
+						if (belowFold(row)) gsap.set(row, { opacity: 0, y: 18 });
+						gsap.to(row, {
+							opacity: 1,
+							y: 0,
 							duration: DURATION.base,
 							ease: EASE,
-							// Drop GSAP's inline transform on complete so the
-							// hover shift keeps working.
-							clearProps: "transform",
+							clearProps: "opacity,transform",
 							scrollTrigger: { trigger: row, ...REVEAL_TRIGGER },
 						});
 					});
+
+				// Scrubbed ledger counter: the sticky '01 / 04' reflects the
+				// feature currently passing the ledger, updating as the
+				// section scrolls. Gated with everything else, so
+				// reduced-motion users simply keep the static '01' label.
+				const rows = gsap.utils.toArray<HTMLElement>(".feature-row");
+				const counter = rootRef.current?.querySelector<HTMLElement>(
+					".features-counter-cur",
+				);
+				if (rows.length && counter) {
+					ScrollTrigger.create({
+						trigger: ".feature-ledger",
+						start: "top 70%",
+						end: "bottom 45%",
+						scrub: true,
+						onUpdate: (self) => {
+							const idx = Math.min(
+								rows.length - 1,
+								Math.floor(self.progress * rows.length),
+							);
+							const label = String(idx + 1).padStart(2, "0");
+							if (counter.textContent !== label) {
+								counter.textContent = label;
+							}
+						},
+					});
+				}
 			});
 		}, rootRef);
 		const raf = requestAnimationFrame(() => ScrollTrigger.refresh());
@@ -67,9 +105,9 @@ export function FeaturesSection() {
 	}, []);
 
 	return (
-		<section id="features" ref={rootRef} className="relative py-28">
+		<section id="features" ref={rootRef} className="relative py-20 lg:py-28">
 			<div className="mx-auto max-w-7xl px-6">
-				<div className="grid gap-14 lg:grid-cols-12">
+				<div className="grid gap-8 lg:gap-14 lg:grid-cols-12">
 					{/* ---- sticky head ---- */}
 					<div className="features-head lg:col-span-5">
 						<div className="lg:sticky lg:top-28">
@@ -86,27 +124,35 @@ export function FeaturesSection() {
 							</p>
 							<a
 								href="#how-it-works"
-								className="mt-8 inline-block text-sm font-medium text-foreground underline decoration-border underline-offset-[6px] transition-colors duration-200 hover:decoration-brand"
+								className="link-underline mt-8 inline-block text-sm font-medium text-foreground transition-colors duration-200"
 							>
 								See the pipeline below
 							</a>
+							<p
+								aria-hidden="true"
+								className="features-counter hidden lg:block mt-8 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground"
+							>
+								<span className="features-counter-cur">01</span>
+								<span className="mx-1 text-border">/</span>
+								04
+							</p>
 						</div>
 					</div>
 
 					{/* ---- ledger ---- */}
-					<div className="lg:col-span-6 lg:col-start-7">
+					<div className="feature-ledger lg:col-span-6 lg:col-start-7">
 						<div className="border-t border-border">
 							{features.map((feature) => (
 								<div
 									key={feature.title}
-									className="feature-row group border-b border-border py-10 transition-colors duration-300"
+									className="feature-row group border-b border-border py-6 lg:py-10 transition-colors duration-300"
 								>
 									<div className="flex items-start justify-between gap-6">
-										<h3 className="font-display text-[1.75rem] font-medium leading-tight tracking-[-0.01em] text-foreground transition-colors duration-300 group-hover:text-brand">
+										<h3 className="font-display text-2xl font-medium leading-tight tracking-[-0.01em] text-foreground transition-colors duration-300 group-hover:text-brand">
 											{feature.title}
 										</h3>
 										<ArrowUpRight
-											className="mt-2 h-5 w-5 shrink-0 text-muted-foreground opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100"
+											className="mt-2 h-5 w-5 shrink-0 text-muted-foreground opacity-0 transition-[transform,opacity] duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100"
 											strokeWidth={1.5}
 										/>
 									</div>

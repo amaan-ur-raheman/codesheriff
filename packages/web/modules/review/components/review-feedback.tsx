@@ -73,13 +73,13 @@ export default function ReviewFeedback({ reviewId }: ReviewFeedbackProps) {
 
 	return (
 		<TooltipProvider delayDuration={200}>
-			<div className="flex items-center gap-3 pt-2 border-t">
+			<div className="flex flex-wrap items-center gap-3 pt-2 border-t">
 				<div className="flex items-center gap-1">
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<Button
 								variant={userRating === 5 ? "default" : "ghost"}
-								size="icon-sm"
+								size="icon"
 								onClick={() => handleRating(5)}
 								disabled={mutation.isPending}
 							>
@@ -93,7 +93,7 @@ export default function ReviewFeedback({ reviewId }: ReviewFeedbackProps) {
 						<TooltipTrigger asChild>
 							<Button
 								variant={userRating === 1 ? "destructive" : "ghost"}
-								size="icon-sm"
+								size="icon"
 								onClick={() => handleRating(1)}
 								disabled={mutation.isPending}
 							>
@@ -105,7 +105,7 @@ export default function ReviewFeedback({ reviewId }: ReviewFeedbackProps) {
 				</div>
 
 				{totalFeedback > 0 && (
-					<div className="flex items-center gap-2 text-xs text-muted-foreground">
+					<div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground">
 						<span>
 							{averageRating.toFixed(1)} avg
 						</span>
@@ -130,7 +130,7 @@ export default function ReviewFeedback({ reviewId }: ReviewFeedbackProps) {
 						rows={2}
 						className="text-sm"
 					/>
-					<div className="flex gap-2">
+					<div className="flex flex-wrap gap-2">
 						<Button
 							size="sm"
 							onClick={handleSubmitComment}

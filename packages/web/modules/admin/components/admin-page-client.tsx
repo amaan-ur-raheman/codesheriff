@@ -47,10 +47,16 @@ import {
 	ResponsiveContainer,
 } from "recharts";
 import { useSession } from "@/lib/auth-client";
-
-export default function AdminPageClient() {
+import { PageHeader } from "@/components/page-header";
+import {
+	CHART_TOOLTIP_STYLE,
+	CHART_AXIS_TICK,
+	CHART_GRID_STROKE,
+} from "@/lib/charts";	export default function AdminPageClient() {
 	const { data: session } = useSession();
-	const user = session?.user as any;
+	// The better-auth client session type omits the custom `role` column even
+	// though the server includes it in the session payload — narrow precisely.
+	const user = session?.user as unknown as { role: string } | undefined;
 
 	if (user?.role !== "admin") {
 		return (
@@ -129,17 +135,11 @@ function AdminDashboard() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
-					System
-				</p>
-				<h1 className="font-display text-3xl tracking-tight text-foreground">
-					Admin Dashboard
-				</h1>
-				<p className="mt-2 text-sm text-muted-foreground">
-					System overview and management.
-				</p>
-			</div>
+			<PageHeader
+				kicker="System"
+				title="Admin Dashboard"
+				description="System overview and management."
+			/>
 
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<StatCard
@@ -175,7 +175,7 @@ function AdminDashboard() {
 			{/* Verify + indexing pipeline metrics (Spec 0006 AC-4) */}
 			<Card>
 				<CardHeader>
-					<CardTitle className="font-display text-lg tracking-tight">Pipeline Metrics</CardTitle>
+					<CardTitle className="text-base font-semibold">Pipeline Metrics</CardTitle>
 					<CardDescription>
 						Sandbox verify and incremental indexing health over the
 						last 7 days
@@ -263,7 +263,7 @@ function AdminDashboard() {
 
 			<Card>
 				<CardHeader>
-					<CardTitle className="font-display text-lg tracking-tight">Reviews Over Time</CardTitle>
+					<CardTitle className="text-base font-semibold">Reviews Over Time</CardTitle>
 					<CardDescription>
 						Daily review count for the last 30 days
 					</CardDescription>
@@ -293,18 +293,20 @@ function AdminDashboard() {
 							<LineChart data={reviewsOverTime}>
 								<CartesianGrid
 									strokeDasharray="3 3"
-									className="stroke-muted"
+									stroke={CHART_GRID_STROKE}
 								/>
 								<XAxis
 									dataKey="date"
-									tick={{ fontSize: 12 }}
+									tick={CHART_AXIS_TICK}
+									stroke={CHART_GRID_STROKE}
 									tickFormatter={(value) => {
 										const date = new Date(value);
 										return `${date.getMonth() + 1}/${date.getDate()}`;
 									}}
 								/>
-								<YAxis tick={{ fontSize: 12 }} />
+								<YAxis tick={CHART_AXIS_TICK} stroke={CHART_GRID_STROKE} />
 								<Tooltip
+									{...CHART_TOOLTIP_STYLE}
 									labelFormatter={(value) =>
 										new Date(value).toLocaleDateString()
 									}
@@ -325,7 +327,7 @@ function AdminDashboard() {
 			<div className="grid gap-6 lg:grid-cols-2">
 				<Card>
 					<CardHeader>
-						<CardTitle className="font-display text-lg tracking-tight">Recent Users</CardTitle>
+						<CardTitle className="text-base font-semibold">Recent Users</CardTitle>
 						<CardDescription>Latest registered users</CardDescription>
 					</CardHeader>
 					<CardContent>
@@ -398,7 +400,7 @@ function AdminDashboard() {
 
 				<Card>
 					<CardHeader>
-						<CardTitle className="font-display text-lg tracking-tight">Recent Reviews</CardTitle>
+						<CardTitle className="text-base font-semibold">Recent Reviews</CardTitle>
 						<CardDescription>Latest code reviews</CardDescription>
 					</CardHeader>
 					<CardContent>
