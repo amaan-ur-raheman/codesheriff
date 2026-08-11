@@ -175,7 +175,7 @@ function AdminDashboard() {
 			{/* Verify + indexing pipeline metrics (Spec 0006 AC-4) */}
 			<Card>
 				<CardHeader>
-					<CardTitle className="font-display text-lg tracking-tight">Pipeline Metrics</CardTitle>
+					<CardTitle className="text-base font-semibold">Pipeline Metrics</CardTitle>
 					<CardDescription>
 						Sandbox verify and incremental indexing health over the
 						last 7 days
@@ -263,7 +263,7 @@ function AdminDashboard() {
 
 			<Card>
 				<CardHeader>
-					<CardTitle className="font-display text-lg tracking-tight">Reviews Over Time</CardTitle>
+					<CardTitle className="text-base font-semibold">Reviews Over Time</CardTitle>
 					<CardDescription>
 						Daily review count for the last 30 days
 					</CardDescription>
@@ -327,7 +327,7 @@ function AdminDashboard() {
 			<div className="grid gap-6 lg:grid-cols-2">
 				<Card>
 					<CardHeader>
-						<CardTitle className="font-display text-lg tracking-tight">Recent Users</CardTitle>
+						<CardTitle className="text-base font-semibold">Recent Users</CardTitle>
 						<CardDescription>Latest registered users</CardDescription>
 					</CardHeader>
 					<CardContent>
@@ -400,7 +400,7 @@ function AdminDashboard() {
 
 				<Card>
 					<CardHeader>
-						<CardTitle className="font-display text-lg tracking-tight">Recent Reviews</CardTitle>
+						<CardTitle className="text-base font-semibold">Recent Reviews</CardTitle>
 						<CardDescription>Latest code reviews</CardDescription>
 					</CardHeader>
 					<CardContent>

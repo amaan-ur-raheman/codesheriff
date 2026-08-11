@@ -40,7 +40,7 @@ export function EmailNotifications() {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle className="font-display text-lg tracking-tight">Email Notifications</CardTitle>
+				<CardTitle className="text-base font-semibold">Email Notifications</CardTitle>
 				<CardDescription>
 					Control which emails you receive from Code Sheriff.
 				</CardDescription>

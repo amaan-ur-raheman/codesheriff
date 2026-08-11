@@ -61,7 +61,7 @@ export default function DeviceVerifyClient() {
 				</CardHeader>
 				<CardContent className="pb-10">
 					{status === "success" ? (
-						<div className="text-center py-6 space-y-4">
+						<div role="status" className="text-center py-6 space-y-4">
 							<div className="mx-auto w-14 h-14 bg-brand-soft flex items-center justify-center text-brand-text">
 								<CheckCircle2 className="w-8 h-8" />
 							</div>
@@ -80,9 +80,13 @@ export default function DeviceVerifyClient() {
 						</div>
 					) : (
 						<form onSubmit={handleSubmit} className="space-y-4">
-							<div className="space-y-2">
-								<Input
-									placeholder="ABCD-EFGH"
+						<div className="space-y-2">
+							<label htmlFor="device-code" className="sr-only">
+								Authorization code
+							</label>
+							<Input
+								id="device-code"
+								placeholder="ABCD-EFGH"
 									value={code}
 									onChange={(e) => setCode(e.target.value)}
 									disabled={status === "loading"}
@@ -93,7 +97,7 @@ export default function DeviceVerifyClient() {
 							</div>
 
 							{status === "error" && (
-								<div className="flex items-center gap-2 text-sm text-destructive bg-destructive/5 border border-destructive/30 p-3">
+								<div role="alert" className="flex items-center gap-2 text-sm text-destructive bg-destructive/5 border border-destructive/30 p-3">
 									<AlertCircle className="w-4 h-4 shrink-0" />
 									<span>{errorMsg}</span>
 								</div>

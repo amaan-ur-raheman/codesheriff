@@ -112,25 +112,13 @@ const LoginUI = () => {
 						<p className="text-center text-sm text-muted-foreground mb-6">
 							New to CodeSheriff? Signing in with GitHub creates your account automatically.
 						</p>
-						<div className="flex items-center justify-center gap-5 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-							<a href="#" className="hover:text-foreground transition-colors">
-								Terms
-							</a>
-							<span className="text-border">/</span>
-							<a href="#" className="hover:text-foreground transition-colors">
-								Privacy
-							</a>
-							<span className="text-border">/</span>
-							<a href="#" className="hover:text-foreground transition-colors">
-								Support
-							</a>
-						</div>
+
 					</div>
 
 					<div className="mt-10 text-center">
 						<a
 							href="/"
-							className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors"
+							className="font-mono text-xs text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 py-2 px-3 -mx-3 rounded hover:bg-muted transition-colors"
 						>
 							← Back to home
 						</a>

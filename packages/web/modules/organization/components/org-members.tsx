@@ -190,7 +190,7 @@ export default function OrgMembers({
 			<CardHeader>
 				<div className="flex items-center justify-between">
 					<div>
-						<CardTitle className="font-display text-lg tracking-tight">Members: {orgName}</CardTitle>
+						<CardTitle className="text-base font-semibold">Members: {orgName}</CardTitle>
 						<CardDescription>
 							Manage organization members and their roles
 						</CardDescription>

@@ -4,7 +4,7 @@ import { useEffect, useMemo } from "react";
 import { Handle, Position, useNodesState, useEdgesState } from "@xyflow/react";
 import { Canvas } from "@/components/ai-elements/canvas";
 import { Badge } from "@/components/ui/badge";
-import { parseSuggestionsFromReview } from "@/modules/ai/lib/suggestions";
+import { parseSuggestionsFromReview, readStoredSuggestions } from "@/modules/ai/lib/suggestions";
 import { resolveVerifyStatus } from "@/modules/review/lib/verify-status";
 import { FileCode2, Check, AlertCircle, AlertTriangle } from "lucide-react";
 
@@ -85,11 +85,17 @@ interface ReviewFlowCanvasProps {
 		prTitle: string;
 		prNumber: number;
 		review: string;
+		suggestions?: unknown;
 	};
 }
 
 export default function ReviewFlowCanvas({ review }: ReviewFlowCanvasProps) {
-	const parsed = useMemo(() => parseSuggestionsFromReview(review.review ?? ""), [review.review]);
+	const parsed = useMemo(
+		() =>
+			readStoredSuggestions(review.suggestions) ??
+			parseSuggestionsFromReview(review.review ?? ""),
+		[review.suggestions, review.review],
+	);
 
 	const [nodes, setNodes, onNodesChange] = useNodesState<any>([]);
 	const [edges, setEdges, onEdgesChange] = useEdgesState<any>([]);
@@ -193,7 +199,7 @@ export default function ReviewFlowCanvas({ review }: ReviewFlowCanvasProps) {
 	}
 
 	return (
-		<div className="h-[450px] w-full border border-border overflow-hidden bg-muted/5 relative">
+		<div className="h-[300px] sm:h-[450px] w-full border border-border overflow-auto bg-muted/5 relative">
 			<Canvas
 				nodes={nodes}
 				edges={edges}

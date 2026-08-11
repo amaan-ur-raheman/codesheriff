@@ -158,7 +158,7 @@ export const AppSidebar = () => {
 									asChild
 									tooltip={item.title}
 									isActive={isActive(item.url)}
-									className={`h-10 px-4 transition-colors duration-150 ${
+									className={`h-11 px-4 transition-colors duration-150 ${
 										isActive(item.url)
 											? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
 											: "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"

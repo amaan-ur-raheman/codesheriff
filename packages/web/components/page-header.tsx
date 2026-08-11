@@ -48,7 +48,7 @@ export function PageHeader({
 			>
 				{kicker}
 			</p>
-			<h1 className="font-display text-3xl tracking-tight text-foreground">
+			<h1 className="font-display text-2xl sm:text-3xl tracking-tight text-foreground">
 				{title}
 			</h1>
 			{description && (

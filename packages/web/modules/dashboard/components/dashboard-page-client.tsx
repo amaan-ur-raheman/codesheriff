@@ -113,7 +113,7 @@ const DashboardPageClient = () => {
 				description="Your coding activity and AI reviews at a glance"
 			/>
 
-			<div className="grid gap-4 md:grid-cols-4">
+			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">
@@ -122,7 +122,7 @@ const DashboardPageClient = () => {
 						<GitBranch className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="font-display text-3xl tracking-tight">
+						<div className="font-mono text-3xl tracking-tight tabular-nums">
 							{isLoading ? (
 								<Skeleton className="h-8 w-14" />
 							) : isStatsError ? (
@@ -144,7 +144,7 @@ const DashboardPageClient = () => {
 						<GitCommit className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="font-display text-3xl tracking-tight">
+						<div className="font-mono text-3xl tracking-tight tabular-nums">
 							{isLoading ? (
 								<Skeleton className="h-8 w-20" />
 							) : isStatsError ? (
@@ -166,7 +166,7 @@ const DashboardPageClient = () => {
 						<GitPullRequest className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="font-display text-3xl tracking-tight">
+						<div className="font-mono text-3xl tracking-tight tabular-nums">
 							{isLoading ? (
 								<Skeleton className="h-8 w-14" />
 							) : isStatsError ? (
@@ -188,7 +188,7 @@ const DashboardPageClient = () => {
 						<MessageSquare className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="font-display text-3xl tracking-tight">
+						<div className="font-mono text-3xl tracking-tight tabular-nums">
 							{isLoading ? (
 								<Skeleton className="h-8 w-14" />
 							) : isStatsError ? (
@@ -208,41 +208,44 @@ const DashboardPageClient = () => {
 				<HealthScoreCard />
 				<Card className="flex flex-col">
 					<CardHeader>
-						<CardTitle className="font-display text-lg tracking-tight">Quick Actions</CardTitle>
+						<CardTitle className="text-sm font-semibold tracking-wide uppercase font-mono">Quick Actions</CardTitle>
 						<CardDescription>
 							Jump straight to the work that matters
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="flex-1 flex flex-col justify-center">
-						{QUICK_ACTIONS.map((action) => {
-							const Icon = action.icon;
-							return (
-								<Link
-									key={action.href}
-									href={action.href}
-									className="group flex items-center gap-3 border-t border-border py-3 -mx-6 px-6 transition-colors first:border-t-0 hover:bg-muted/40"
-								>
-									<span className="flex size-8 shrink-0 items-center justify-center border border-border text-muted-foreground transition-colors group-hover:border-brand/40 group-hover:text-brand">
-										<Icon className="h-4 w-4" />
-									</span>
-									<span className="flex-1 min-w-0">
-										<span className="block text-sm font-medium">
-											{action.label}
+					<CardContent className="flex-1 p-0">
+						<div className="divide-y divide-border">
+							{QUICK_ACTIONS.map((action) => {
+								const Icon = action.icon;
+								return (
+									<Link
+										key={action.href}
+										href={action.href}
+										className="group flex items-center gap-3 px-6 py-3 transition-colors hover:bg-muted/40"
+									>
+										<span className="flex size-8 shrink-0 items-center justify-center border border-border text-muted-foreground transition-colors group-hover:border-brand/40 group-hover:text-brand">
+											<Icon className="h-4 w-4" />
 										</span>
-										<span className="block text-xs text-muted-foreground">
-											{action.description}
+										<span className="flex-1 min-w-0">
+											<span className="block text-sm font-medium">
+												{action.label}
+											</span>
+											<span className="block text-xs text-muted-foreground">
+												{action.description}
+											</span>
 										</span>
-									</span>
-									<ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground opacity-0 -translate-x-1 transition-[transform,opacity,color] group-hover:translate-x-0 group-hover:opacity-100 group-hover:text-brand" />
-								</Link>
-							);
-						})}
+										<ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground opacity-0 -translate-x-1 transition-[transform,opacity,color] group-hover:translate-x-0 group-hover:opacity-100 group-hover:text-brand" />
+									</Link>
+								);
+							})}
+						</div>
 					</CardContent>
 				</Card>
 			</div>
 
 			<Card>
-				<CardHeader>						<CardTitle className="font-display text-lg tracking-tight">Contribution Activity</CardTitle>
+				<CardHeader>
+					<CardTitle className="text-base font-semibold">Contribution Activity</CardTitle>
 					<CardDescription>
 						Visualizing your coding frequency over the last year
 					</CardDescription>
@@ -255,7 +258,7 @@ const DashboardPageClient = () => {
 			<div className="grid gap-4 md:grid-cols-2">
 				<Card className="col-span-2">
 					<CardHeader>
-						<CardTitle className="font-display text-lg tracking-tight">Activity Overview</CardTitle>
+						<CardTitle className="text-base font-semibold">Activity Overview</CardTitle>
 						<CardDescription>
 							Monthly breakdown of commits, PRs and reviews (last
 							6 months)
@@ -263,7 +266,7 @@ const DashboardPageClient = () => {
 					</CardHeader>
 					<CardContent>
 						{isLoadingActivity ? (
-							<div className="flex h-80 w-full items-end gap-2 px-2 pb-1">
+							<div className="flex h-60 sm:h-80 w-full items-end gap-2 px-2 pb-1">
 								{Array.from({ length: 12 }).map((_, i) => (
 									<Skeleton
 										key={i}
@@ -275,7 +278,7 @@ const DashboardPageClient = () => {
 								))}
 							</div>
 						) : isActivityError ? (
-							<div className="h-80 w-full">
+							<div className="h-60 sm:h-80 w-full">
 								<ErrorState
 									title="Couldn't load activity"
 									description="Your contribution activity couldn't be fetched right now."
@@ -284,7 +287,7 @@ const DashboardPageClient = () => {
 								/>
 							</div>
 						) : !monthlyActivity || monthlyActivity.length === 0 ? (
-							<div className="h-80 w-full">
+							<div className="h-60 sm:h-80 w-full">
 								<EmptyState
 									kicker="Activity"
 									title="No activity yet"
@@ -293,7 +296,7 @@ const DashboardPageClient = () => {
 								/>
 							</div>
 						) : (
-							<div className="h-80 w-full">
+							<div className="h-60 sm:h-80 w-full">
 								<ResponsiveContainer
 									width={"100%"}
 									height={"100%"}

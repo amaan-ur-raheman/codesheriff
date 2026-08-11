@@ -53,39 +53,39 @@ export function ReviewCard({
 	const [showFullReview, setShowFullReview] = useState(false);
 
 	return (
-		<Card className="hover:border-brand/50 transition-colors">
+		<Card className="hover:border-brand/50 transition-colors overflow-hidden">
 			<CardHeader>
-				<div className="flex items-center justify-between">
-					<div className="space-y-2 flex-1">
-						<div className="flex items-center gap-2">
-							<CardTitle className="text-lg">
+				<div className="flex flex-col gap-3">
+					<div className="space-y-2 flex-1 min-w-0">
+						<div className="flex flex-wrap items-center gap-2">
+							<CardTitle className="text-lg min-w-0 truncate text-balance">
 								{review.prTitle}
 							</CardTitle>
 							{review.status === "completed" && (
-								<Badge variant="default" className="gap-1">
+								<Badge variant="default" className="gap-1 shrink-0">
 									<CheckCircle2 className="h-3 w-3" />
 									Completed
 								</Badge>
 							)}
 							{review.status === "failed" && (
-								<Badge variant="destructive" className="gap-1">
+								<Badge variant="destructive" className="gap-1 shrink-0">
 									<XCircle className="h-3 w-3" />
 									Failed
 								</Badge>
 							)}
 							{review.status === "pending" && (
-								<Badge variant="secondary" className="gap-1">
+								<Badge variant="secondary" className="gap-1 shrink-0">
 									<Clock className="h-3 w-3" />
 									Pending
 								</Badge>
 							)}
 						</div>
-						<CardDescription>
+						<CardDescription className="truncate">
 							{review.repository.fullName} ⋅ PR #{review.prNumber}
 						</CardDescription>
 					</div>
 
-					<Button variant="ghost" size="icon" asChild>
+					<Button variant="ghost" size="icon" asChild className="self-end shrink-0">
 						<a
 							href={review.prUrl}
 							target="_blank"
@@ -103,8 +103,8 @@ export function ReviewCard({
 							addSuffix: true,
 						})}
 					</div>
-					<div className="bg-card border border-border p-6">
-						<div className="prose prose-sm dark:prose-invert max-w-none">
+					<div className="bg-card border border-border p-4 sm:p-6 overflow-x-auto">
+						<div className="prose prose-sm dark:prose-invert max-w-none overflow-hidden break-words min-w-0">
 							<MessageResponse
 								key={showFullReview ? "full" : "short"}
 								mode="static"
@@ -146,7 +146,7 @@ export function ReviewCard({
 								</Button>
 							</CollapsibleTrigger>
 							<CollapsibleContent>
-								<div className="mt-3 p-4 rounded-lg border bg-card">
+								<div className="mt-3 p-3 sm:p-4 rounded-lg border bg-card">
 									<Tabs defaultValue="list" className="w-full space-y-4">
 										<TabsList className="grid w-full grid-cols-2">
 											<TabsTrigger value="list">List View</TabsTrigger>
@@ -165,15 +165,6 @@ export function ReviewCard({
 					)}
 
 					<ReviewFeedback reviewId={review.id} />
-					<Button variant="outline" asChild>
-						<a
-							href={review.prUrl}
-							target="_blank"
-							rel="noopener noreferrer"
-						>
-							View Full Review on GitHub
-						</a>
-					</Button>
 				</div>
 			</CardContent>
 		</Card>

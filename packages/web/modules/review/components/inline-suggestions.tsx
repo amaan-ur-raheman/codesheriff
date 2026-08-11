@@ -92,7 +92,7 @@ function CodeDiff({
 	if (!original && !suggested) return null;
 
 	return (
-		<div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono">
+		<div className="grid grid-cols-1 gap-2 text-xs font-mono">
 			{original && (
 				<div className="border border-destructive/30 bg-destructive/5 p-3 overflow-x-auto">
 					<div className="text-[10px] uppercase tracking-wider text-destructive/70 mb-1.5 font-mono font-medium">
@@ -289,7 +289,7 @@ function SummaryBar({ summary }: { summary: ReviewSuggestions["summary"] }) {
 	if (summary.totalIssues === 0) return null;
 
 	return (
-		<div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+		<div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-muted-foreground">
 			<span className="font-medium">Summary:</span>
 			{summary.errors > 0 && (
 				<span className="flex items-center gap-1 text-destructive">
@@ -312,7 +312,9 @@ function SummaryBar({ summary }: { summary: ReviewSuggestions["summary"] }) {
 			)}
 		</div>
 	);
-}interface InlineSuggestionsProps {
+}
+
+interface InlineSuggestionsProps {
 	review: ReviewWithRepository;
 }
 export default function InlineSuggestions({
@@ -388,11 +390,11 @@ export default function InlineSuggestions({
 
 	return (
 		<div className="space-y-4">
-			<div className="flex items-center justify-between gap-4 flex-wrap bg-muted/40 p-3 rounded-lg border border-border">
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-muted/40 p-3 rounded-lg border border-border">
 				<SummaryBar summary={summary} />
 				
 				{unappliedSuggestions.length > 0 && (
-					<div className="flex items-center gap-3">
+					<div className="flex flex-wrap items-center gap-2 sm:gap-3">
 						<div className="flex items-center gap-2">
 							<Checkbox
 								id={`select-all-${review.id}`}
