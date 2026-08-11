@@ -29,7 +29,7 @@ const FileNode = ({ data }: any) => (
 			{data.filePath}
 		</div>
 		<div className="flex items-center gap-1.5 mt-2">
-			<Badge variant="secondary" className="text-[9px] py-0 h-4">
+			<Badge variant="secondary" className="text-[10px] py-0 h-4">
 				{data.suggestionCount} issue{data.suggestionCount !== 1 && "s"}
 			</Badge>
 		</div>
@@ -49,22 +49,22 @@ const SuggestionNode = ({ data }: any) => {
 		<div className={`p-3 border-2 shadow-sm min-w-[260px] text-left max-w-xs ${severityColors[data.severity] || "border-border bg-card"}`}>
 			<Handle type="target" position={Position.Top} className="w-2 h-2" />
 			<div className="flex items-center justify-between gap-2 mb-1.5">
-				<Badge variant="outline" className="text-[9px] uppercase tracking-widest py-0 font-bold px-1.5 bg-background">
+				<Badge variant="outline" className="text-[10px] uppercase tracking-widest py-0 font-bold px-1.5 bg-background">
 					{data.severity}
 				</Badge>
 				{data.verifyStatus === "verified" && (
-					<Badge variant="outline" className="text-[8px] bg-verified/10 border-verified/50 text-verified font-semibold py-0 gap-0.5">
-						<Check className="h-2 w-2" /> Verified
+					<Badge variant="outline" className="text-[10px] bg-verified/10 border-verified/50 text-verified font-semibold py-0 gap-0.5">
+						<Check className="h-3 w-3" /> Verified
 					</Badge>
 				)}
 				{data.verifyStatus === "failed" && (
-					<Badge variant="outline" className="text-[8px] bg-destructive/10 border-destructive/50 text-destructive font-semibold py-0 gap-0.5">
-						<AlertCircle className="h-2 w-2" /> Failed
+					<Badge variant="outline" className="text-[10px] bg-destructive/10 border-destructive/50 text-destructive font-semibold py-0 gap-0.5">
+						<AlertCircle className="h-3 w-3" /> Failed
 					</Badge>
 				)}
 				{data.verifyStatus === "sandbox_error" && (
-					<Badge variant="outline" className="text-[8px] bg-chart-2/10 border-chart-2/50 text-chart-2 font-semibold py-0 gap-0.5">
-						<AlertTriangle className="h-2 w-2" /> Sandbox Error
+					<Badge variant="outline" className="text-[10px] bg-chart-2/10 border-chart-2/50 text-chart-2 font-semibold py-0 gap-0.5">
+						<AlertTriangle className="h-3 w-3" /> Sandbox Error
 					</Badge>
 				)}
 			</div>
