@@ -142,6 +142,8 @@ Motion is quiet and purposeful; nothing bounces or lingers. The canonical tokens
 
 Flat by default: separation comes from hairlines and paper tone, not shadow. The shadow scale exists but stays quiet — subtle warm shadows on light, slightly deeper black shadows on dark, reserved for floating elements (popovers, dialogs) and deliberate lift. If a design reads as needing a card, prefer a hairline-bordered panel before reaching for a shadow.
 
+The one sanctioned translucency is the **sticky navbar** (`modules/landing/components/navbar.tsx`): `bg-background/80` with `backdrop-blur-sm`, plus `bg-background/95` on the mobile menu sheet. This is a deliberate legibility carve-out — a fixed header must stay readable while content slides beneath it, and a full-opacity band would fight the paper language. Keep it confined to that header: no other surface gets blur, and the mobile menu stays near-opaque so blur is never doing the work of contrast there.
+
 ## Shapes
 
 Sharp corners everywhere. `rounded.base` is `0px` and every radius utility maps to `0px` — no pills, no rounded cards, no border-radius on any surface. The sharp corner is a brand marker; introducing rounding on one element reads as a mistake.
@@ -165,6 +167,6 @@ Sharp corners everywhere. `rounded.base` is `0px` and every radius utility maps 
 **Don't**
 
 - Don't round corners — the system is sharp everywhere (`rounded.base: 0px`).
-- Don't add glow, gradients, or backdrop blur — the sweep removed them; flat paper + hairline is the language.
+- Don't add glow, gradients, or backdrop blur — flat paper + hairline is the language. The single exception is the sticky navbar's `backdrop-blur-sm` translucency (see Elevation & Depth); no other surface may blur.
 - Don't invent new hexes or use raw named colors where a token exists.
 - Don't use emoji or ASCII-art branding in the CLI — the lockup and tagline are the identity.
