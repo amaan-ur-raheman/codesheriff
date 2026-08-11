@@ -58,9 +58,15 @@ export const MOTION_PREFERRED_QUERY =
 /**
  * One-shot scroll reveal config: plays exactly once when its trigger enters
  * and can never leave content hidden on a re-enter or reverse.
+ *
+ * `invalidateOnRefresh: true` — recalculates the trigger's start position
+ * whenever ScrollTrigger.refresh() is called (e.g. after fonts/images load).
+ * Without this, a layout shift can leave a trigger's start position stale so
+ * it never fires, and the element stays hidden at opacity:0 forever.
  */
 export const REVEAL_TRIGGER = {
-	start: "top 85%",
+	start: "top 92%",
 	once: true,
 	toggleActions: "play none none none",
+	invalidateOnRefresh: true,
 } as const;

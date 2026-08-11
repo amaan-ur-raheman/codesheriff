@@ -101,7 +101,7 @@
 	--brand: #ff6b35;
 	--brand-text: #ff9e6b;
 	--brand-soft: #3a2315;
-	--border: #2e271b;
+	--border: #3a3122;
 	--input: #3a3122;
 	--ring: #ff6b35;
 	--chart-1: #ff6b35;
@@ -219,6 +219,14 @@
 	body {
 		@apply bg-background text-foreground;
 		font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+	p {
+		text-wrap: pretty;
+	}
+	h2, h3 {
+		text-wrap: balance;
 	}
 }
 
@@ -411,3 +419,15 @@
 	margin-top: 0.25rem;
 	margin-bottom: 0.25rem;
 }
+
+/* Prevent inline code from overflowing its container on mobile */
+.prose :not(pre) > code {
+	word-break: break-all;
+	white-space: pre-wrap;
+}
+
+/* Feature rows and pipeline stages — GSAP set+to handles initial states at
+   runtime, but only for elements below the fold at init time (belowFold
+   guard in each section). Elements already visible are never hidden, so a
+   late or missed ScrollTrigger can never strand content at opacity:0.
+   clearProps removes inline styles after animation so no residue persists. */

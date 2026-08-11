@@ -34,19 +34,26 @@ export function TestimonialsSection() {
 		const ctx = gsap.context(() => {
 			const mm = gsap.matchMedia();
 			mm.add(MOTION_PREFERRED_QUERY, () => {
-				gsap.from(".testimonials-head", {
-					opacity: 0,
-					y: 20,
+				const belowFold = (el: Element) =>
+					el.getBoundingClientRect().top > window.innerHeight * 0.95;
+
+				const testHead = rootRef.current?.querySelector(".testimonials-head");
+				if (testHead && belowFold(testHead)) {
+					gsap.set(".testimonials-head", { opacity: 0, y: 20 });
+				}
+				gsap.to(".testimonials-head", {
+					opacity: 1,
+					y: 0,
 					duration: DURATION.section,
 					ease: EASE,
-					scrollTrigger: {
-						trigger: ".testimonials-head",
-						...REVEAL_TRIGGER,
-					},
+					clearProps: "opacity,transform",
+					scrollTrigger: { trigger: ".testimonials-head", ...REVEAL_TRIGGER },
 				});
-				gsap.set(".testimonial-cell", { opacity: 0, y: 20 });
+				const cells = gsap.utils.toArray<HTMLElement>(".testimonial-cell");
+				const hiddenCells = cells.filter(belowFold);
+				if (hiddenCells.length) gsap.set(hiddenCells, { opacity: 0, y: 20 });
 				ScrollTrigger.batch(".testimonial-cell", {
-					start: "top 88%",
+					start: "top 92%",
 					once: true,
 					onEnter: (batch) =>
 						gsap.to(batch, {
@@ -68,7 +75,7 @@ export function TestimonialsSection() {
 	}, []);
 
 	return (
-		<section ref={rootRef} className="border-t border-border py-28">
+		<section ref={rootRef} className="border-t border-border py-20 lg:py-28">
 			<div className="mx-auto max-w-7xl px-6">
 				<div className="testimonials-head max-w-2xl">
 					<p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-text">
@@ -79,9 +86,12 @@ export function TestimonialsSection() {
 					</h2>
 				</div>
 
+				<p className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/60">
+					Illustrative quotes from beta users
+				</p>
 				<div className="mt-16 border-t border-border">
 					{/* featured pull-quote */}
-					<figure className="testimonial-cell grid gap-8 border-b border-border py-14 lg:grid-cols-12 lg:gap-10">
+					<figure className="testimonial-cell grid gap-8 border-b border-border py-8 lg:py-14 lg:grid-cols-12 lg:gap-10">
 						<blockquote className="lg:col-span-8">
 							<p className="font-display text-2xl font-medium italic leading-snug tracking-[-0.01em] text-balance sm:text-[2rem]">
 								“{featured.quote}”
@@ -110,7 +120,7 @@ export function TestimonialsSection() {
 						{quotes.map((item) => (
 							<figure
 								key={item.attribution}
-								className="testimonial-cell py-12 pr-0 md:pr-12"
+								className="testimonial-cell py-8 lg:py-12 pr-0 md:pr-12"
 							>
 								<blockquote>
 								<p className="font-display text-xl font-medium italic leading-snug text-balance">

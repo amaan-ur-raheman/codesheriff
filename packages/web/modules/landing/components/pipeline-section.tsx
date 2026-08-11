@@ -46,25 +46,31 @@ export function PipelineSection() {
 		const ctx = gsap.context(() => {
 			const mm = gsap.matchMedia();
 			mm.add(MOTION_PREFERRED_QUERY, () => {
-				gsap.from(".pipeline-head", {
-					opacity: 0,
-					y: 20,
+				const belowFold = (el: Element) =>
+					el.getBoundingClientRect().top > window.innerHeight * 0.95;
+
+				const pipeHead = rootRef.current?.querySelector(".pipeline-head");
+				if (pipeHead && belowFold(pipeHead)) {
+					gsap.set(".pipeline-head", { opacity: 0, y: 20 });
+				}
+				gsap.to(".pipeline-head", {
+					opacity: 1,
+					y: 0,
 					duration: DURATION.section,
 					ease: EASE,
-					scrollTrigger: {
-						trigger: ".pipeline-head",
-						...REVEAL_TRIGGER,
-					},
+					clearProps: "opacity,transform",
+					scrollTrigger: { trigger: ".pipeline-head", ...REVEAL_TRIGGER },
 				});
 				gsap.utils
 					.toArray<HTMLElement>(".pipeline-stage")
 					.forEach((stage) => {
-						gsap.from(stage, {
-							opacity: 0,
-							y: 22,
+						if (belowFold(stage)) gsap.set(stage, { opacity: 0, y: 22 });
+						gsap.to(stage, {
+							opacity: 1,
+							y: 0,
 							duration: DURATION.cell,
 							ease: EASE,
-							clearProps: "transform",
+							clearProps: "opacity,transform",
 							scrollTrigger: {
 								trigger: stage,
 								...REVEAL_TRIGGER,
@@ -87,8 +93,9 @@ export function PipelineSection() {
 				);
 				const stageEls = gsap.utils.toArray<HTMLElement>(
 					".pipeline-stage",
-				);					if (fill) gsap.set(fill, { scaleY: 0 });
-					if (dot) gsap.set(dot, { y: 0 });
+				);
+					if (fill) gsap.set(fill, { scaleY: 0 });
+				if (dot) gsap.set(dot, { y: 0 });
 
 				ScrollTrigger.create({
 					trigger: ".pipeline-stages",
@@ -123,16 +130,13 @@ export function PipelineSection() {
 		<section
 			id="how-it-works"
 			ref={rootRef}
-			className="relative isolate border-y border-border bg-muted/30 py-28"
+			className="relative isolate border-y border-border bg-muted/30 py-20 lg:py-28"
 		>
 			<PointField />
 
 			<div className="relative z-10 mx-auto max-w-7xl px-6">
 				<div className="pipeline-head max-w-2xl">
-					<p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-text">
-						How it runs
-					</p>
-					<h2 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.02em] text-balance sm:text-5xl">
+					<h2 className="mt-5 font-display text-4xl font-semibold leading-[1.1] tracking-[-0.02em] text-balance sm:text-5xl">
 						From push to merge, fully automatic
 					</h2>
 					<p className="mt-6 max-w-lg leading-relaxed text-muted-foreground">
@@ -155,7 +159,7 @@ export function PipelineSection() {
 						{stages.map((stage) => (
 							<div
 								key={stage.number}
-								className="pipeline-stage group grid gap-6 border-b border-border py-12 transition-colors duration-300 sm:grid-cols-12 sm:gap-10"
+								className="pipeline-stage group grid gap-6 border-b border-border py-8 lg:py-12 transition-colors duration-300 sm:grid-cols-12 sm:gap-10"
 							>
 								<div className="sm:col-span-2">
 									<p className="stage-num font-display text-5xl font-light italic leading-none text-foreground/15 transition-colors duration-300 group-hover:text-brand">
