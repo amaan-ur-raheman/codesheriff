@@ -16,6 +16,7 @@ import { getOrganizations } from "@/modules/organization/actions";
 import CreateOrgDialog from "@/modules/organization/components/create-org-dialog";
 import OrgMembers from "@/modules/organization/components/org-members";
 import OrgRepositories from "@/modules/organization/components/org-repositories";
+import { PageHeader } from "@/components/page-header";
 
 export default function OrganizationPageClient() {
 	const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
@@ -64,14 +65,11 @@ export default function OrganizationPageClient() {
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="text-3xl font-bold tracking-tight">
-						Organizations
-					</h1>
-					<p className="text-muted-foreground">
-						Manage your teams and collaborate with members
-					</p>
-				</div>
+				<PageHeader
+					kicker="Teams"
+					title="Organizations"
+					description="Manage your teams and collaborate with members"
+				/>
 				<CreateOrgDialog />
 			</div>
 

@@ -27,12 +27,15 @@ import {
 	Check,
 	Loader2,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
 	parseSuggestionsFromReview,
+	readStoredSuggestions,
 	type CodeSuggestion,
 	type ReviewSuggestions,
 } from "@/modules/ai/lib/suggestions";
+import type { ReviewWithRepository } from "@/modules/review/types";
 import { Message, MessageContent } from "@/components/ai-elements/message";
 import { useQueryClient } from "@tanstack/react-query";
 import { applySuggestion, applySuggestionsBatch } from "@/modules/review/actions";
@@ -43,7 +46,7 @@ import { resolveVerifyStatus } from "@/modules/review/lib/verify-status";
 
 const SEVERITY_CONFIG: Record<
 	CodeSuggestion["severity"],
-	{ label: string; icon: React.ElementType; className: string }
+	{ label: string; icon: LucideIcon; className: string }
 > = {
 	error: {
 		label: "Error",
@@ -309,12 +312,9 @@ function SummaryBar({ summary }: { summary: ReviewSuggestions["summary"] }) {
 			)}
 		</div>
 	);
+}interface InlineSuggestionsProps {
+	review: ReviewWithRepository;
 }
-
-interface InlineSuggestionsProps {
-	review: any;
-}
-
 export default function InlineSuggestions({
 	review,
 }: InlineSuggestionsProps) {
@@ -325,13 +325,11 @@ export default function InlineSuggestions({
 	let parsedSuggestions: CodeSuggestion[] = [];
 	let summary = { totalIssues: 0, errors: 0, warnings: 0, suggestions: 0 };
 
-	if (review.suggestions && typeof review.suggestions === "object") {
-		const suggestionsData = review.suggestions as any;
-		if (Array.isArray(suggestionsData.suggestions)) {
-			parsedSuggestions = suggestionsData.suggestions;
-		}
-		if (suggestionsData.summary) {
-			summary = suggestionsData.summary;
+	if (review.suggestions) {
+		const stored = readStoredSuggestions(review.suggestions);
+		if (stored) {
+			parsedSuggestions = stored.suggestions;
+			summary = stored.summary;
 		}
 	}
 
@@ -348,9 +346,12 @@ export default function InlineSuggestions({
 
 	const handleApplyCallback = () => {
 		queryClient.invalidateQueries({ queryKey: ["reviews"] });
+		// Keep the review detail page (/dashboard/reviews/[id]) in sync after
+		// a suggestion is applied or batched.
+		queryClient.invalidateQueries({ queryKey: ["review", review.id] });
 	};
 
-	const handleSelectAll = (checked: any) => {
+	const handleSelectAll = (checked: boolean | "indeterminate") => {
 		if (checked) {
 			setSelectedIds(unappliedSuggestions.map((s) => s.id));
 		} else {

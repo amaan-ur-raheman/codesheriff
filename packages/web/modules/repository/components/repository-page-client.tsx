@@ -18,6 +18,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { useRepositories } from "@/modules/repository/hooks/use-repositories";
 import { RepositoryListSkeleton } from "@/modules/repository/components/repository-skeleton";
 import { useConnectRepository } from "@/modules/repository/hooks/use-connect-repository";
+import { PageHeader } from "@/components/page-header";
 
 interface Repository {
 	id: number;
@@ -103,17 +104,11 @@ const RepositoryPageClient = () => {
 	if (isLoading) {
 		return (
 			<div className="space-y-4">
-				<div>
-					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
-						Source control
-					</p>
-					<h1 className="font-display text-3xl tracking-tight text-foreground">
-						Repositories
-					</h1>
-					<p className="mt-2 text-sm text-muted-foreground">
-						Manage and view all your GitHub repositories
-					</p>
-				</div>
+				<PageHeader
+					kicker="Source control"
+					title="Repositories"
+					description="Manage and view all your GitHub repositories"
+				/>
 				<RepositoryListSkeleton />
 			</div>
 		);
@@ -122,17 +117,11 @@ const RepositoryPageClient = () => {
 	if (isError) {
 		return (
 			<div className="space-y-4">
-				<div>
-					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
-						Source control
-					</p>
-					<h1 className="font-display text-3xl tracking-tight text-foreground">
-						Repositories
-					</h1>
-					<p className="mt-2 text-sm text-muted-foreground">
-						Manage and view all your GitHub repositories
-					</p>
-				</div>
+				<PageHeader
+					kicker="Source control"
+					title="Repositories"
+					description="Manage and view all your GitHub repositories"
+				/>
 				<ErrorState
 					title="Couldn't load repositories"
 					description="Your GitHub repositories couldn't be fetched. Check your connection and try again."
@@ -144,17 +133,11 @@ const RepositoryPageClient = () => {
 
 	return (
 		<div className="space-y-4">
-			<div>
-				<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
-					Source control
-				</p>
-				<h1 className="font-display text-3xl tracking-tight text-foreground">
-					Repositories
-				</h1>
-				<p className="mt-2 text-sm text-muted-foreground">
-					Manage and view all your GitHub repositories
-				</p>
-			</div>
+			<PageHeader
+				kicker="Source control"
+				title="Repositories"
+				description="Manage and view all your GitHub repositories"
+			/>
 
 			<div className="relative">
 				<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />

@@ -57,6 +57,33 @@ export function FeaturesSection() {
 							scrollTrigger: { trigger: row, ...REVEAL_TRIGGER },
 						});
 					});
+
+				// Scrubbed ledger counter: the sticky '01 / 04' reflects the
+				// feature currently passing the ledger, updating as the
+				// section scrolls. Gated with everything else, so
+				// reduced-motion users simply keep the static '01' label.
+				const rows = gsap.utils.toArray<HTMLElement>(".feature-row");
+				const counter = rootRef.current?.querySelector<HTMLElement>(
+					".features-counter-cur",
+				);
+				if (rows.length && counter) {
+					ScrollTrigger.create({
+						trigger: ".feature-ledger",
+						start: "top 70%",
+						end: "bottom 45%",
+						scrub: true,
+						onUpdate: (self) => {
+							const idx = Math.min(
+								rows.length - 1,
+								Math.floor(self.progress * rows.length),
+							);
+							const label = String(idx + 1).padStart(2, "0");
+							if (counter.textContent !== label) {
+								counter.textContent = label;
+							}
+						},
+					});
+				}
 			});
 		}, rootRef);
 		const raf = requestAnimationFrame(() => ScrollTrigger.refresh());
@@ -86,15 +113,23 @@ export function FeaturesSection() {
 							</p>
 							<a
 								href="#how-it-works"
-								className="mt-8 inline-block text-sm font-medium text-foreground underline decoration-border underline-offset-[6px] transition-colors duration-200 hover:decoration-brand"
+								className="link-underline mt-8 inline-block text-sm font-medium text-foreground transition-colors duration-200"
 							>
 								See the pipeline below
 							</a>
+							<p
+								aria-hidden="true"
+								className="features-counter mt-8 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground"
+							>
+								<span className="features-counter-cur">01</span>
+								<span className="mx-1 text-border">/</span>
+								04
+							</p>
 						</div>
 					</div>
 
 					{/* ---- ledger ---- */}
-					<div className="lg:col-span-6 lg:col-start-7">
+					<div className="feature-ledger lg:col-span-6 lg:col-start-7">
 						<div className="border-t border-border">
 							{features.map((feature) => (
 								<div
@@ -106,7 +141,7 @@ export function FeaturesSection() {
 											{feature.title}
 										</h3>
 										<ArrowUpRight
-											className="mt-2 h-5 w-5 shrink-0 text-muted-foreground opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100"
+											className="mt-2 h-5 w-5 shrink-0 text-muted-foreground opacity-0 transition-[transform,opacity] duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100"
 											strokeWidth={1.5}
 										/>
 									</div>

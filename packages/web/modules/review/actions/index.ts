@@ -30,6 +30,28 @@ export async function getReviews() {
 	});
 
 	return reviews;
+}	export async function getReview(reviewId: string) {
+	const session = await auth.api.getSession({
+		headers: await headers(),
+	});
+
+	if (!session) {
+		throw new Error("Unauthorized");
+	}
+
+	const review = await prisma.review.findFirst({
+		where: {
+			id: reviewId,
+			repository: {
+				userId: session.user.id,
+			},
+		},
+		include: {
+			repository: true,
+		},
+	});
+
+	return review;
 }
 
 export async function applySuggestion(reviewId: string, suggestionId: string) {

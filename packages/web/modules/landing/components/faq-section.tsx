@@ -65,10 +65,9 @@ export function FAQSection() {
 		<section ref={rootRef} className="border-t border-border py-28">
 			<div className="mx-auto max-w-4xl px-6">
 				<div className="faq-head max-w-2xl">
-					<p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-text">
-						FAQ
-					</p>
-					<h2 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.02em] text-balance sm:text-5xl">
+					{/* hairline-led header: no kicker, a brand hairline carries the mark */}
+					<div className="h-px w-16 bg-brand" />
+					<h2 className="mt-6 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.02em] text-balance sm:text-5xl">
 						Questions, answered
 					</h2>
 				</div>
@@ -83,7 +82,7 @@ export function FAQSection() {
 									aria-expanded={isOpen}
 									aria-controls={`faq-panel-${i}`}
 									onClick={() => setOpen(isOpen ? -1 : i)}
-									className="flex w-full items-center justify-between gap-6 py-7 text-left"
+									className="flex w-full cursor-pointer items-center justify-between gap-6 py-7 text-left"
 								>
 									<span className="flex items-baseline gap-5">
 										<span className="font-mono text-xs text-brand-text">
@@ -102,7 +101,7 @@ export function FAQSection() {
 								</button>
 								<div
 									id={`faq-panel-${i}`}
-									className={`grid transition-[grid-template-rows] duration-300 ease-in-out motion-reduce:transition-none ${
+									className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
 										isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr] invisible"
 									}`}
 								>

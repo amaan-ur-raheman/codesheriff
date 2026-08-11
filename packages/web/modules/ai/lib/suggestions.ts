@@ -39,6 +39,39 @@ export interface ReviewSuggestions {
 	};
 }
 
+/**
+ * Read the structured suggestions block stored on a review record
+ * (Review.suggestions is a Prisma Json column). Validates the shape and
+ * falls back to a computed summary when the stored summary is missing, so
+ * callers never touch `JsonValue` directly or cast through `any`.
+ */
+export function readStoredSuggestions(
+	value: unknown
+): ReviewSuggestions | null {
+	if (!value || typeof value !== "object" || Array.isArray(value)) {
+		return null;
+	}
+
+	const candidate = value as {
+		suggestions?: unknown;
+		summary?: unknown;
+	};
+
+	if (!Array.isArray(candidate.suggestions)) {
+		return null;
+	}
+
+	const suggestions = candidate.suggestions as CodeSuggestion[];
+	const summary =
+		candidate.summary &&
+		typeof candidate.summary === "object" &&
+		!Array.isArray(candidate.summary)
+			? (candidate.summary as ReviewSuggestions["summary"])
+			: computeSummary(suggestions);
+
+	return { suggestions, summary };
+}
+
 const SUGGESTIONS_JSON_REGEX =
 	/<!--\s*SUGGESTIONS_JSON\s*\n([\s\S]*?)\n\s*-->/;
 

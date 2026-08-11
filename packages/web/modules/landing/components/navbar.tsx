@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Menu, X } from "lucide-react";
 
 const navLinks = [
@@ -36,21 +37,20 @@ export function Navbar() {
 						<a
 							key={link.href}
 							href={link.href}
-							className="text-sm text-muted-foreground underline-offset-[6px] decoration-border transition-colors duration-200 hover:text-foreground hover:decoration-brand"
+							className="link-underline text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
 						>
-							<span className="underline decoration-inherit">
-								{link.label}
-							</span>
+							{link.label}
 						</a>
 					))}
 				</nav>
 
 				<div className="hidden md:flex items-center gap-6">
+					<ThemeToggle />
 					<a
 						href="/login"
-						className="text-sm text-muted-foreground underline-offset-[6px] decoration-border transition-colors duration-200 hover:text-foreground hover:decoration-brand"
+						className="link-underline text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
 					>
-						<span className="underline decoration-inherit">Log in</span>
+						Log in
 					</a>
 					<Button size="sm" className="rounded-none px-5" asChild>
 						<a href="/login">Get started</a>
@@ -80,13 +80,16 @@ export function Navbar() {
 							</a>
 						))}
 						<div className="flex items-center justify-between border-t border-border pt-4">
-							<a
-								href="/login"
-								onClick={() => setIsOpen(false)}
-								className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-							>
-								Log in
-							</a>
+							<div className="flex items-center gap-4">
+								<ThemeToggle />
+								<a
+									href="/login"
+									onClick={() => setIsOpen(false)}
+									className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+								>
+									Log in
+								</a>
+							</div>
 							<Button size="sm" className="rounded-none" asChild>
 								<a href="/login">Get started</a>
 							</Button>

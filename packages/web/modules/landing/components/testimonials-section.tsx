@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { gsap, EASE, REVEAL_TRIGGER, DURATION, MOTION_PREFERRED_QUERY, ScrollTrigger } from "../lib/gsap";
+import { gsap, EASE, REVEAL_TRIGGER, DURATION, STAGGER, MOTION_PREFERRED_QUERY, ScrollTrigger } from "../lib/gsap";
 
 const featured = {
 	quote:
@@ -40,21 +40,24 @@ export function TestimonialsSection() {
 						...REVEAL_TRIGGER,
 					},
 				});
-				gsap.utils
-					.toArray<HTMLElement>(".testimonial-cell")
-					.forEach((cell) => {
-						gsap.from(cell, {
-							opacity: 0,
-							y: 20,
+				// Batch-reveal the pull-quotes: the featured quote and the two
+				// secondary quotes enter as one staggered register. Explicit
+				// initial states (never `from`) per the landing safety rule,
+				// cleared on complete so no inline styles survive.
+				gsap.set(".testimonial-cell", { opacity: 0, y: 20 });
+				ScrollTrigger.batch(".testimonial-cell", {
+					start: "top 88%",
+					once: true,
+					onEnter: (batch) =>
+						gsap.to(batch, {
+							opacity: 1,
+							y: 0,
 							duration: DURATION.cell,
 							ease: EASE,
-							clearProps: "transform",
-							scrollTrigger: {
-								trigger: cell,
-								...REVEAL_TRIGGER,
-							},
-						});
-					});
+							stagger: STAGGER.heroCta,
+							clearProps: "opacity,transform",
+						}),
+				});
 			});
 		}, rootRef);
 		const raf = requestAnimationFrame(() => ScrollTrigger.refresh());

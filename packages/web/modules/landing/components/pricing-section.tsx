@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
-import { gsap, EASE, REVEAL_TRIGGER, DURATION, MOTION_PREFERRED_QUERY, ScrollTrigger } from "../lib/gsap";
+import { gsap, EASE, REVEAL_TRIGGER, DURATION, STAGGER, MOTION_PREFERRED_QUERY, ScrollTrigger } from "../lib/gsap";
 
 const plans = [
 	{
@@ -72,18 +72,25 @@ export function PricingSection() {
 					ease: EASE,
 					scrollTrigger: { trigger: ".pricing-head", ...REVEAL_TRIGGER },
 				});
-				gsap.utils
-					.toArray<HTMLElement>(".pricing-cell")
-					.forEach((cell) => {
-						gsap.from(cell, {
-							opacity: 0,
-							y: 24,
+				// Batch-reveal the pricing cells: one shared trigger, staggered
+				// onEnter, so the three tiers enter as a register instead of
+				// each managing its own ScrollTrigger. Explicit initial states
+				// (never `from`) per the landing safety rule, cleared on
+				// complete so no inline styles survive.
+				gsap.set(".pricing-cell", { opacity: 0, y: 24 });
+				ScrollTrigger.batch(".pricing-cell", {
+					start: "top 88%",
+					once: true,
+					onEnter: (batch) =>
+						gsap.to(batch, {
+							opacity: 1,
+							y: 0,
 							duration: DURATION.cell,
 							ease: EASE,
-							clearProps: "transform",
-							scrollTrigger: { trigger: cell, ...REVEAL_TRIGGER },
-						});
-					});
+							stagger: STAGGER.heroCta,
+							clearProps: "opacity,transform",
+						}),
+				});
 			});
 		}, rootRef);
 		const raf = requestAnimationFrame(() => ScrollTrigger.refresh());
@@ -97,10 +104,9 @@ export function PricingSection() {
 		<section id="pricing" ref={rootRef} className="relative py-28">
 			<div className="mx-auto max-w-7xl px-6">
 				<div className="pricing-head max-w-2xl">
-					<p className="font-mono text-[11px] uppercase tracking-[0.14em] text-brand-text">
-						Pricing
-					</p>
-					<h2 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.02em] text-balance sm:text-5xl">
+					{/* hairline-led header: no kicker, a brand hairline carries the mark */}
+					<div className="h-px w-16 bg-brand" />
+					<h2 className="mt-6 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.02em] text-balance sm:text-5xl">
 						Start free. Upgrade when the team grows.
 					</h2>
 					<p className="mt-6 max-w-lg leading-relaxed text-muted-foreground">

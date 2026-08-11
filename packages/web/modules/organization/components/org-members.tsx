@@ -88,7 +88,7 @@ export default function OrgMembers({
 			if (data?.seatCheckoutUrl) {
 				setSeatCheckoutUrl(data.seatCheckoutUrl);
 				toast.success(
-					"Invite created — complete payment to activate the seat"
+					"Invite created. Complete payment to activate the seat."
 				);
 			} else {
 				toast.success("Member invited successfully");
@@ -190,7 +190,7 @@ export default function OrgMembers({
 			<CardHeader>
 				<div className="flex items-center justify-between">
 					<div>
-						<CardTitle className="font-display text-lg tracking-tight">Members — {orgName}</CardTitle>
+						<CardTitle className="font-display text-lg tracking-tight">Members: {orgName}</CardTitle>
 						<CardDescription>
 							Manage organization members and their roles
 						</CardDescription>

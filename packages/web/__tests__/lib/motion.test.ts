@@ -14,6 +14,7 @@ describe("shared motion language", () => {
 
 	it("locks the duration register", () => {
 		expect(DURATION).toEqual({
+			micro: 0.22,
 			fast: 0.5,
 			base: 0.6,
 			cell: 0.65,

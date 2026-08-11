@@ -2,7 +2,7 @@
  * Main application sidebar component providing navigation and user controls
  *
  * Editorial Paper treatment: serif wordmark, mono connected-account row,
- * hairline brand rule for the active item, quiet footer.
+ * paper wash for the active item, quiet footer.
  *
  * @component
  */
@@ -12,8 +12,6 @@ import {
 	Github,
 	BookOpen,
 	Settings,
-	Moon,
-	Sun,
 	LogOut,
 	Star,
 	Crown,
@@ -21,7 +19,6 @@ import {
 	Shield,
 	Plug,
 } from "lucide-react";
-import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
@@ -47,9 +44,9 @@ import Link from "next/link";
 
 import Logout from "@/modules/auth/components/logout";
 import { useSession } from "@/lib/auth-client";
+import { ThemeMenu } from "@/components/ui/theme-menu";
 
 export const AppSidebar = () => {
-	const { theme, setTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
 	const pathname = usePathname();
 	const { data: session } = useSession();
@@ -161,10 +158,10 @@ export const AppSidebar = () => {
 									asChild
 									tooltip={item.title}
 									isActive={isActive(item.url)}
-									className={`h-10 px-4 border-l-2 group-data-[collapsible=icon]:border-l-0 transition-colors duration-150 ${
+									className={`h-10 px-4 transition-colors duration-150 ${
 										isActive(item.url)
-											? "border-brand bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-											: "border-transparent text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+											? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+											: "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
 									}`}
 								>
 									<Link
@@ -243,30 +240,7 @@ export const AppSidebar = () => {
 								</div>
 
 								<div className="px-2 py-3">
-									<DropdownMenuItem asChild>
-										<button
-											onClick={() =>
-												setTheme(
-													theme === "dark"
-														? "light"
-														: "dark"
-												)
-											}
-											className="w-full px-3 py-3 flex items-center gap-3 cursor-pointer hover:bg-sidebar-accent/50 transition-colors text-sm font-medium"
-										>
-											{theme === "dark" ? (
-												<>
-													<Sun className="w-5 h-5 shrink-0" />
-													<span>Light Mode</span>
-												</>
-											) : (
-												<>
-													<Moon className="w-5 h-5 shrink-0" />
-													<span>Dark Mode</span>
-												</>
-											)}
-										</button>
-									</DropdownMenuItem>
+									<ThemeMenu />
 									<DropdownMenuItem className="cursor-pointer px-3 py-3 my-1 hover:bg-destructive/10 hover:text-destructive transition-colors font-medium">
 										<LogOut className="w-5 h-5 mr-3 shrink-0" />
 										<Logout>

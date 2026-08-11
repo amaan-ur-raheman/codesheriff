@@ -80,11 +80,9 @@ export function Footer() {
 									<li key={link.label}>
 										<a
 											href={link.href}
-											className="text-sm text-muted-foreground underline-offset-[6px] decoration-border transition-colors duration-200 hover:text-foreground hover:decoration-brand"
+											className="link-underline text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
 										>
-											<span className="underline decoration-inherit">
-												{link.label}
-											</span>
+											{link.label}
 										</a>
 									</li>
 								))}
@@ -97,9 +95,6 @@ export function Footer() {
 					<p className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
 						© {new Date().getFullYear()} CodeSheriff. All rights
 						reserved.
-					</p>
-					<p className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-						Set in Fraunces &amp; Geist
 					</p>
 				</div>
 			</div>

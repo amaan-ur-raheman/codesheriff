@@ -19,6 +19,8 @@ export const EASE = "power3.out" as const;
  * with zero value change.
  */
 export const DURATION = {
+	/** micro-interaction pop: tooltip / small hover reveals */
+	micro: 0.22,
 	/** micro entrances: hero kicker, hero CTA row */
 	fast: 0.5,
 	/** standard reveals: hero sub, feature rows */

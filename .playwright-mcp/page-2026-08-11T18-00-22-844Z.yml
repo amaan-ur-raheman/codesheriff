@@ -1,0 +1,332 @@
+- generic [active] [ref=f4e1]:
+  - generic [ref=f4e2]:
+    - banner [ref=f4e3]:
+      - generic [ref=f4e4]:
+        - link [ref=f4e5] [cursor=pointer]:
+          - /url: /
+          - img "CodeSheriff" [ref=f4e6]
+          - text: CodeSheriff
+        - navigation [ref=f4e7]:
+          - link "Features" [ref=f4e8] [cursor=pointer]:
+            - /url: "#features"
+          - link "How it works" [ref=f4e9] [cursor=pointer]:
+            - /url: "#how-it-works"
+          - link "Pricing" [ref=f4e10] [cursor=pointer]:
+            - /url: "#pricing"
+        - generic [ref=f4e11]:
+          - button "Toggle theme" [ref=f4e12]
+          - link "Log in" [ref=f4e14] [cursor=pointer]:
+            - /url: /login
+          - link "Get started" [ref=f4e15] [cursor=pointer]:
+            - /url: /login
+    - generic [ref=f4e16]:
+      - generic [ref=f4e17]:
+        - paragraph [ref=f4e18]: Automated code review · for GitHub
+        - paragraph [ref=f4e19]: Edition 01 · 2026
+      - generic [ref=f4e20]:
+        - generic [ref=f4e21]:
+          - heading "Your code, under review." [level=1] [ref=f4e22]:
+            - generic [ref=f4e23]: Your code,
+            - generic [ref=f4e25]: under review.
+          - paragraph [ref=f4e27]: An AI reads every pull request, catches bugs, blocks regressions, and verifies each fix in a sandbox before it ships.
+          - generic [ref=f4e28]:
+            - link "Get started" [ref=f4e29] [cursor=pointer]:
+              - /url: /login
+            - link "See how it works" [ref=f4e30] [cursor=pointer]:
+              - /url: "#how-it-works"
+          - generic [ref=f4e32]:
+            - generic [ref=f4e33]:
+              - paragraph [ref=f4e34]: 12,400+
+              - paragraph [ref=f4e35]: PRs reviewed
+            - generic [ref=f4e36]:
+              - paragraph [ref=f4e37]: 14s
+              - paragraph [ref=f4e38]: median review
+            - generic [ref=f4e39]:
+              - paragraph [ref=f4e40]: 100%
+              - paragraph [ref=f4e41]: fixes sandboxed
+        - generic [ref=f4e42]:
+          - generic [ref=f4e43]:
+            - generic [ref=f4e44]:
+              - generic [ref=f4e45]:
+                - paragraph [ref=f4e46]: "acme/web-app · pull request #347"
+                - paragraph [ref=f4e47]: src/validation.ts · 4 comments
+              - generic [ref=f4e48]: AI review
+            - generic [ref=f4e49]:
+              - generic [ref=f4e50]:
+                - generic [ref=f4e51]: −
+                - generic [ref=f4e52]: const password = req.body.password;
+              - generic [ref=f4e53]:
+                - generic [ref=f4e54]: +
+                - generic [ref=f4e55]: const hashed = await argon2.hash(req.body.password);
+            - generic [ref=f4e56]:
+              - generic [ref=f4e57]:
+                - paragraph [ref=f4e58]: 01Input validation missing
+                - generic [ref=f4e59]: Sandbox verified
+              - paragraph [ref=f4e60]:
+                - text: Add
+                - code [ref=f4e61]: isEmail()
+                - text: validation before data reaches the database layer.
+          - paragraph [ref=f4e62]: Fig. 01 · a live review, unretouched
+    - generic [ref=f4e65]:
+      - generic [ref=f4e67]:
+        - paragraph [ref=f4e68]: What it does
+        - heading "A second pair of eyes on every pull request" [level=2] [ref=f4e69]
+        - paragraph [ref=f4e70]: It fits the workflow you already have. Open a PR, get a review. No new tools, no context switching, no CI config to babysit.
+        - link "See the pipeline below" [ref=f4e71] [cursor=pointer]:
+          - /url: "#how-it-works"
+        - paragraph [ref=f4e72]: 01/04
+      - generic [ref=f4e74]:
+        - generic [ref=f4e75]:
+          - heading "AI code review" [level=3] [ref=f4e77]
+          - paragraph [ref=f4e81]: "Deep analysis of every diff: bugs, security holes, dead code, and smells, flagged before they ship."
+        - generic [ref=f4e82]:
+          - heading "Inline PR comments" [level=3] [ref=f4e84]
+          - paragraph [ref=f4e88]: Actionable suggestions posted on the exact lines of your pull request, ready for one-click apply.
+        - generic [ref=f4e89]:
+          - heading "Health scores" [level=3] [ref=f4e91]
+          - paragraph [ref=f4e95]: "Code quality trends tracked over time: issue density, review completion rates, and team velocity."
+        - generic [ref=f4e96]:
+          - heading "Every language you ship" [level=3] [ref=f4e98]
+          - paragraph [ref=f4e102]: One reviewer fluent in TypeScript, Python, Go, Rust, Java, Ruby, and the rest of your stack.
+    - generic [ref=f4e104]:
+      - paragraph [ref=f4e105]: Works where you already work
+      - generic "Supported integrations" [ref=f4e107]:
+        - generic [ref=f4e108]:
+          - generic [ref=f4e109]: GitHub
+          - generic [ref=f4e111]: GitLab
+          - generic [ref=f4e113]: Bitbucket
+          - generic [ref=f4e115]: Slack
+          - generic [ref=f4e117]: Discord
+          - generic [ref=f4e119]: Inngest
+          - generic [ref=f4e121]: Pinecone
+          - generic [ref=f4e123]: Polar
+          - generic [ref=f4e125]: E2B
+        - generic [ref=f4e127]:
+          - generic [ref=f4e128]: GitHub
+          - generic [ref=f4e130]: GitLab
+          - generic [ref=f4e132]: Bitbucket
+          - generic [ref=f4e134]: Slack
+          - generic [ref=f4e136]: Discord
+          - generic [ref=f4e138]: Inngest
+          - generic [ref=f4e140]: Pinecone
+          - generic [ref=f4e142]: Polar
+          - generic [ref=f4e144]: E2B
+    - generic [ref=f4e147]:
+      - generic [ref=f4e148]:
+        - paragraph [ref=f4e149]: How it runs
+        - heading "From push to merge, fully automatic" [level=2] [ref=f4e150]
+        - paragraph [ref=f4e151]: Four stages run behind the scenes on every pull request. You only ever see the result.
+      - generic [ref=f4e156]:
+        - generic [ref=f4e157]:
+          - paragraph [ref=f4e159]: "01"
+          - generic [ref=f4e160]:
+            - paragraph [ref=f4e161]: Trigger
+            - heading "A pull request opens" [level=3] [ref=f4e162]
+            - paragraph [ref=f4e163]: The webhook fires the moment a PR is created or updated. Nothing to install in CI, no YAML to maintain.
+          - generic [ref=f4e164]: "webhook: pull_request.opened"
+        - generic [ref=f4e166]:
+          - paragraph [ref=f4e168]: "02"
+          - generic [ref=f4e169]:
+            - paragraph [ref=f4e170]: Analyze
+            - heading "The AI reads the diff" [level=3] [ref=f4e171]
+            - paragraph [ref=f4e172]: Every changed file is analyzed against your codebase context, project standards, and a library of known bug patterns.
+          - generic [ref=f4e173]: "diff: 47 files · 1,203 lines"
+        - generic [ref=f4e175]:
+          - paragraph [ref=f4e177]: "03"
+          - generic [ref=f4e178]:
+            - paragraph [ref=f4e179]: Verify
+            - heading "Suggestions run in a sandbox" [level=3] [ref=f4e180]
+            - paragraph [ref=f4e181]: Every fix is executed in an isolated sandbox first. If the suggested patch doesn't compile and pass, it never reaches your PR.
+          - generic [ref=f4e182]: "sandbox: e2b · 14s"
+        - generic [ref=f4e184]:
+          - paragraph [ref=f4e186]: "04"
+          - generic [ref=f4e187]:
+            - paragraph [ref=f4e188]: Deliver
+            - heading "Comments land on the PR" [level=3] [ref=f4e189]
+            - paragraph [ref=f4e190]: Verified, inline suggestions appear on the exact lines, ready for one-click apply. Your team reviews less and ships more.
+          - generic [ref=f4e191]: 3 comments · 1 verified fix
+    - generic [ref=f4e194]:
+      - generic [ref=f4e195]:
+        - paragraph [ref=f4e196]: Field notes
+        - heading "Trusted by teams that ship" [level=2] [ref=f4e197]
+      - generic [ref=f4e198]:
+        - figure [ref=f4e199]:
+          - blockquote [ref=f4e200]:
+            - paragraph [ref=f4e201]: “CodeSheriff flagged a race condition in our billing service the morning it shipped. We would have found it in production.”
+          - generic [ref=f4e202]:
+            - paragraph [ref=f4e203]: Staff engineer · B2B SaaS
+            - paragraph [ref=f4e204]: "PR #482 · 6 files · 2 verified fixes"
+        - generic [ref=f4e205]:
+          - figure "Tech lead · fintech platform" [ref=f4e206]:
+            - blockquote [ref=f4e207]:
+              - paragraph [ref=f4e208]: “The sandbox verification is the part that sells itself. The only suggestions that reach our PRs are the ones that compile and pass.”
+          - figure "Engineering manager · e-commerce" [ref=f4e210]:
+            - blockquote [ref=f4e211]:
+              - paragraph [ref=f4e212]: “It reads a diff like a senior reviewer who already knows our codebase. The health score gave the team a number to chase.”
+    - generic [ref=f4e215]:
+      - generic [ref=f4e216]:
+        - heading "Start free. Upgrade when the team grows." [level=2] [ref=f4e218]
+        - paragraph [ref=f4e219]: No hidden fees, no per-seat surprises, cancel anytime.
+      - generic [ref=f4e220]:
+        - generic [ref=f4e221]:
+          - heading "Free" [level=3] [ref=f4e223]
+          - generic [ref=f4e224]:
+            - generic [ref=f4e225]: $0
+            - generic [ref=f4e226]: forever
+          - paragraph [ref=f4e227]: For individual developers getting started.
+          - list [ref=f4e228]:
+            - listitem [ref=f4e229]:
+              - generic [ref=f4e232]: 3 repositories
+            - listitem [ref=f4e233]:
+              - generic [ref=f4e236]: 50 reviews / month
+            - listitem [ref=f4e237]:
+              - generic [ref=f4e240]: Basic AI analysis
+            - listitem [ref=f4e241]:
+              - generic [ref=f4e244]: Email notifications
+            - listitem [ref=f4e245]:
+              - generic [ref=f4e248]: Community support
+          - link "Start free" [ref=f4e249] [cursor=pointer]:
+            - /url: /login
+        - generic [ref=f4e250]:
+          - generic [ref=f4e252]:
+            - heading "Pro" [level=3] [ref=f4e253]
+            - generic [ref=f4e254]: Most popular
+          - generic [ref=f4e255]:
+            - generic [ref=f4e256]: $19
+            - generic [ref=f4e257]: / month
+          - paragraph [ref=f4e258]: For teams that ship fast.
+          - list [ref=f4e259]:
+            - listitem [ref=f4e260]:
+              - generic [ref=f4e263]: Unlimited repositories
+            - listitem [ref=f4e264]:
+              - generic [ref=f4e267]: Unlimited reviews
+            - listitem [ref=f4e268]:
+              - generic [ref=f4e271]: Advanced AI suggestions
+            - listitem [ref=f4e272]:
+              - generic [ref=f4e275]: Slack / Discord integration
+            - listitem [ref=f4e276]:
+              - generic [ref=f4e279]: Custom review rules
+            - listitem [ref=f4e280]:
+              - generic [ref=f4e283]: Health score tracking
+            - listitem [ref=f4e284]:
+              - generic [ref=f4e287]: Priority support
+          - link "Get Pro" [ref=f4e288] [cursor=pointer]:
+            - /url: /login
+        - generic [ref=f4e289]:
+          - heading "Enterprise" [level=3] [ref=f4e291]
+          - generic [ref=f4e292]: Custom
+          - paragraph [ref=f4e294]: For organizations with advanced needs.
+          - list [ref=f4e295]:
+            - listitem [ref=f4e296]:
+              - generic [ref=f4e299]: Everything in Pro
+            - listitem [ref=f4e300]:
+              - generic [ref=f4e303]: Self-hosted option
+            - listitem [ref=f4e304]:
+              - generic [ref=f4e307]: SSO / SAML
+            - listitem [ref=f4e308]:
+              - generic [ref=f4e311]: Audit logs
+            - listitem [ref=f4e312]:
+              - generic [ref=f4e315]: Dedicated support
+            - listitem [ref=f4e316]:
+              - generic [ref=f4e319]: Custom integrations
+            - listitem [ref=f4e320]:
+              - generic [ref=f4e323]: SLA guarantee
+          - link "Contact sales" [ref=f4e324] [cursor=pointer]:
+            - /url: /login
+    - generic [ref=f4e326]:
+      - heading "Questions, answered" [level=2] [ref=f4e329]
+      - generic [ref=f4e330]:
+        - generic [ref=f4e331]:
+          - button "01 How is CodeSheriff different from a linter?" [expanded] [ref=f4e332]:
+            - generic [ref=f4e333]:
+              - generic [ref=f4e334]: "01"
+              - generic [ref=f4e335]: How is CodeSheriff different from a linter?
+          - paragraph [ref=f4e341]: A linter checks syntax and style against a rulebook. CodeSheriff reviews the whole diff for bugs, security holes, and regressions in context, then verifies every suggested fix in a sandbox before it reaches your PR.
+        - button "02 Does it run in our CI?" [ref=f4e343]:
+          - generic [ref=f4e344]:
+            - generic [ref=f4e345]: "02"
+            - generic [ref=f4e346]: Does it run in our CI?
+        - button "03 Which languages does it support?" [ref=f4e349]:
+          - generic [ref=f4e350]:
+            - generic [ref=f4e351]: "03"
+            - generic [ref=f4e352]: Which languages does it support?
+        - button "04 What happens in the sandbox?" [ref=f4e355]:
+          - generic [ref=f4e356]:
+            - generic [ref=f4e357]: "04"
+            - generic [ref=f4e358]: What happens in the sandbox?
+        - button "05 Can we change the review rules?" [ref=f4e361]:
+          - generic [ref=f4e362]:
+            - generic [ref=f4e363]: "05"
+            - generic [ref=f4e364]: Can we change the review rules?
+        - button "06 What does it cost, and can we cancel?" [ref=f4e367]:
+          - generic [ref=f4e368]:
+            - generic [ref=f4e369]: "06"
+            - generic [ref=f4e370]: What does it cost, and can we cancel?
+    - generic [ref=f4e374]:
+      - paragraph [ref=f4e375]: Final word
+      - heading "Ready to ship better code?" [level=2] [ref=f4e376]
+      - paragraph [ref=f4e377]: Connect a repository and the first review lands in minutes. No credit card required.
+      - link "Get started" [ref=f4e379] [cursor=pointer]:
+        - /url: /login
+      - paragraph [ref=f4e380]: Setup takes about four minutes
+    - contentinfo [ref=f4e381]:
+      - generic [ref=f4e382]:
+        - generic [ref=f4e383]:
+          - link [ref=f4e384] [cursor=pointer]:
+            - /url: /
+            - img "CodeSheriff" [ref=f4e385]
+            - text: CodeSheriff
+          - paragraph [ref=f4e386]: Edition 01 · Automated code review, since 2026
+        - generic [ref=f4e387]:
+          - generic [ref=f4e388]:
+            - paragraph [ref=f4e389]: AI-powered code review that catches bugs before they reach production and verifies every fix before it reaches your branch.
+            - generic [ref=f4e390]:
+              - link "GitHub" [ref=f4e391] [cursor=pointer]:
+                - /url: "#"
+              - link "Twitter" [ref=f4e395] [cursor=pointer]:
+                - /url: "#"
+          - generic [ref=f4e398]:
+            - heading "Product" [level=4] [ref=f4e399]
+            - list [ref=f4e400]:
+              - listitem [ref=f4e401]:
+                - link "Features" [ref=f4e402] [cursor=pointer]:
+                  - /url: "#features"
+              - listitem [ref=f4e403]:
+                - link "Pricing" [ref=f4e404] [cursor=pointer]:
+                  - /url: "#pricing"
+              - listitem [ref=f4e405]:
+                - link "Documentation" [ref=f4e406] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f4e407]:
+                - link "Changelog" [ref=f4e408] [cursor=pointer]:
+                  - /url: "#"
+          - generic [ref=f4e409]:
+            - heading "Company" [level=4] [ref=f4e410]
+            - list [ref=f4e411]:
+              - listitem [ref=f4e412]:
+                - link "About" [ref=f4e413] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f4e414]:
+                - link "Blog" [ref=f4e415] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f4e416]:
+                - link "Careers" [ref=f4e417] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f4e418]:
+                - link "Contact" [ref=f4e419] [cursor=pointer]:
+                  - /url: "#"
+          - generic [ref=f4e420]:
+            - heading "Legal" [level=4] [ref=f4e421]
+            - list [ref=f4e422]:
+              - listitem [ref=f4e423]:
+                - link "Privacy Policy" [ref=f4e424] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f4e425]:
+                - link "Terms of Service" [ref=f4e426] [cursor=pointer]:
+                  - /url: "#"
+              - listitem [ref=f4e427]:
+                - link "Security" [ref=f4e428] [cursor=pointer]:
+                  - /url: "#"
+        - paragraph [ref=f4e430]: © 2026 CodeSheriff. All rights reserved.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f4e436] [cursor=pointer]

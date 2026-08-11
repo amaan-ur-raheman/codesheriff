@@ -23,6 +23,7 @@ import {
 	syncSubscriptionStatus,
 } from "@/modules/payment/actions";
 import { Spinner } from "@/components/ui/spinner";
+import { PageHeader } from "@/components/page-header";
 
 const PLAN_FEATURE = {
 	free: [
@@ -86,17 +87,11 @@ export default function SubscriptionPageClient() {
 	if (error) {
 		return (
 			<div className="space-y-6">
-				<div>
-					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
-						Billing
-					</p>
-					<h1 className="font-display text-3xl tracking-tight text-foreground">
-						Subscription Plans
-					</h1>
-					<p className="mt-2 text-sm text-muted-foreground">
-						Failed to load subscription data. Please try again.
-					</p>
-				</div>
+				<PageHeader
+					kicker="Billing"
+					title="Subscription Plans"
+					description="Failed to load subscription data. Please try again."
+				/>
 				<Alert variant={"destructive"}>
 					<AlertTitle>Error</AlertTitle>
 					<AlertDescription>
@@ -118,17 +113,11 @@ export default function SubscriptionPageClient() {
 	if (!data?.user) {
 		return (
 			<div className="space-y-8">
-				<div>
-					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
-						Billing
-					</p>
-					<h1 className="font-display text-3xl tracking-tight text-foreground">
-						Subscription Plans
-					</h1>
-					<p className="mt-2 text-sm text-muted-foreground">
-						Please sign in to view subscription options.
-					</p>
-				</div>
+				<PageHeader
+					kicker="Billing"
+					title="Subscription Plans"
+					description="Please sign in to view subscription options."
+				/>
 			</div>
 		);
 	}
@@ -183,17 +172,11 @@ export default function SubscriptionPageClient() {
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
-				<div>
-					<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-brand-text mb-2">
-						Billing
-					</p>
-					<h1 className="font-display text-3xl tracking-tight text-foreground">
-						Subscription Plans
-					</h1>
-					<p className="mt-2 text-sm text-muted-foreground">
-						Choose the right plan for your needs
-					</p>
-				</div>
+				<PageHeader
+					kicker="Billing"
+					title="Subscription Plans"
+					description="Choose the right plan for your needs"
+				/>
 
 				<Button
 					variant={"outline"}
