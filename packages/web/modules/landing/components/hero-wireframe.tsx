@@ -36,10 +36,12 @@ interface Particle {
 }
 
 // ─── Build graph data (runs once per viewport size) ────────────────────────
+// `spreadX` / `spreadY` are separate so the vertical layout can clamp to a
+// square core on portrait canvases (see ReviewGraphScene).
 function buildGraph(
 	rand: () => number,
-	w: number,
-	h: number,
+	spreadX: number,
+	spreadY: number,
 	nodeCount: number,
 	maxEdgeDist: number,
 ): { nodes: NodeData[]; edges: EdgeData[] } {
@@ -47,8 +49,8 @@ function buildGraph(
 	for (let i = 0; i < nodeCount; i++) {
 		nodes.push({
 			pos: new THREE.Vector3(
-				(rand() - 0.5) * w * 0.86,
-				(rand() - 0.5) * h * 0.82,
+				(rand() - 0.5) * spreadX * 0.86,
+				(rand() - 0.5) * spreadY * 0.82,
 				(rand() - 0.5) * 1.4,
 			),
 			velocity: new THREE.Vector3(
@@ -89,6 +91,15 @@ function ReviewGraphScene({ ink, accent }: { ink: string; accent: string }) {
 	const w = viewport.width;
 	const h = viewport.height;
 
+	// Square composition core. R3F keeps the viewport HEIGHT fixed (~5 world
+	// units at this camera) while width collapses on portrait canvases, so
+	// deriving the vertical layout from `h` alone stretches the graph into a
+	// tall streak on mobile (nodes span the whole hero, rings shrink to
+	// min(w,h), the scan beam sweeps the full height). Every composition
+	// dimension clamps to the min side so the graph reads as one balanced
+	// cluster on any aspect ratio; the background grid stays full-bleed.
+	const size = Math.min(w, h);
+
 	const groupRef   = useRef<THREE.Group>(null);
 	const scanRef    = useRef<THREE.Mesh>(null);
 	const haloRef    = useRef<THREE.Mesh>(null);
@@ -117,7 +128,7 @@ function ReviewGraphScene({ ink, accent }: { ink: string; accent: string }) {
 	const MAX_EDGE_DIST = Math.min(w, h) * 0.46;
 
 	const { nodes, edges } = useMemo(
-		() => buildGraph(rand, w, h, NODE_COUNT, MAX_EDGE_DIST),
+		() => buildGraph(rand, w, size, NODE_COUNT, MAX_EDGE_DIST),
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[w, h],
 	);
@@ -236,7 +247,7 @@ function ReviewGraphScene({ ink, accent }: { ink: string; accent: string }) {
 			const n = nodes[i];
 			n.pos.addScaledVector(n.velocity, 1);
 			if (Math.abs(n.pos.x) > w * 0.43) n.velocity.x *= -1;
-			if (Math.abs(n.pos.y) > h * 0.41) n.velocity.y *= -1;
+			if (Math.abs(n.pos.y) > size * 0.41) n.velocity.y *= -1;
 			if (Math.abs(n.pos.z) > 0.7)       n.velocity.z *= -1;
 			n.pos.toArray(nodePositions, i * 3);
 		}
@@ -282,8 +293,8 @@ function ReviewGraphScene({ ink, accent }: { ink: string; accent: string }) {
 			attr.needsUpdate = true;
 		}
 
-		// Scan beam sweeps vertically with a sine wave
-		const sweepY = (Math.sin(t * 0.72) * h) / 2.15;
+		// Scan beam sweeps vertically within the square core with a sine wave
+		const sweepY = (Math.sin(t * 0.72) * size) / 2.15;
 		if (scanRef.current) scanRef.current.position.y = sweepY;
 		if (haloRef.current) haloRef.current.position.y = sweepY;
 
