@@ -95,7 +95,7 @@ const LoginUI = () => {
 					<button
 						onClick={handleGithubLogin}
 						disabled={isLoading}
-						className="group mt-10 w-full h-12 bg-foreground text-background font-medium hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-3"
+						className="group mt-10 w-full h-12 bg-foreground text-background font-medium hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-3 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
 					>
 						{isLoading ? (
 							<div className="w-5 h-5 border-2 border-background/30 border-t-background rounded-full animate-spin" />
