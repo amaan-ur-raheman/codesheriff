@@ -80,6 +80,8 @@ Rules for the SUGGESTIONS_JSON block:
 - "category" should be one of: "security", "performance", "bug", "style", "maintainability", "best-practice", "general"
 - Each suggestion must have a unique "id"
 - "originalCode" and "suggestedCode" should contain the exact code snippets (use the original indentation)
+- "suggestedCode" MUST have exactly the same number of lines as "originalCode", and "endLine" - "startLine" + 1 MUST equal that same number. GitHub applies a suggestion by replacing exactly the line range it is attached to, so a replacement of a different length cannot be applied and the reviewer loses the one-click fix. If a fix genuinely needs a different number of lines, keep "suggestedCode" the same length where you can, and put the fuller replacement in the "description".
+- "startLine" and "endLine" must both fall inside the lines this pull request actually changed, on the new-file side
 - If no actionable inline suggestions exist, return an empty suggestions array with all summary counts at 0
 - Do NOT include any markdown or text after the closing --> of the SUGGESTIONS_JSON block
 

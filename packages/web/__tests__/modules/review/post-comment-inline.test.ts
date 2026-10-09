@@ -154,7 +154,7 @@ describe("postComment inline placement", () => {
 	 * surplus past the range onto deleted content and the user's click fails
 	 * with "Applying suggestions on deleted lines is currently not supported".
 	 */
-	it("drops a suggestion block whose line count exceeds the range", async () => {
+	it("renders a diff instead of an unapplicable suggestion block", async () => {
 		mockValidDiffLines.mockReturnValue({ "src/orders.ts": new Set([10, 11, 12, 13, 14, 15]) });
 
 		// 6-line range, 11-line replacement — the shape seen on the live demo PR.
@@ -171,12 +171,16 @@ describe("postComment inline placement", () => {
 		);
 
 		const body = mockPostInline.mock.calls[0][3][0].body;
+		// No "Apply suggestion" button, because GitHub could never apply it.
 		expect(body).not.toContain("```suggestion");
-		// The finding itself must still reach the reader.
+		// But the fix is still shown, as a diff.
+		expect(body).toContain("```diff");
+		expect(body).toContain("+ 11");
+		expect(body).toContain("- old");
+		// And the finding itself still reaches the reader.
 		expect(body).toContain("Real finding");
 		expect(body).toContain("something is wrong");
 		expect(body).toContain("🤖 Prompt for AI Agents");
-		// And it must still be posted at the right place.
 		expect(mockPostInline.mock.calls[0][3][0]).toMatchObject({
 			line: 15,
 			start_line: 10,
@@ -194,7 +198,9 @@ describe("postComment inline placement", () => {
 			]) as never,
 		);
 
-		expect(mockPostInline.mock.calls[0][3][0].body).not.toContain("```suggestion");
+		const body = mockPostInline.mock.calls[0][3][0].body;
+		expect(body).not.toContain("```suggestion");
+		expect(body).toContain("```diff");
 	});
 
 	it("keeps a single-line suggestion for a single-line range", async () => {
