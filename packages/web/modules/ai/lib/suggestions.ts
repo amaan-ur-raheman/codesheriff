@@ -106,6 +106,63 @@ export function readStoredSuggestions(
 const SUGGESTIONS_JSON_REGEX =
 	/<!--\s*SUGGESTIONS_JSON\s*\n([\s\S]*?)\n\s*-->/;
 
+const EMPTY_SUMMARY = {
+	totalIssues: 0,
+	errors: 0,
+	warnings: 0,
+	suggestions: 0,
+};
+
+const CONTROL_ESCAPES: Record<string, string> = {
+	"\t": "\\t",
+	"\n": "\\n",
+	"\r": "\\r",
+};
+
+/**
+ * Escapes raw control bytes that appear *inside* JSON string literals.
+ *
+ * JSON permits only `\" \\ \/ \b \f \n \r \t` and `\uXXXX` escapes within a
+ * string; a literal tab or newline byte is a syntax error. Models emit code
+ * blocks verbatim often enough that a single unescaped tab in one
+ * `suggestedCode` value makes the entire SUGGESTIONS_JSON block unparseable —
+ * which used to discard every finding in the review, silently.
+ *
+ * Only bytes inside a string are touched, so already-escaped `\n` sequences
+ * pass through untouched. Structural whitespace (indentation, newlines between
+ * properties) is left alone.
+ */
+export function escapeRawControlChars(source: string): string {
+	let out = "";
+	let inString = false;
+	let escaped = false;
+
+	for (const char of source) {
+		if (escaped) {
+			out += char;
+			escaped = false;
+			continue;
+		}
+		if (char === "\\") {
+			out += char;
+			escaped = true;
+			continue;
+		}
+		if (char === '"') {
+			inString = !inString;
+			out += char;
+			continue;
+		}
+		if (inString && char < " ") {
+			out += CONTROL_ESCAPES[char] ?? `\\u${char.charCodeAt(0).toString(16).padStart(4, "0")}`;
+			continue;
+		}
+		out += char;
+	}
+
+	return out;
+}
+
 function computeSummary(
 	suggestions: CodeSuggestion[]
 ): ReviewSuggestions["summary"] {
@@ -146,8 +203,11 @@ function parseStructuredBlocks(
 ): CodeSuggestion[] {
 	const suggestions: CodeSuggestion[] = [];
 
+	// `\z` is a Perl end-of-string anchor; JavaScript has no such escape and
+	// reads it as a literal "z", which made this pattern require a trailing
+	// "z" and never match. `$` (no `m` flag) is the end of input.
 	const sectionRegex =
-		/###\s+Suggestion:\s*(.+?)(?:\n|$)([\s\S]*?)(?=###\s+Suggestion:|##\s|\z)/gi;
+		/###\s+Suggestion:\s*(.+?)(?:\n|$)([\s\S]*?)(?=###\s+Suggestion:|##\s|$)/gi;
 
 	let match;
 	while ((match = sectionRegex.exec(reviewText)) !== null) {
@@ -200,33 +260,67 @@ function parseStructuredBlocks(
 }
 
 /**
+ * Parses the `<!-- SUGGESTIONS_JSON ... -->` block from a review.
+ *
+ * Tries a strict parse first, then retries with raw control bytes escaped, so
+ * a model that emits a literal tab or newline inside a code block does not cost
+ * us the whole review. Returns `null` only when no block is present or the
+ * payload is unsalvageable — the caller decides whether to try other shapes.
+ */
+export function parseSuggestionBlock(
+	reviewText: string
+): ReviewSuggestions | null {
+	const match = reviewText.match(SUGGESTIONS_JSON_REGEX);
+	if (!match?.[1]) return null;
+
+	const raw = match[1];
+
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(raw);
+	} catch {
+		try {
+			parsed = JSON.parse(escapeRawControlChars(raw));
+			console.warn(
+				"SUGGESTIONS_JSON contained raw control characters and was repaired before parsing",
+				raw.length
+			);
+		} catch {
+			return null;
+		}
+	}
+
+	if (!parsed || typeof parsed !== "object") return null;
+
+	const candidate = parsed as {
+		suggestions?: unknown;
+		summary?: ReviewSuggestions["summary"];
+	};
+
+	const suggestions = Array.isArray(candidate.suggestions)
+		? (candidate.suggestions as CodeSuggestion[])
+		: [];
+
+	return {
+		suggestions,
+		summary: candidate.summary ?? computeSummary(suggestions),
+	};
+}
+
+/**
  * Parse suggestions from a review text.
  *
  * Strategy:
- * 1. Look for a <!-- SUGGESTIONS_JSON { ... } --> block
+ * 1. Look for a <!-- SUGGESTIONS_JSON { ... } --> block (repairing raw control
+ *    bytes if the strict parse fails)
  * 2. Fall back to parsing structured markdown suggestion blocks
  * 3. Return empty suggestions if nothing found
  */
 export function parseSuggestionsFromReview(
 	reviewText: string
 ): ReviewSuggestions {
-	const jsonMatch = reviewText.match(SUGGESTIONS_JSON_REGEX);
-
-	if (jsonMatch?.[1]) {
-		try {
-			const parsed = JSON.parse(jsonMatch[1]);
-			const suggestions: CodeSuggestion[] = Array.isArray(parsed.suggestions)
-				? parsed.suggestions
-				: [];
-
-			return {
-				suggestions,
-				summary: parsed.summary ?? computeSummary(suggestions),
-			};
-		} catch {
-			// JSON parse failed, fall through to structured block parsing
-		}
-	}
+	const fromBlock = parseSuggestionBlock(reviewText);
+	if (fromBlock) return fromBlock;
 
 	const structuredSuggestions = parseStructuredBlocks(reviewText);
 
@@ -237,8 +331,5 @@ export function parseSuggestionsFromReview(
 		};
 	}
 
-	return {
-		suggestions: [],
-		summary: { totalIssues: 0, errors: 0, warnings: 0, suggestions: 0 },
-	};
+	return { suggestions: [], summary: { ...EMPTY_SUMMARY } };
 }
