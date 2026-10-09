@@ -87,9 +87,22 @@ export async function postComment(
 					if (blockLines === rangeSize) {
 						suggestionBlock = `\`\`\`suggestion\n${s.suggestedCode}\n\`\`\`\n\n`;
 					} else {
+						// Unapplicable as one-click, but the fix must still reach the
+						// reader — so show it as a diff. GitHub renders an "Apply
+						// suggestion" button only for a real suggestion block, so
+						// dropping it silently would lose the fix entirely.
 						console.warn(
-							`Omitting suggestion block: ${blockLines} line(s) of suggestedCode cannot replace a ${rangeSize}-line range at ${s.filePath}:${startLine}-${endLine}`
+							`Rendering suggestion as a diff: ${blockLines} line(s) of suggestedCode cannot replace a ${rangeSize}-line range at ${s.filePath}:${startLine}-${endLine}`
 						);
+
+						const before = (s.originalCode || "").split(/\r?\n/) as string[];
+						const after = s.suggestedCode.split(/\r?\n/) as string[];
+						const diff = [
+							...before.map((line) => `- ${line}`),
+							...after.map((line) => `+ ${line}`),
+						].join("\n");
+
+						suggestionBlock = `\`\`\`diff\n${diff}\n\`\`\`\n\n`;
 					}
 				}
 
