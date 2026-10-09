@@ -51,7 +51,9 @@ function suggestion(overrides: Record<string, unknown> = {}) {
 		title: "Real finding",
 		description: "something is wrong",
 		originalCode: "old",
-		suggestedCode: "const a = 1;\nconst b = 2;",
+		// Default: a 6-line range (10-15) carrying a 6-line replacement, so the
+		// suggestion block is well-formed unless a test says otherwise.
+		suggestedCode: "const a = 1;\nconst b = 2;\nconst c = 3;\nconst d = 4;\nconst e = 5;\nconst f = 6;",
 		category: "correctness",
 		...overrides,
 	};
@@ -142,6 +144,87 @@ describe("postComment inline placement", () => {
 		mockValidDiffLines.mockReturnValue({ "src/orders.ts": new Set([10, 15]) });
 
 		await postComment(ctx, "review", parsed([suggestion()]) as never);
+
+		expect(mockPostInline.mock.calls[0][3][0].body).toContain("```suggestion");
+	});
+
+	/**
+	 * GitHub applies a ```suggestion block by replacing exactly the commented
+	 * range. When the block's line count differs from the range, GitHub maps the
+	 * surplus past the range onto deleted content and the user's click fails
+	 * with "Applying suggestions on deleted lines is currently not supported".
+	 */
+	it("drops a suggestion block whose line count exceeds the range", async () => {
+		mockValidDiffLines.mockReturnValue({ "src/orders.ts": new Set([10, 11, 12, 13, 14, 15]) });
+
+		// 6-line range, 11-line replacement — the shape seen on the live demo PR.
+		await postComment(
+			ctx,
+			"review",
+			parsed([
+				suggestion({
+					startLine: 10,
+					endLine: 15,
+					suggestedCode: "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11",
+				}),
+			]) as never,
+		);
+
+		const body = mockPostInline.mock.calls[0][3][0].body;
+		expect(body).not.toContain("```suggestion");
+		// The finding itself must still reach the reader.
+		expect(body).toContain("Real finding");
+		expect(body).toContain("something is wrong");
+		expect(body).toContain("🤖 Prompt for AI Agents");
+		// And it must still be posted at the right place.
+		expect(mockPostInline.mock.calls[0][3][0]).toMatchObject({
+			line: 15,
+			start_line: 10,
+		});
+	});
+
+	it("drops a suggestion block with too few lines for the range", async () => {
+		mockValidDiffLines.mockReturnValue({ "src/orders.ts": new Set([10, 15]) });
+
+		await postComment(
+			ctx,
+			"review",
+			parsed([
+				suggestion({ startLine: 10, endLine: 15, suggestedCode: "only one line" }),
+			]) as never,
+		);
+
+		expect(mockPostInline.mock.calls[0][3][0].body).not.toContain("```suggestion");
+	});
+
+	it("keeps a single-line suggestion for a single-line range", async () => {
+		mockValidDiffLines.mockReturnValue({ "src/orders.ts": new Set([15]) });
+
+		await postComment(
+			ctx,
+			"review",
+			parsed([
+				suggestion({
+					startLine: 15,
+					endLine: 15,
+					suggestedCode: "const a = 2;",
+				}),
+			]) as never,
+		);
+
+		expect(mockPostInline.mock.calls[0][3][0].body).toContain("```suggestion");
+	});
+
+	it("keeps a matching multi-line suggestion block", async () => {
+		mockValidDiffLines.mockReturnValue({ "src/orders.ts": new Set([10, 11, 12]) });
+
+		await postComment(
+			ctx,
+			"review",
+			parsed([
+				suggestion({ startLine: 10, endLine: 12, suggestedCode: "a\nb\nc" }),
+			]) as never,
+		);
 
 		expect(mockPostInline.mock.calls[0][3][0].body).toContain("```suggestion");
 	});

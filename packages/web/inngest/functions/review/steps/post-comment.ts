@@ -59,37 +59,62 @@ export async function postComment(
 						: `### ${severityText}\n\n`;
 					const description = s.description ? `${s.description}\n\n` : "";
 
-					let suggestionBlock = "";
-					if (
-						s.suggestedCode !== undefined &&
-						s.suggestedCode !== null
-					) {
+				const endLine = s.endLine || s.startLine;
+				const startLine = s.startLine || endLine;
+				const rangeSize = endLine - startLine + 1;
+
+				/**
+				 * GitHub applies a ```suggestion block by replacing exactly the
+				 * commented range, so the block must have precisely that many
+				 * lines. Models routinely disagree with themselves here — a
+				 * 9-line range carrying an 11-line replacement — and the review
+				 * still posts fine. The failure only surfaces later, as
+				 * "Applying suggestions on deleted lines is currently not
+				 * supported", because GitHub maps the surplus lines past the
+				 * range and onto deleted content.
+				 *
+				 * A mismatched block is therefore dropped rather than shipped:
+				 * the explanation and the fix still reach the reader, they just
+				 * are not one click away.
+				 */
+				let suggestionBlock = "";
+				if (
+					s.suggestedCode !== undefined &&
+					s.suggestedCode !== null
+				) {
+					const blockLines = s.suggestedCode.split(/\r?\n/).length;
+
+					if (blockLines === rangeSize) {
 						suggestionBlock = `\`\`\`suggestion\n${s.suggestedCode}\n\`\`\`\n\n`;
+					} else {
+						console.warn(
+							`Omitting suggestion block: ${blockLines} line(s) of suggestedCode cannot replace a ${rangeSize}-line range at ${s.filePath}:${startLine}-${endLine}`
+						);
 					}
+				}
 
-					// Per-suggestion sandbox verify status (verified / failed /
-					// sandbox_error). Neutral suggestions render no status line.
-					const verifyStatusLine = verifyStatusMarkdown(s);
+				// Per-suggestion sandbox verify status (verified / failed /
+				// sandbox_error). Neutral suggestions render no status line.
+				const verifyStatusLine = verifyStatusMarkdown(s);
 
-					const promptBlock = `<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\nVerify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn \`@${s.filePath}\` at line ${s.startLine}, ${
-						s.title ? `${s.title}: ` : ""
-					}${s.description || ""}\n</details>\n\n`;
+				const promptBlock = `<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\nVerify each finding against current code. Fix only still-valid issues, skip the rest with a brief reason, keep changes minimal, and validate.\n\nIn \`@${s.filePath}\` at line ${startLine}, ${
+					s.title ? `${s.title}: ` : ""
+				}${s.description || ""}\n</details>\n\n`;
 
-					const endLine = s.endLine || s.startLine;
-					const commentObj: any = {
-						path: s.filePath,
-						line: endLine,
-						side: "RIGHT",
-						body: `${verifyStatusLine}${title}${description}${suggestionBlock}${promptBlock}`,
-					};
+				const commentObj: any = {
+					path: s.filePath,
+					line: endLine,
+					side: "RIGHT",
+					body: `${verifyStatusLine}${title}${description}${suggestionBlock}${promptBlock}`,
+				};
 
-					// Support multi-line suggestions
-					if (s.startLine && s.endLine && s.startLine < s.endLine) {
-						commentObj.start_line = s.startLine;
-						commentObj.start_side = "RIGHT";
-					}
+				// Support multi-line suggestions
+				if (startLine < endLine) {
+					commentObj.start_line = startLine;
+					commentObj.start_side = "RIGHT";
+				}
 
-					return commentObj;
+				return commentObj;
 				})
 				.filter((comment: any) => {
 					const filePath = comment.path;
