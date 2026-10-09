@@ -104,12 +104,52 @@ export async function postComment(
 						return false;
 					}
 
-					// Check if end line is in diff
-					if (!fileValidLines.has(line)) {
-						console.warn(
-							`Skipping comment for line not in diff: ${filePath}:${line}`
+					// A multi-line replacement block is only valid on a comment that
+					// spans the same number of lines, so once we drop to a single
+					// line the block has to go with it.
+					const degradeToSingleLine = () => {
+						delete comment.start_line;
+						delete comment.start_side;
+						comment.body = comment.body.replace(
+							/```suggestion\r?\n[\s\S]*?\r?\n```\r?\n\r?\n/,
+							""
 						);
-						return false;
+					};
+
+					// Models routinely overstate endLine — a 53-line file gets a
+					// 53-67 range, and every comment is then dropped. Anchoring to
+					// a line the model itself declared is faithful, so prefer that
+					// over losing the finding entirely. We never reach outside the
+					// declared range, because guessing a different line risks
+					// pointing the reader at code the finding isn't about.
+					if (!fileValidLines.has(line)) {
+						const rangeStart = comment.start_line ?? line;
+						let anchored: number | null = null;
+
+						for (
+							let candidate = rangeStart;
+							candidate <= line;
+							candidate++
+						) {
+							if (fileValidLines.has(candidate)) {
+								anchored = candidate;
+								break;
+							}
+						}
+
+						if (anchored === null) {
+							console.warn(
+								`Skipping comment: no line in ${rangeStart}-${line} is in the diff: ${filePath}`
+							);
+							return false;
+						}
+
+						console.warn(
+							`Anchoring comment to line ${anchored} (declared ${rangeStart}-${line}): ${filePath}`
+						);
+						comment.line = anchored;
+						degradeToSingleLine();
+						return true;
 					}
 
 					// If multi-line, check start line. If start line is not in diff, degrade to single line.
@@ -117,13 +157,7 @@ export async function postComment(
 						console.warn(
 							`Degrading multi-line comment to single line: ${filePath}:${startLine}-${line}`
 						);
-						delete comment.start_line;
-						delete comment.start_side;
-						// Remove the suggestion block to avoid posting an invalid multi-line suggestion on a single-line comment
-						comment.body = comment.body.replace(
-							/```suggestion\r?\n[\s\S]*?\r?\n```\r?\n\r?\n/,
-							""
-						);
+						degradeToSingleLine();
 					}
 
 					return true;
