@@ -71,6 +71,64 @@ export async function getCompareDiff(
 }
 
 /**
+ * Parses a unified diff and returns, per file, the text of each line on the
+ * RIGHT/new side keyed by its line number.
+ *
+ * `getValidDiffLines` answers "which lines may I anchor to"; this answers
+ * "what is actually on those lines", which is what lets a suggestion be
+ * anchored to the code it really targets rather than the line numbers the
+ * model claimed.
+ */
+export function getDiffFileLines(
+	diffContent: string
+): Record<string, Map<number, string>> {
+	const fileLines: Record<string, Map<number, string>> = {};
+	if (!diffContent) return fileLines;
+
+	const fileDiffs = diffContent.split(/^diff --git /m);
+
+	for (const fileDiff of fileDiffs) {
+		if (!fileDiff.trim()) continue;
+
+		const matchFile = fileDiff.match(/^\+\+\+ b\/(.+)$/m);
+		if (!matchFile) continue;
+
+		const filePath = matchFile[1].trim();
+		const lines = new Map<number, string>();
+		fileLines[filePath] = lines;
+
+		// Walk every line of the file diff, re-syncing on each hunk header so
+		// only the lines inside a hunk are recorded.
+		const headerRegex = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@.*$/gm;
+		let currentLine = 0;
+
+		for (const rawLine of fileDiff.split("\n")) {
+			const headerMatch = headerRegex.exec(rawLine);
+			if (headerMatch) {
+				currentLine = parseInt(headerMatch[1], 10);
+				continue;
+			}
+
+			// File header lines precede the first hunk and carry no line number.
+			if (!currentLine) continue;
+
+			if (rawLine.startsWith("+")) {
+				lines.set(currentLine, rawLine.slice(1));
+				currentLine++;
+			} else if (rawLine.startsWith("-")) {
+				// Present only on the LEFT side; consumes no RIGHT-side number.
+			} else if (rawLine.startsWith(" ")) {
+				lines.set(currentLine, rawLine.slice(1));
+				currentLine++;
+			}
+			// "\ No newline at end of file" and anything else is not code.
+		}
+	}
+
+	return fileLines;
+}
+
+/**
  * Parses a unified diff string and returns a map of file paths to a Set of line numbers
  * that are valid for inline commenting (i.e., lines present on the RIGHT/new side of hunks).
  */
