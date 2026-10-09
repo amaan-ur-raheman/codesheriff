@@ -8,14 +8,17 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  * tests call the step itself.
  */
 
-const { mockValidDiffLines, mockPostInline, mockUpdateComment } = vi.hoisted(() => ({
-	mockValidDiffLines: vi.fn(),
-	mockPostInline: vi.fn(),
-	mockUpdateComment: vi.fn(),
-}));
+const { mockValidDiffLines, mockDiffFileLines, mockPostInline, mockUpdateComment } =
+	vi.hoisted(() => ({
+		mockValidDiffLines: vi.fn(),
+		mockDiffFileLines: vi.fn(),
+		mockPostInline: vi.fn(),
+		mockUpdateComment: vi.fn(),
+	}));
 
 vi.mock("@/modules/github/lib/github", () => ({
 	getValidDiffLines: mockValidDiffLines,
+	getDiffFileLines: mockDiffFileLines,
 }));
 
 vi.mock("@/modules/vcs/resolve", () => ({
@@ -69,6 +72,9 @@ describe("postComment inline placement", () => {
 		vi.clearAllMocks();
 		mockUpdateComment.mockResolvedValue(undefined);
 		mockPostInline.mockResolvedValue(undefined);
+		// No line-text map by default, so anchoring falls back to the declared
+		// range and these tests stay focused on placement and block choice.
+		mockDiffFileLines.mockReturnValue({});
 	});
 
 	it("posts inline when the whole range is in the diff", async () => {
@@ -241,6 +247,58 @@ describe("postComment inline placement", () => {
 		await postComment(ctx, "review", parsed([suggestion()]) as never);
 
 		expect(mockPostInline).not.toHaveBeenCalled();
+	});
+
+	/**
+	 * A one-click apply on a fix the sandbox proved wrong invites a reviewer to
+	 * commit code that fails the tests they can see failing.
+	 */
+	it("never offers an apply button for a suggestion the sandbox marked failed", async () => {
+		mockValidDiffLines.mockReturnValue({ "src/orders.ts": new Set([10]) });
+
+		await postComment(
+			ctx,
+			"review",
+			parsed([
+				suggestion({
+					startLine: 10,
+					endLine: 10,
+					suggestedCode: "const broken = 1;",
+					verifyStatus: "failed",
+				}),
+			]) as never,
+		);
+
+		const body = mockPostInline.mock.calls[0][3][0].body;
+		expect(body).not.toContain("```suggestion");
+		expect(body).toContain("```diff");
+		// The finding still reaches the reader.
+		expect(body).toContain("Real finding");
+	});
+
+	it("still offers an apply button when verification could not run", async () => {
+		mockValidDiffLines.mockReturnValue({ "src/orders.ts": new Set([10]) });
+
+		for (const verifyStatus of [undefined, "sandbox_error", "verified"]) {
+			mockPostInline.mockClear();
+
+			await postComment(
+				ctx,
+				"review",
+				parsed([
+					suggestion({
+						startLine: 10,
+						endLine: 10,
+						suggestedCode: "const ok = 1;",
+						verifyStatus,
+					}),
+				]) as never,
+			);
+
+			expect(mockPostInline.mock.calls[0][3][0].body).toContain(
+				"```suggestion",
+			);
+		}
 	});
 
 	it("posts only the placeable findings when some must be dropped", async () => {

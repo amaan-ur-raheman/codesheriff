@@ -1,7 +1,26 @@
 import { isReviewCapableProvider } from "@/modules/vcs/resolve";
-import { getValidDiffLines } from "@/modules/github/lib/github";
+import { getValidDiffLines, getDiffFileLines } from "@/modules/github/lib/github";
+import { resolveSuggestionAnchor } from "@/modules/review/lib/suggestion-anchor";
 import { verifyStatusMarkdown } from "@/modules/review/lib/verify-status";
 import type { ReviewContext, ParsedSuggestions } from "../context";
+
+/**
+ * Renders a proposed change as a readable diff.
+ *
+ * Used whenever a ```suggestion block would be inapplicable — GitHub only
+ * offers "Apply suggestion" for a real block, so a diff is how the fix still
+ * reaches the reader without a control that cannot work.
+ */
+function renderDiff(originalCode: unknown, suggestedCode: string): string {
+	const before = String(originalCode ?? "").split(/\r?\n/) as string[];
+	const after = suggestedCode.split(/\r?\n/) as string[];
+	const diff = [
+		...before.map((line) => `- ${line}`),
+		...after.map((line) => `+ ${line}`),
+	].join("\n");
+
+	return `\`\`\`diff\n${diff}\n\`\`\`\n\n`;
+}
 
 /**
  * Step: post-comment
@@ -45,6 +64,7 @@ export async function postComment(
 	) {
 		try {
 			const validDiffLines = getValidDiffLines(ctx.diff);
+			const diffFileLines = getDiffFileLines(ctx.diff);
 			const inlineComments = verifiedSuggestions.suggestions
 				.map((s: any) => {
 					const severityText =
@@ -59,8 +79,23 @@ export async function postComment(
 						: `### ${severityText}\n\n`;
 					const description = s.description ? `${s.description}\n\n` : "";
 
-				const endLine = s.endLine || s.startLine;
-				const startLine = s.startLine || endLine;
+				/**
+				 * Anchor to where the code actually is, not where the model said
+				 * it was. The declared range and `originalCode` routinely disagree
+				 * (a live run declared 7 lines for an 8-line snippet), and a wrong
+				 * anchor puts the comment — and any suggestion riding on it — on
+				 * the wrong code.
+				 */
+				const anchor = resolveSuggestionAnchor({
+					lines: diffFileLines[s.filePath],
+					validLines: validDiffLines[s.filePath],
+					originalCode: s.originalCode,
+					declaredStartLine: s.startLine,
+					declaredEndLine: s.endLine,
+				});
+
+				const endLine = anchor.endLine;
+				const startLine = anchor.startLine;
 				const rangeSize = endLine - startLine + 1;
 
 				/**
@@ -84,7 +119,23 @@ export async function postComment(
 				) {
 					const blockLines = s.suggestedCode.split(/\r?\n/).length;
 
-					if (blockLines === rangeSize) {
+					/**
+					 * A one-click "Apply suggestion" on a fix the sandbox already
+					 * proved wrong is worse than no button: it invites a reviewer to
+					 * commit code that fails the tests they can see failing. Only a
+					 * definite failure suppresses the block — an unverified or
+					 * sandbox-errored suggestion is unknown, not known-bad, and
+					 * hiding those would remove the button wherever E2B is not
+					 * configured.
+					 */
+					const knownBad = s.verifyStatus === "failed";
+
+					if (knownBad) {
+						console.warn(
+							`Rendering as diff, not a suggestion block: sandbox marked this fix failed at ${s.filePath}:${startLine}-${endLine}`
+						);
+						suggestionBlock = renderDiff(s.originalCode, s.suggestedCode);
+					} else if (blockLines === rangeSize) {
 						suggestionBlock = `\`\`\`suggestion\n${s.suggestedCode}\n\`\`\`\n\n`;
 					} else {
 						// Unapplicable as one-click, but the fix must still reach the
@@ -95,14 +146,7 @@ export async function postComment(
 							`Rendering suggestion as a diff: ${blockLines} line(s) of suggestedCode cannot replace a ${rangeSize}-line range at ${s.filePath}:${startLine}-${endLine}`
 						);
 
-						const before = (s.originalCode || "").split(/\r?\n/) as string[];
-						const after = s.suggestedCode.split(/\r?\n/) as string[];
-						const diff = [
-							...before.map((line) => `- ${line}`),
-							...after.map((line) => `+ ${line}`),
-						].join("\n");
-
-						suggestionBlock = `\`\`\`diff\n${diff}\n\`\`\`\n\n`;
+						suggestionBlock = renderDiff(s.originalCode, s.suggestedCode);
 					}
 				}
 

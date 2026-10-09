@@ -81,6 +81,8 @@ Rules for the SUGGESTIONS_JSON block:
 - Each suggestion must have a unique "id"
 - "suggestedCode" should contain the exact code snippets (use the original indentation)
 - Prefer a "suggestedCode" with the same number of lines as the code it replaces, and matching "endLine" - "startLine" + 1, so a reviewer can apply it in one click. NEVER pad with blank lines, comment-only lines, or repeated filler to reach a line count — a fix stuffed with junk comments is worse than a fix of a different length. If the correct fix is naturally a different length, emit it as-is; it will be shown as a diff and that is perfectly acceptable.
+- Prefer the smallest fix that resolves the problem. When a one-line change is correct, give one line — a reviewer is far more likely to apply a minimal change than to restructure code.
+- Quote "originalCode" exactly as it appears in the file, and make sure its line count matches the "startLine"-"endLine" range you declare. Comments count as lines.
 - "startLine" and "endLine" must both fall inside the lines this pull request actually changed, on the new-file side
 - If no actionable inline suggestions exist, return an empty suggestions array with all summary counts at 0
 - Do NOT include any markdown or text after the closing --> of the SUGGESTIONS_JSON block
